@@ -10,6 +10,8 @@ A standalone browser extension for intelligent data extraction and form filling 
 - **Chat with Data**: Interactive Q&A with extracted content
 - **Local AI Models**: Full Ollama integration for privacy-focused AI
 - **Cloud AI Models**: Support for GPT-4, DeepSeek, and other cloud providers
+- **Backend Configuration**: Built-in settings interface for configuring backend connections
+- **Service Status Monitoring**: Real-time backend connection status and error handling
 - **Browser Integration**: Works seamlessly with Chrome and other Chromium-based browsers
 
 ## 📁 Project Structure
@@ -45,7 +47,7 @@ npm run dev
 ```
 
 ### Extension Setup
-1. Open Chrome and navigate to `chrome://extensions/`
+1. Open Chrome and navigate to `chrome://extensions/` (`edge://extensions/` for Edge browsers)
 2. Enable "Developer mode"
 3. Click "Load unpacked" and select the `extension` folder
 4. The extension should now appear in your browser toolbar
@@ -69,6 +71,29 @@ The backend server will start on `http://localhost:3001`
 - `POST /api/form-filler/analyze-field-mapping` - Generate field mappings
 
 ## ⚙️ Configuration
+
+### Backend Configuration
+
+The extension includes a built-in settings interface for configuring the backend connection:
+
+#### Using the Settings Interface
+1. **Open Settings**: Click the ⚙️ settings button in the extension header
+2. **Configure Backend URL**: Enter your backend server URL (default: `http://localhost:3001`)
+3. **Test Connection**: Click "Test" to verify the connection
+4. **Save Settings**: Click "Save" to apply the new configuration
+
+#### Features
+- **Persistent Storage**: Settings are saved across browser sessions
+- **Connection Testing**: Real-time validation of backend connectivity
+- **Error Handling**: Clear feedback for connection issues
+- **Auto-reload**: Models automatically refresh when backend changes
+
+#### Default Configuration
+```
+Backend URL: http://localhost:3001
+```
+
+### Environment Variables
 
 Copy `.env.example` to `.env` and configure your environment variables:
 
@@ -132,13 +157,30 @@ ollama pull deepseek-r1
 
 ### 🛠️ Troubleshooting
 
-#### Models Not Showing?
+#### Backend Connection Issues
+
+**Service Unavailable Message**
+If you see "⚠️ Service unavailable - Check backend connection":
+1. **Check Backend Server**: Ensure the backend is running on the configured URL
+2. **Verify URL**: Click ⚙️ settings and verify the backend URL is correct
+3. **Test Connection**: Use the "Test" button in settings to verify connectivity
+4. **Check Network**: Ensure no firewall or network issues blocking the connection
+
+**Models Not Loading**
+1. **Backend Status**: Verify backend server is running (`npm run dev`)
+2. **URL Configuration**: Check settings for correct backend URL
+3. **Refresh Models**: Click the 🔄 refresh button
+4. **Check Logs**: Look at browser console for specific error messages
+
+#### Ollama Integration Issues
+
+**Models Not Showing?**
 1. **Check Ollama Status**: `curl http://localhost:11434/api/tags`
 2. **List Models**: `ollama list`
 3. **Restart Ollama**: `ollama serve`
 4. **Refresh Extension**: Click 🔄 button
 
-#### Connection Issues?
+**Connection Issues?**
 - Ensure Ollama runs on `http://localhost:11434`
 - Check firewall settings
 - Update `OLLAMA_URL` if using custom port

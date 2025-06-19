@@ -19,6 +19,9 @@
                     <button id="globalRefreshModelsBtn" class="btn btn--header" title="Refresh Ollama models">
                         <span class="btn__icon">🔄</span>
                     </button>
+                    <button id="settingsBtn" class="btn btn--header" title="Settings">
+                        <span class="btn__icon">⚙️</span>
+                    </button>
                 </div>
             </div>
             <div class="analyzer__status" id="authStatus">
@@ -360,6 +363,51 @@
                 <span class="footer-version">v2.0.0</span>
                 <span class="footer-separator">•</span>
                 <span class="footer-mode" id="selectedMode">Data Extraction</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Settings</h3>
+                <button id="settingsCloseBtn" class="btn btn--icon" title="Close">
+                    <span class="btn__icon">×</span>
+                </button>
+            </div>
+            <div class="modal__body">
+                <div class="settings-section">
+                    <h4 class="settings-section__title">Backend Configuration</h4>
+                    <div class="form-group">
+                        <label for="backendUrl" class="label">Backend URL:</label>
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="backendUrl" 
+                                class="input input--full" 
+                                placeholder="http://localhost:3001"
+                                value="http://localhost:3001"
+                            >
+                            <button id="testConnectionBtn" class="btn btn--secondary" title="Test Connection">
+                                <span class="btn__icon">🔗</span>
+                                <span class="btn__text">Test</span>
+                            </button>
+                        </div>
+                        <div id="connectionStatus" class="connection-status hidden">
+                            <span class="connection-status__icon"></span>
+                            <span class="connection-status__text"></span>
+                        </div>
+                        <div class="help-text">
+                            Enter the URL of your Smart Form Filler backend server.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button id="settingsCancelBtn" class="btn btn--secondary">Cancel</button>
+                <button id="settingsSaveBtn" class="btn btn--primary">Save</button>
             </div>
         </div>
     </div>

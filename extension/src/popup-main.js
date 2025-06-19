@@ -149,6 +149,16 @@ class PopupManager {
             globalModelSelect: document.getElementById("globalModelSelect"),
             globalRefreshModelsBtn: document.getElementById("globalRefreshModelsBtn"),
             
+            // Settings
+            settingsBtn: document.getElementById("settingsBtn"),
+            settingsModal: document.getElementById("settingsModal"),
+            settingsCloseBtn: document.getElementById("settingsCloseBtn"),
+            settingsCancelBtn: document.getElementById("settingsCancelBtn"),
+            settingsSaveBtn: document.getElementById("settingsSaveBtn"),
+            backendUrl: document.getElementById("backendUrl"),
+            testConnectionBtn: document.getElementById("testConnectionBtn"),
+            connectionStatus: document.getElementById("connectionStatus"),
+            
             // Main tabs
             mainTabs: document.querySelectorAll(".main-tab"),
             extractionTab: document.getElementById("extractionTab"),
@@ -339,6 +349,11 @@ class PopupManager {
             console.log("🔧 Binding refresh model events...");
             this.bindRefreshModelEvents();
             console.log("✅ Refresh model events bound");
+            
+            // Bind settings events
+            console.log("🔧 Binding settings events...");
+            this.bindSettingsEvents();
+            console.log("✅ Settings events bound");
             
             // Bind chat events
             console.log("🔧 Binding chat events...");
@@ -752,6 +767,54 @@ class PopupManager {
     }
 
     /**
+     * Bind settings events
+     */
+    bindSettingsEvents() {
+        // Settings button
+        if (this.elements.settingsBtn) {
+            this.elements.settingsBtn.addEventListener("click", () => {
+                this.openSettings();
+            });
+        }
+
+        // Close settings
+        if (this.elements.settingsCloseBtn) {
+            this.elements.settingsCloseBtn.addEventListener("click", () => {
+                this.closeSettings();
+            });
+        }
+
+        if (this.elements.settingsCancelBtn) {
+            this.elements.settingsCancelBtn.addEventListener("click", () => {
+                this.closeSettings();
+            });
+        }
+
+        // Save settings
+        if (this.elements.settingsSaveBtn) {
+            this.elements.settingsSaveBtn.addEventListener("click", () => {
+                this.saveSettings();
+            });
+        }
+
+        // Test connection
+        if (this.elements.testConnectionBtn) {
+            this.elements.testConnectionBtn.addEventListener("click", () => {
+                this.testConnection();
+            });
+        }
+
+        // Close modal on backdrop click
+        if (this.elements.settingsModal) {
+            this.elements.settingsModal.addEventListener("click", (e) => {
+                if (e.target === this.elements.settingsModal || e.target.classList.contains('modal__backdrop')) {
+                    this.closeSettings();
+                }
+            });
+        }
+    }
+
+    /**
      * Refresh models from server (including Ollama models)
      */
     async refreshModels() {
@@ -816,6 +879,157 @@ class PopupManager {
                 this.elements.globalRefreshModelsBtn.title = "Refresh Ollama models";
             }, 3000);
         }
+    }
+
+    /**
+     * Open settings modal
+     */
+    openSettings() {
+        if (this.elements.settingsModal) {
+            // Load current backend URL
+            if (this.elements.backendUrl) {
+                this.elements.backendUrl.value = this.apiClient.getStoredBackendUrl() || "http://localhost:3001";
+            }
+            
+            // Clear connection status
+            if (this.elements.connectionStatus) {
+                this.elements.connectionStatus.classList.add('hidden');
+            }
+            
+            this.elements.settingsModal.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Close settings modal
+     */
+    closeSettings() {
+        if (this.elements.settingsModal) {
+            this.elements.settingsModal.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Save settings
+     */
+    async saveSettings() {
+        const newUrl = this.elements.backendUrl?.value?.trim();
+        
+        if (!newUrl) {
+            this.showConnectionStatus('error', 'Backend URL cannot be empty');
+            return;
+        }
+
+        // Validate URL format
+        try {
+            new URL(newUrl);
+        } catch (error) {
+            this.showConnectionStatus('error', 'Invalid URL format');
+            return;
+        }
+
+        // Save the URL
+        const saved = this.apiClient.setBackendUrl(newUrl);
+        
+        if (saved) {
+            // Test the new connection
+            const connected = await this.testConnection(false);
+            
+            if (connected) {
+                this.showConnectionStatus('success', 'Settings saved and connection verified!');
+                
+                // Reload models with new backend
+                setTimeout(async () => {
+                    await this.loadModels();
+                    this.closeSettings();
+                }, 1000);
+            } else {
+                this.showConnectionStatus('error', 'Settings saved but connection failed');
+            }
+        } else {
+            this.showConnectionStatus('error', 'Failed to save settings');
+        }
+    }
+
+    /**
+     * Test backend connection
+     */
+    async testConnection(showStatus = true) {
+        if (showStatus) {
+            this.showConnectionStatus('testing', 'Testing connection...');
+        }
+        
+        // Update base URL temporarily for testing
+        const testUrl = this.elements.backendUrl?.value?.trim();
+        if (testUrl) {
+            const originalUrl = this.apiClient.baseUrl;
+            this.apiClient.baseUrl = testUrl.replace(/\/$/, '');
+            
+            try {
+                const connected = await this.apiClient.testConnection();
+                
+                if (showStatus) {
+                    if (connected) {
+                        this.showConnectionStatus('success', 'Connection successful!');
+                    } else {
+                        this.showConnectionStatus('error', 'Connection failed');
+                    }
+                }
+                
+                // Restore original URL if this was just a test
+                if (showStatus) {
+                    this.apiClient.baseUrl = originalUrl;
+                }
+                
+                return connected;
+            } catch (error) {
+                if (showStatus) {
+                    this.showConnectionStatus('error', `Connection error: ${error.message}`);
+                    this.apiClient.baseUrl = originalUrl;
+                }
+                return false;
+            }
+        } else {
+            if (showStatus) {
+                this.showConnectionStatus('error', 'Please enter a backend URL');
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Show connection status
+     */
+    showConnectionStatus(type, message) {
+        if (!this.elements.connectionStatus) return;
+        
+        // Clear previous status classes
+        this.elements.connectionStatus.classList.remove('connection-status--success', 'connection-status--error', 'connection-status--testing');
+        
+        // Add appropriate class
+        this.elements.connectionStatus.classList.add(`connection-status--${type}`);
+        
+        // Set icon and text
+        const iconElement = this.elements.connectionStatus.querySelector('.connection-status__icon');
+        const textElement = this.elements.connectionStatus.querySelector('.connection-status__text');
+        
+        if (iconElement && textElement) {
+            switch (type) {
+                case 'success':
+                    iconElement.textContent = '✅';
+                    break;
+                case 'error':
+                    iconElement.textContent = '❌';
+                    break;
+                case 'testing':
+                    iconElement.textContent = '🔄';
+                    break;
+            }
+            textElement.textContent = message;
+        }
+        
+        // Show status
+        this.elements.connectionStatus.classList.remove('hidden');
     }
 }
 

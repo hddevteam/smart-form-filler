@@ -11,8 +11,33 @@ class ApiClient {
     }
 
     getBaseUrl() {
-        // Smart Form Filler backend
-        return "http://localhost:3001";
+        // Get backend URL from storage or use default
+        return this.getStoredBackendUrl() || "http://localhost:3001";
+    }
+
+    getStoredBackendUrl() {
+        try {
+            return localStorage.getItem('smart-form-filler-backend-url');
+        } catch (error) {
+            console.warn('Could not access localStorage:', error);
+            return null;
+        }
+    }
+
+    setBackendUrl(url) {
+        try {
+            if (url && url.trim()) {
+                // Ensure URL doesn't end with slash
+                const cleanUrl = url.trim().replace(/\/$/, '');
+                localStorage.setItem('smart-form-filler-backend-url', cleanUrl);
+                this.baseUrl = cleanUrl;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Could not save backend URL:', error);
+            return false;
+        }
     }
 
     async makeRequest(endpoint, options = {}) {
