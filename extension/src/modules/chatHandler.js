@@ -175,11 +175,18 @@ class ChatHandler {
 
     /**
      * Get selected model from global model selector
-     * @returns {string} The selected model ID
+     * @returns {string|null} The selected model ID or null if service unavailable
      */
     getSelectedModel() {
         const globalModelSelect = document.getElementById("globalModelSelect");
-        return globalModelSelect?.value || 'gpt-4.1-nano';
+        const selectedValue = globalModelSelect?.value;
+        
+        // If no value selected or selector is disabled (service unavailable), return null
+        if (!selectedValue || globalModelSelect?.disabled) {
+            return null;
+        }
+        
+        return selectedValue;
     }
 
     /**
@@ -193,7 +200,7 @@ class ChatHandler {
         const dataSources = this.getSelectedDataSourcesContent();
         
         if (!model) {
-            this.showError("Please select a model.");
+            this.showError("❌ Service unavailable: Please check backend connection and try again");
             return;
         }
         

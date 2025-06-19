@@ -285,10 +285,17 @@ class PopupManager {
 
     /**
      * Get currently selected model from global selector
-     * @returns {string} The selected model ID
+     * @returns {string} The selected model ID, or null if service unavailable
      */
     getSelectedModel() {
-        return this.elements.globalModelSelect?.value || 'gpt-4.1-nano';
+        const selectedValue = this.elements.globalModelSelect?.value;
+        
+        // If no value selected or selector is disabled (service unavailable), return null
+        if (!selectedValue || this.elements.globalModelSelect?.disabled) {
+            return null;
+        }
+        
+        return selectedValue;
     }
 
     /**
@@ -413,32 +420,30 @@ class PopupManager {
         } catch (error) {
             console.error("❌ Failed to load models:", error);
             
-            // Fallback: populate with default models
+            // Show service unavailable message instead of fallback models
             this.elements.globalModelSelect.innerHTML = "";
-            const fallbackModels = [
-                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
-                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-                { id: "gpt-4o", name: "GPT-4o" },
-                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
-            ];
             
-            fallbackModels.forEach(model => {
-                const option = document.createElement("option");
-                option.value = model.id;
-                option.textContent = model.name;
-                this.elements.globalModelSelect.appendChild(option);
-            });
+            // Add service unavailable option
+            const unavailableOption = document.createElement("option");
+            unavailableOption.value = "";
+            unavailableOption.textContent = "⚠️ Service unavailable - Check backend connection";
+            unavailableOption.disabled = true;
+            this.elements.globalModelSelect.appendChild(unavailableOption);
             
-            // Set default to first fallback model
-            this.elements.globalModelSelect.value = fallbackModels[0].id;
-            this.elements.globalModelSelect.disabled = false;
+            // Set the unavailable option as selected
+            this.elements.globalModelSelect.value = "";
+            this.elements.globalModelSelect.disabled = true;
             
-            // Update chat models with fallback data
-            if (this.chatHandler) {
-                this.chatHandler.populateChatModels();
+            // Show additional connection error option if it's a network error
+            if (error.message.includes("fetch") || error.message.includes("network") || error.message.includes("NetworkError")) {
+                const networkErrorOption = document.createElement("option");
+                networkErrorOption.value = "";
+                networkErrorOption.textContent = "🔌 Backend server not running (localhost:3001)";
+                networkErrorOption.disabled = true;
+                this.elements.globalModelSelect.appendChild(networkErrorOption);
             }
             
-            console.log("✅ Using fallback models");
+            console.log("❌ Models unavailable due to backend connection error");
         }
     }
 
@@ -512,6 +517,13 @@ class PopupManager {
      */
     async handleExtractData() {
         try {
+            // Check if a model is selected and service is available
+            const selectedModel = this.uiController.getSelectedModel();
+            if (!selectedModel) {
+                this.resultsHandler.showError("❌ Service unavailable: Please check backend connection and try again");
+                return;
+            }
+            
             this.uiController.showLoading("Extracting data sources...");
             this.uiController.updateLoadingDetails("Getting page content and iframe data");
             

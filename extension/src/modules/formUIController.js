@@ -11,12 +11,19 @@
 class FormUIController {
     /**
      * Get selected form filler model
-     * @returns {string} Selected model name
+     * @returns {string|null} Selected model name or null if service unavailable
      */
     getSelectedFormFillerModel() {
         // Use global model selector instead of form-specific one
         const globalModelSelect = document.getElementById("globalModelSelect");
-        return globalModelSelect ? globalModelSelect.value : "gpt-4.1-nano";
+        const selectedValue = globalModelSelect?.value;
+        
+        // If no value selected or selector is disabled (service unavailable), return null
+        if (!selectedValue || globalModelSelect?.disabled) {
+            return null;
+        }
+        
+        return selectedValue;
     }
     
     /**

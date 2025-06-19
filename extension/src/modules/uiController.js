@@ -166,7 +166,14 @@ class UIController {
      */
     getSelectedModel() {
         const globalModelSelect = document.getElementById("globalModelSelect");
-        return globalModelSelect?.value || "gpt-4.1-nano";
+        const selectedValue = globalModelSelect?.value;
+        
+        // If no value selected or selector is disabled (service unavailable), return null
+        if (!selectedValue || globalModelSelect?.disabled) {
+            return null;
+        }
+        
+        return selectedValue;
     }
 
     /**
@@ -174,7 +181,14 @@ class UIController {
      */
     getSelectedFormFillerModel() {
         const globalModelSelect = document.getElementById("globalModelSelect");
-        return globalModelSelect?.value || "gpt-4.1-nano";
+        const selectedValue = globalModelSelect?.value;
+        
+        // If no value selected or selector is disabled (service unavailable), return null
+        if (!selectedValue || globalModelSelect?.disabled) {
+            return null;
+        }
+        
+        return selectedValue;
     }
 
     /**

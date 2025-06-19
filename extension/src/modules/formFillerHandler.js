@@ -158,6 +158,11 @@ class FormFillerHandler {
             
             // Get selected model
             const model = this.uiController.getSelectedFormFillerModel();
+            if (!model) {
+                this.uiController.setAnalysisLoading(false);
+                this.uiController.showError("❌ Service unavailable: Please check backend connection and try again");
+                return;
+            }
             
             // Get page HTML for enhanced analysis
             let pageHtml = "";
@@ -245,6 +250,12 @@ class FormFillerHandler {
             }
             
             const model = this.uiController.getSelectedFormFillerModel();
+            if (!model) {
+                this.uiController.setAnalysisLoading(false);
+                this.uiController.showError("❌ Service unavailable: Please check backend connection and try again");
+                return;
+            }
+            
             const selectedLanguage = this.uiController.getSelectedLanguage();
             
             // Perform field mapping analysis (Stage 2)

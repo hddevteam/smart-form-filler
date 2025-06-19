@@ -76,23 +76,12 @@ class ApiClient {
                 return data.models;
             }
             
-            // Fallback models with GPT-4.1 Nano as preferred default
-            return [
-                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
-                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-                { id: "gpt-4o", name: "GPT-4o" },
-                { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
-            ];
+            // If response doesn't have models array, throw error to indicate service issue
+            throw new Error("Invalid response format from models endpoint");
         } catch (error) {
             console.error("Failed to fetch models:", error);
-            // Return fallback models with GPT-4.1 Nano as preferred default
-            return [
-                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
-                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-                { id: "gpt-4o", name: "GPT-4o" },
-                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
-            ];
+            // Don't return fallback models - let the UI handle service unavailable state
+            throw error;
         }
     }
 
@@ -112,11 +101,8 @@ class ApiClient {
             }));
         }
 
-        // Fallback
-        return [
-            { id: "gpt-4", name: "GPT-4" },
-            { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
-        ];
+        // If no valid data, throw error instead of returning fallback
+        throw new Error("Invalid models data format received from backend");
     }
 
     async testConnection() {
