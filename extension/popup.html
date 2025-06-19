@@ -12,7 +12,14 @@
         <div class="analyzer__header">
             <div class="analyzer__brand">
                 <img src="icons/icon32.png" alt="Smart Form Filler" class="analyzer__icon">
-                <h1 class="analyzer__title">Smart Form Filler</h1>
+                <div class="analyzer__model-controls">
+                    <select id="globalModelSelect" class="select select--header" title="Select AI Model" disabled>
+                        <option value="">Loading models...</option>
+                    </select>
+                    <button id="globalRefreshModelsBtn" class="btn btn--header" title="Refresh Ollama models">
+                        <span class="btn__icon">🔄</span>
+                    </button>
+                </div>
             </div>
             <div class="analyzer__status" id="authStatus">
                 <div class="status-indicator" id="authIndicator"></div>
@@ -38,18 +45,6 @@
 
             <!-- Data Extraction Tab Content -->
             <div id="extractionTab" class="main-tab-content main-tab-content--active">
-                <!-- Model Selection Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">AI Model</h3>
-                    </div>
-                    <div class="section__content">
-                        <select id="modelSelect" class="select select--primary" title="Select AI Model" disabled>
-                            <option value="">Loading models...</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Analysis Purpose Section -->
                 <div class="section">
                     <div class="section__header">
@@ -146,15 +141,6 @@
                         <div class="chat-config">
                             <div class="chat-config__row">
                                 <div class="chat-config__col">
-                                    <label class="chat-config__label">Chat Model:</label>
-                                    <select id="chatModelSelect" class="select select--secondary" title="Select chat model">
-                                        <option value="">Select model...</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="chat-config__row">
-                                <div class="chat-config__col">
                                     <label class="chat-config__label">Data Source Type:</label>
                                     <select id="dataSourceTypeSelect" class="select select--secondary" title="Select data source type">
                                         <option value="markdown">Markdown</option>
@@ -220,18 +206,6 @@
 
             <!-- Form Filler Tab Content -->
             <div id="formFillerTab" class="main-tab-content">
-                <!-- Model Selection Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">AI Model</h3>
-                    </div>
-                    <div class="section__content">
-                        <select id="formFillerModelSelect" class="select select--primary" title="Select AI Model" disabled>
-                            <option value="">Loading models...</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Language Selection Section -->
                 <div class="section">
                     <div class="section__header">

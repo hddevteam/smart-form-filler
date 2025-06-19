@@ -159,17 +159,15 @@ class DataAnalysisController {
                 });
             }
 
-            if (dataSources.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    error: "At least one data source is required"
-                });
-            }
-
-            // Prepare context from data sources
-            const contextParts = [];
-            dataSources.forEach((source, index) => {
-                const sourceInfo = `Data Source ${index + 1} (${source.type}):
+            // Prepare context from data sources (if any)
+            let context = "";
+            let systemPrompt = "";
+            
+            if (dataSources.length > 0) {
+                // Chat with data sources
+                const contextParts = [];
+                dataSources.forEach((source, index) => {
+                    const sourceInfo = `Data Source ${index + 1} (${source.type}):
 Title: ${source.title}
 URL: ${source.url}
 Content:
@@ -177,16 +175,11 @@ ${source.content}
 
 ---
 `;
-                contextParts.push(sourceInfo);
-            });
-
-            const context = contextParts.join("\n");
-
-            // Prepare conversation history
-            const messages = [
-                {
-                    role: "system",
-                    content: `You are a helpful AI assistant that answers questions based on provided data sources. 
+                    contextParts.push(sourceInfo);
+                });
+                
+                context = contextParts.join("\n");
+                systemPrompt = `You are a helpful AI assistant that answers questions based on provided data sources. 
 
 You have access to the following data sources:
 ${context}
@@ -197,7 +190,17 @@ Instructions:
 - Cite which data source(s) you're referencing when possible
 - Be concise but comprehensive
 - Format your response clearly with appropriate markdown formatting
-- If asked about multiple sources, compare and contrast the information`
+- If asked about multiple sources, compare and contrast the information`;
+            } else {
+                // General chat without data sources
+                systemPrompt = `You are a helpful AI assistant. Provide accurate, helpful, and well-structured responses to user questions. Use markdown formatting when appropriate to make your responses clear and readable.`;
+            }
+
+            // Prepare conversation history
+            const messages = [
+                {
+                    role: "system",
+                    content: systemPrompt
                 }
             ];
 
@@ -219,8 +222,11 @@ Instructions:
 
             // Get API configuration for the model
             const apiConfig = gptService.getApiConfig(model);
-            if (!apiConfig.apiKey || !apiConfig.apiUrl) {
+            if (!apiConfig.apiKey && !apiConfig.isOllama) {
                 throw new Error(`API configuration not found for model: ${model}`);
+            }
+            if (!apiConfig.apiUrl) {
+                throw new Error(`API URL not found for model: ${model}`);
             }
 
             // Call GPT service using makeRequest (consistent with other methods)
@@ -232,7 +238,9 @@ Instructions:
                 params: {
                     max_tokens: 2000,
                     temperature: 0.7
-                }
+                },
+                ollamaUrl: apiConfig.ollamaUrl,
+                isOllama: apiConfig.isOllama
             });
 
             // Check if response has data and choices

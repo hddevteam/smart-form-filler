@@ -22,6 +22,8 @@ const AdapterFactory = require("./modelAdapters/AdapterFactory");
  * @param {Array} options.customTools - Custom tools for function calling (optional)
  * @param {string} options.reasoningEffort - Reasoning effort level (low, medium, high) for reasoning models
  * @param {string} options.reasoningSummary - Reasoning summary mode (auto, concise, detailed) for supported models
+ * @param {Object} options.ollamaUrl - Ollama base URL for Ollama models
+ * @param {boolean} options.isOllama - Whether this is an Ollama model
  * @returns {Promise<Object>} API response
  */
 const makeRequest = async ({ 
@@ -33,13 +35,19 @@ const makeRequest = async ({
     includeFunctionCalls = false,
     customTools,
     reasoningEffort,
-    reasoningSummary
+    reasoningSummary,
+    ollamaUrl,
+    isOllama = false
 }) => {
     console.log("Making API request to:", apiUrl, "with model:", model);
     
     try {
         // Get adapter for the model
-        const adapter = AdapterFactory.getAdapter(model, config);
+        const adapterConfig = {
+            ...config,
+            ollamaUrl: ollamaUrl
+        };
+        const adapter = AdapterFactory.getAdapter(model, adapterConfig);
         
         // Process messages for model compatibility (system vs developer messages)
         const processedPrompt = processMessagesForModel(prompt, model);
@@ -57,6 +65,9 @@ const makeRequest = async ({
             };
             console.log(`Adding reasoning summary to params: ${reasoningSummary}`);
         }
+
+        // Add model to params for adapter processing
+        params.model = model;
 
         // Use adapter to process request data (including reasoning parameters)
         const requestData = adapter.processRequestBody(processedPrompt, params);
@@ -84,10 +95,18 @@ const makeRequest = async ({
             throw new Error(`API endpoint not found: ${apiUrl}`);
         }
 
-        // Process reasoning summary if present
-        const processedResponse = processReasoningSummary(response);
+        // Process response using adapter if it has a processResponse method
+        let processedResponse;
+        if (isOllama && adapter.processResponse) {
+            processedResponse = adapter.processResponse(response.data);
+        } else {
+            processedResponse = response;
+        }
 
-        return processedResponse;
+        // Process reasoning summary if present
+        const finalResponse = processReasoningSummary(processedResponse);
+
+        return finalResponse;
     } catch (error) {
         console.error("API request failed:", error.message);
         if (error.response) {

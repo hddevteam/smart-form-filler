@@ -1,12 +1,15 @@
 # Smart Form Filler - AI-Powered Browser Extension
 
-A standalone browser extension for intelligent data extraction and form filling using AI technology.
+A standalone browser extension for intelligent data extraction and form filling using AI technology. Now with **Ollama local model support**!
 
 ## 🚀 Features
 
 - **Data Extraction**: Extract structured data from web pages
 - **Smart Form Filling**: AI-powered automatic form completion
 - **Multi-format Output**: Raw HTML, cleaned HTML, and Markdown formats
+- **Chat with Data**: Interactive Q&A with extracted content
+- **Local AI Models**: Full Ollama integration for privacy-focused AI
+- **Cloud AI Models**: Support for GPT-4, DeepSeek, and other cloud providers
 - **Browser Integration**: Works seamlessly with Chrome and other Chromium-based browsers
 
 ## 📁 Project Structure
@@ -73,6 +76,72 @@ Copy `.env.example` to `.env` and configure your environment variables:
 cd backend
 cp .env.example .env
 ```
+
+### Ollama Configuration (Optional)
+For local AI model support, add to your `.env` file:
+```env
+OLLAMA_URL=http://localhost:11434
+```
+
+## 🤖 Ollama Integration
+
+This extension supports **Ollama local models** for privacy-focused AI! Use your own locally-hosted models alongside cloud providers.
+
+### 🚀 Quick Setup
+
+#### 1. Install Ollama
+Visit [https://ollama.ai/](https://ollama.ai/) and install Ollama for your platform.
+
+#### 2. Start Ollama Service
+```bash
+ollama serve
+```
+
+#### 3. Download Models
+```bash
+# Recommended models for form filling and data extraction
+ollama pull llama2
+ollama pull mistral
+ollama pull codellama
+ollama pull qwen2.5:7b
+ollama pull deepseek-r1
+```
+
+#### 4. Use in Extension
+1. Open the extension popup
+2. Click the 🔄 refresh button next to "AI Model"
+3. Select from **Local Models (Ollama)** or **Cloud Models**
+4. Enjoy private, local AI processing!
+
+### 🔧 Features
+
+- **Auto-Discovery**: Automatically detects running Ollama servers
+- **Model Hot-Loading**: Refresh model list without restarting
+- **Unified Interface**: Seamless switching between local and cloud models
+- **Privacy-First**: Data never leaves your machine with local models
+
+### 📋 Recommended Models
+
+| Model | Use Case | Command |
+|-------|----------|---------|
+| `llama2` | General tasks | `ollama pull llama2` |
+| `mistral` | High performance | `ollama pull mistral` |
+| `codellama` | Code understanding | `ollama pull codellama` |
+| `qwen2.5:7b` | Multilingual | `ollama pull qwen2.5:7b` |
+| `deepseek-r1` | Reasoning tasks | `ollama pull deepseek-r1` |
+
+### 🛠️ Troubleshooting
+
+#### Models Not Showing?
+1. **Check Ollama Status**: `curl http://localhost:11434/api/tags`
+2. **List Models**: `ollama list`
+3. **Restart Ollama**: `ollama serve`
+4. **Refresh Extension**: Click 🔄 button
+
+#### Connection Issues?
+- Ensure Ollama runs on `http://localhost:11434`
+- Check firewall settings
+- Update `OLLAMA_URL` if using custom port
 
 ## 🧪 Testing
 

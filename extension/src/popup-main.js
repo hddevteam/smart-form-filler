@@ -145,8 +145,9 @@ class PopupManager {
             authIndicator: document.getElementById("authIndicator"),
             authText: document.getElementById("authText"),
             
-            // Model selection
-            modelSelect: document.getElementById("modelSelect"),
+            // Model selection (now global in header)
+            globalModelSelect: document.getElementById("globalModelSelect"),
+            globalRefreshModelsBtn: document.getElementById("globalRefreshModelsBtn"),
             
             // Main tabs
             mainTabs: document.querySelectorAll(".main-tab"),
@@ -191,7 +192,6 @@ class PopupManager {
             chatBtn: document.getElementById("chatBtn"),
             
             // Chat elements
-            chatModelSelect: document.getElementById("chatModelSelect"),
             dataSourceTypeSelect: document.getElementById("dataSourceTypeSelect"),
             dataSourceList: document.getElementById("dataSourceList"),
             chatMessages: document.getElementById("chatMessages"),
@@ -205,7 +205,6 @@ class PopupManager {
             retryBtn: document.getElementById("retryBtn"),
             
             // Form Filler elements
-            formFillerModelSelect: document.getElementById("formFillerModelSelect"),
             fillContentInput: document.getElementById("fillContentInput"),
             detectFormsBtn: document.getElementById("detectFormsBtn"),
             analyzeContentBtn: document.getElementById("analyzeContentBtn"),
@@ -285,6 +284,24 @@ class PopupManager {
     }
 
     /**
+     * Get currently selected model from global selector
+     * @returns {string} The selected model ID
+     */
+    getSelectedModel() {
+        return this.elements.globalModelSelect?.value || 'gpt-4.1-nano';
+    }
+
+    /**
+     * Set the selected model in global selector
+     * @param {string} modelId - The model ID to select
+     */
+    setSelectedModel(modelId) {
+        if (this.elements.globalModelSelect) {
+            this.elements.globalModelSelect.value = modelId;
+        }
+    }
+
+    /**
      * Setup UI and bind events
      */
     setupUI() {
@@ -310,6 +327,11 @@ class PopupManager {
             console.log("🔧 Binding UI events...");
             this.uiController.bindEvents(handlers);
             console.log("✅ UI events bound");
+            
+            // Bind refresh model events
+            console.log("🔧 Binding refresh model events...");
+            this.bindRefreshModelEvents();
+            console.log("✅ Refresh model events bound");
             
             // Bind chat events
             console.log("🔧 Binding chat events...");
@@ -364,55 +386,35 @@ class PopupManager {
             console.log("🔧 Received models:", models);
             
             // Clear current options
-            this.elements.modelSelect.innerHTML = "";
+            this.elements.globalModelSelect.innerHTML = "";
             
-            // Add models to dropdown
-            models.forEach(model => {
-                const option = document.createElement("option");
-                option.value = model.id;
-                option.textContent = model.name;
-                this.elements.modelSelect.appendChild(option);
-            });
+            // Group models by type
+            const groupedModels = this.groupModelsByType(models);
+            
+            // Add models to dropdown with grouping
+            this.populateModelSelect(this.elements.globalModelSelect, groupedModels, models);
             
             // Set default selection (prefer gpt-4.1-nano if available, otherwise first model)
             const preferredModel = models.find(m => m.id === "gpt-4.1-nano") || models[0];
             if (preferredModel) {
-                this.elements.modelSelect.value = preferredModel.id;
+                this.elements.globalModelSelect.value = preferredModel.id;
             }
             
             // Enable the dropdown
-            this.elements.modelSelect.disabled = false;
-            
-            // Also populate form filler models if element exists
-            if (this.elements.formFillerModelSelect) {
-                this.elements.formFillerModelSelect.innerHTML = "";
-                models.forEach(model => {
-                    const option = document.createElement("option");
-                    option.value = model.id;
-                    option.textContent = model.name;
-                    this.elements.formFillerModelSelect.appendChild(option);
-                });
-                
-                // Set default for form filler (prefer gpt-4.1-nano for consistency)
-                const formFillerPreferred = models.find(m => m.id === "gpt-4.1-nano") || models.find(m => m.id === "gpt-4o-mini") || models[0];
-                if (formFillerPreferred) {
-                    this.elements.formFillerModelSelect.value = formFillerPreferred.id;
-                }
-                this.elements.formFillerModelSelect.disabled = false;
-            }
+            this.elements.globalModelSelect.disabled = false;
             
             // Update chat models if chat handler is available
             if (this.chatHandler) {
                 this.chatHandler.populateChatModels();
             }
             
-            console.log(`✅ Loaded ${models.length} models, selected: ${this.elements.modelSelect.value}`);
+            console.log(`✅ Loaded ${models.length} models, selected: ${this.elements.globalModelSelect.value}`);
             
         } catch (error) {
             console.error("❌ Failed to load models:", error);
             
             // Fallback: populate with default models
-            this.elements.modelSelect.innerHTML = "";
+            this.elements.globalModelSelect.innerHTML = "";
             const fallbackModels = [
                 { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
                 { id: "gpt-4o-mini", name: "GPT-4o Mini" },
@@ -424,28 +426,12 @@ class PopupManager {
                 const option = document.createElement("option");
                 option.value = model.id;
                 option.textContent = model.name;
-                this.elements.modelSelect.appendChild(option);
+                this.elements.globalModelSelect.appendChild(option);
             });
             
             // Set default to first fallback model
-            this.elements.modelSelect.value = fallbackModels[0].id;
-            this.elements.modelSelect.disabled = false;
-            
-            // Also populate form filler models with fallback data
-            if (this.elements.formFillerModelSelect) {
-                this.elements.formFillerModelSelect.innerHTML = "";
-                fallbackModels.forEach(model => {
-                    const option = document.createElement("option");
-                    option.value = model.id;
-                    option.textContent = model.name;
-                    this.elements.formFillerModelSelect.appendChild(option);
-                });
-                
-                // Set default for form filler (prefer gpt-4o-mini)
-                const formFillerDefault = fallbackModels.find(m => m.id === "gpt-4.1-nano") || fallbackModels[0];
-                this.elements.formFillerModelSelect.value = formFillerDefault.id;
-                this.elements.formFillerModelSelect.disabled = false;
-            }
+            this.elements.globalModelSelect.value = fallbackModels[0].id;
+            this.elements.globalModelSelect.disabled = false;
             
             // Update chat models with fallback data
             if (this.chatHandler) {
@@ -453,6 +439,71 @@ class PopupManager {
             }
             
             console.log("✅ Using fallback models");
+        }
+    }
+
+    /**
+     * Group models by type for better organization
+     */
+    groupModelsByType(models) {
+        const grouped = {
+            cloud: [],
+            ollama: []
+        };
+        
+        models.forEach(model => {
+            if (model.type === "ollama" || model.id.startsWith("ollama:")) {
+                grouped.ollama.push(model);
+            } else {
+                grouped.cloud.push(model);
+            }
+        });
+        
+        return grouped;
+    }
+
+    /**
+     * Populate model select element with grouped options
+     */
+    populateModelSelect(selectElement, groupedModels, allModels) {
+        // Add cloud models first
+        if (groupedModels.cloud.length > 0) {
+            const cloudGroup = document.createElement("optgroup");
+            cloudGroup.label = "Cloud Models";
+            
+            groupedModels.cloud.forEach(model => {
+                const option = document.createElement("option");
+                option.value = model.id;
+                option.textContent = model.name;
+                cloudGroup.appendChild(option);
+            });
+            
+            selectElement.appendChild(cloudGroup);
+        }
+        
+        // Add Ollama models if available
+        if (groupedModels.ollama.length > 0) {
+            const ollamaGroup = document.createElement("optgroup");
+            ollamaGroup.label = "Local Models (Ollama)";
+            
+            groupedModels.ollama.forEach(model => {
+                const option = document.createElement("option");
+                option.value = model.id;
+                option.textContent = model.name;
+                ollamaGroup.appendChild(option);
+            });
+            
+            selectElement.appendChild(ollamaGroup);
+        }
+        
+        // If no models are grouped, add them directly (fallback)
+        if (groupedModels.cloud.length === 0 && groupedModels.ollama.length === 0) {
+            allModels.forEach(model => {
+                const option = document.createElement("option");
+                option.value = model.id;
+                option.textContent = model.name;
+                selectElement.appendChild(option);
+            });
         }
     }
 
@@ -673,6 +724,85 @@ class PopupManager {
         } catch (error) {
             console.error("Switch to chat error:", error);
             this.resultsHandler.showError("Failed to switch to chat: " + error.message);
+        }
+    }
+
+    /**
+     * Bind refresh model button events
+     */
+    bindRefreshModelEvents() {
+        // Global refresh models button in header
+        if (this.elements.globalRefreshModelsBtn) {
+            this.elements.globalRefreshModelsBtn.addEventListener("click", async () => {
+                await this.refreshModels();
+            });
+        }
+    }
+
+    /**
+     * Refresh models from server (including Ollama models)
+     */
+    async refreshModels() {
+        try {
+            console.log("🔄 Refreshing models...");
+            
+            // Disable refresh button during refresh
+            if (this.elements.globalRefreshModelsBtn) {
+                this.elements.globalRefreshModelsBtn.disabled = true;
+                this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">⏳</span>';
+            }
+            
+            // First refresh Ollama models specifically
+            try {
+                const ollamaResult = await this.apiClient.refreshOllamaModels();
+                console.log("🔄 Ollama models refreshed:", ollamaResult);
+            } catch (error) {
+                console.warn("⚠️ Failed to refresh Ollama models (this is normal if Ollama is not running):", error.message);
+            }
+            
+            // Then reload all models
+            await this.loadModels();
+            
+            console.log("✅ Models refreshed successfully");
+            
+            // Show temporary success indicator
+            this.showRefreshSuccess();
+            
+        } catch (error) {
+            console.error("❌ Failed to refresh models:", error);
+            this.showRefreshError(error);
+        } finally {
+            // Re-enable refresh button
+            if (this.elements.globalRefreshModelsBtn) {
+                this.elements.globalRefreshModelsBtn.disabled = false;
+                this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">🔄</span>';
+            }
+        }
+    }
+
+    /**
+     * Show refresh success feedback
+     */
+    showRefreshSuccess() {
+        if (this.elements.globalRefreshModelsBtn) {
+            this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">✅</span>';
+            setTimeout(() => {
+                this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">🔄</span>';
+            }, 2000);
+        }
+    }
+
+    /**
+     * Show refresh error feedback
+     */
+    showRefreshError(error) {
+        if (this.elements.globalRefreshModelsBtn) {
+            this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">❌</span>';
+            this.elements.globalRefreshModelsBtn.title = `Refresh failed: ${error.message}`;
+            setTimeout(() => {
+                this.elements.globalRefreshModelsBtn.innerHTML = '<span class="btn__icon">🔄</span>';
+                this.elements.globalRefreshModelsBtn.title = "Refresh Ollama models";
+            }, 3000);
         }
     }
 }

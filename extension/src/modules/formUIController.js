@@ -14,8 +14,9 @@ class FormUIController {
      * @returns {string} Selected model name
      */
     getSelectedFormFillerModel() {
-        const modelSelect = document.getElementById("formFillerModelSelect");
-        return modelSelect ? modelSelect.value : "gpt-4.1-nano";
+        // Use global model selector instead of form-specific one
+        const globalModelSelect = document.getElementById("globalModelSelect");
+        return globalModelSelect ? globalModelSelect.value : "gpt-4.1-nano";
     }
     
     /**

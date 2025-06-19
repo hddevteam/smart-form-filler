@@ -8,6 +8,7 @@ const controllers = require('../controllers');
 // Extension Core APIs
 router.get('/extension/health', controllers.extensionCore.healthCheck);
 router.get('/extension/models', controllers.extensionCore.getAvailableModels);
+router.post('/extension/refresh-ollama-models', controllers.extensionCore.refreshOllamaModels);
 
 // Data Extraction APIs
 router.post('/extension/extract-data-sources', controllers.dataExtraction.extractDataSources);

@@ -54,71 +54,12 @@ class ChatHandler {
 
     /**
      * Populate chat model dropdown with available models
+     * NOTE: Since we now use a global model selector, this method is no longer needed
+     * but kept for compatibility. The global model selector is managed by PopupManager.
      */
     populateChatModels() {
-        console.log("🔧 Populating chat models...");
-        
-        // Copy models from main model select
-        const mainModelSelect = this.elements.modelSelect;
-        const chatModelSelect = this.elements.chatModelSelect;
-        
-        if (!chatModelSelect) {
-            console.warn("⚠️ Chat model select element not found");
-            return;
-        }
-        
-        // Clear existing options
-        chatModelSelect.innerHTML = "";
-        
-        // Add default option
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "Select model...";
-        chatModelSelect.appendChild(defaultOption);
-        
-        // Check if main model select has models
-        if (mainModelSelect && mainModelSelect.options.length > 1) {
-            // Copy options from main model select (skip first empty option)
-            console.log(`🔧 Copying ${mainModelSelect.options.length - 1} models from main selector`);
-            for (let i = 0; i < mainModelSelect.options.length; i++) {
-                const option = mainModelSelect.options[i];
-                if (option.value) {
-                    const newOption = document.createElement("option");
-                    newOption.value = option.value;
-                    newOption.textContent = option.textContent;
-                    chatModelSelect.appendChild(newOption);
-                }
-            }
-            
-            // Set default to currently selected model
-            if (mainModelSelect.value) {
-                chatModelSelect.value = mainModelSelect.value;
-                console.log(`🔧 Set chat model to: ${mainModelSelect.value}`);
-            }
-        } else {
-            // Main model select is empty, add some default models
-            console.log("🔧 Main model select is empty, adding default models");
-            const defaultModels = [
-                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
-                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-                { id: "gpt-4o", name: "GPT-4o" },
-                { id: "gpt-4", name: "GPT-4" },
-                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
-            ];
-            
-            defaultModels.forEach(model => {
-                const option = document.createElement("option");
-                option.value = model.id;
-                option.textContent = model.name;
-                chatModelSelect.appendChild(option);
-            });
-            
-            // Set default to first model
-            chatModelSelect.value = defaultModels[0].id;
-            console.log(`🔧 Set default chat model to: ${defaultModels[0].id}`);
-        }
-        
-        console.log(`✅ Chat model select populated with ${chatModelSelect.options.length - 1} models`);
+        console.log("🔧 Chat models are now managed by global model selector - this method is deprecated");
+        // No longer needed as we use global model selector
     }
 
     /**
@@ -185,11 +126,11 @@ class ChatHandler {
      * Update send button state based on selections
      */
     updateSendButtonState() {
-        const hasModel = this.elements.chatModelSelect.value;
-        const hasDataSources = this.selectedDataSources.size > 0;
+        const hasModel = this.getSelectedModel();
         const hasMessage = this.elements.chatInput.value.trim();
         
-        this.elements.sendChatBtn.disabled = !hasModel || !hasDataSources || !hasMessage || this.isLoading;
+        // Allow sending message even without data sources for general conversation
+        this.elements.sendChatBtn.disabled = !hasModel || !hasMessage || this.isLoading;
     }
 
     /**
@@ -233,17 +174,26 @@ class ChatHandler {
     }
 
     /**
+     * Get selected model from global model selector
+     * @returns {string} The selected model ID
+     */
+    getSelectedModel() {
+        const globalModelSelect = document.getElementById("globalModelSelect");
+        return globalModelSelect?.value || 'gpt-4.1-nano';
+    }
+
+    /**
      * Send chat message
      */
     async sendMessage() {
         const message = this.elements.chatInput.value.trim();
         if (!message || this.isLoading) return;
         
-        const model = this.elements.chatModelSelect.value;
+        const model = this.getSelectedModel();
         const dataSources = this.getSelectedDataSourcesContent();
         
-        if (!model || dataSources.length === 0) {
-            this.showError("Please select a model and at least one data source.");
+        if (!model) {
+            this.showError("Please select a model.");
             return;
         }
         
@@ -271,7 +221,7 @@ class ChatHandler {
                 body: JSON.stringify({
                     message: message,
                     model: model,
-                    dataSources: dataSources,
+                    dataSources: dataSources, // Can be empty array for general conversation
                     chatHistory: this.chatHistory.slice(-10) // Last 10 messages for context
                 })
             });

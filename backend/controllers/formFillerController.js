@@ -78,8 +78,11 @@ class FormFillerController {
             
             // Get API configuration for the model
             const apiConfig = gptService.getApiConfig(model);
-            if (!apiConfig.apiKey || !apiConfig.apiUrl) {
+            if (!apiConfig.apiKey && !apiConfig.isOllama) {
                 throw new Error(`API configuration not found for model: ${model}`);
+            }
+            if (!apiConfig.apiUrl) {
+                throw new Error(`API URL not found for model: ${model}`);
             }
 
             const response = await gptService.makeRequest({
@@ -90,7 +93,9 @@ class FormFillerController {
                 params: {
                     temperature: 0.2,
                     max_tokens: 1500
-                }
+                },
+                ollamaUrl: apiConfig.ollamaUrl,
+                isOllama: apiConfig.isOllama
             });
 
             if (!response.data || !response.data.choices || !response.data.choices[0]) {
@@ -217,8 +222,11 @@ class FormFillerController {
             
             // Get API configuration for the model
             const apiConfig = gptService.getApiConfig(model);
-            if (!apiConfig.apiKey || !apiConfig.apiUrl) {
+            if (!apiConfig.apiKey && !apiConfig.isOllama) {
                 throw new Error(`API configuration not found for model: ${model}`);
+            }
+            if (!apiConfig.apiUrl) {
+                throw new Error(`API URL not found for model: ${model}`);
             }
 
             const response = await gptService.makeRequest({
@@ -229,7 +237,9 @@ class FormFillerController {
                 params: {
                     temperature: 0.1,
                     max_tokens: 2000
-                }
+                },
+                ollamaUrl: apiConfig.ollamaUrl,
+                isOllama: apiConfig.isOllama
             });
 
             if (!response.data || !response.data.choices || !response.data.choices[0]) {

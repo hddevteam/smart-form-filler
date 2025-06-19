@@ -162,17 +162,19 @@ class UIController {
     }
 
     /**
-     * Get selected model
+     * Get selected model from global selector
      */
     getSelectedModel() {
-        return this.elements.modelSelect?.value || "gpt-4.1-nano";
+        const globalModelSelect = document.getElementById("globalModelSelect");
+        return globalModelSelect?.value || "gpt-4.1-nano";
     }
 
     /**
-     * Get selected form filler model
+     * Get selected form filler model (now uses global selector)
      */
     getSelectedFormFillerModel() {
-        return this.elements.formFillerModelSelect?.value || "gpt-4.1-nano";
+        const globalModelSelect = document.getElementById("globalModelSelect");
+        return globalModelSelect?.value || "gpt-4.1-nano";
     }
 
     /**

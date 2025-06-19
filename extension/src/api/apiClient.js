@@ -139,6 +139,22 @@ class ApiClient {
         }
     }
 
+    async refreshOllamaModels() {
+        try {
+            console.log("🔧 Refreshing Ollama models...");
+            const response = await this.makeRequest("/extension/refresh-ollama-models", {
+                method: "POST"
+            });
+            const data = await response.json();
+            
+            console.log("🔧 Ollama models refresh response:", data);
+            return data;
+        } catch (error) {
+            console.error("❌ Failed to refresh Ollama models:", error);
+            throw error;
+        }
+    }
+
     // Alias for getAvailableModels for backward compatibility
     async getModels() {
         return this.getAvailableModels();

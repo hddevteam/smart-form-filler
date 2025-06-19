@@ -21,6 +21,7 @@ const apiKeys = {
     gpt41: process.env.GPT_4_1_API_KEY, // API Key for gpt-4.1 model
     gpt41Nano: process.env.GPT_4_1_NANO_API_KEY, // API Key for gpt-4.1-nano model
     gpt41Mini: process.env.GPT_4_1_MINI_API_KEY, // API Key for gpt-4.1-mini model
+    ollama: null, // Ollama doesn't require API key for local usage
     // Default key based on environment
     default: devMode ? process.env.API_KEY_DEV : process.env.GPT_4_1_API_KEY
 };
@@ -39,6 +40,7 @@ const apiUrls = {
     gpt41: process.env.GPT_4_1_API_URL, // URL for gpt-4.1 model
     gpt41Nano: process.env.GPT_4_1_NANO_API_URL, // URL for gpt-4.1-nano model
     gpt41Mini: process.env.GPT_4_1_MINI_API_URL, // URL for gpt-4.1-mini model
+    ollama: process.env.OLLAMA_URL || "http://localhost:11434", // Default Ollama URL
     // Default URL based on environment
     default: devMode ? process.env.API_URL_DEV : process.env.GPT_4_1_API_URL
 };
@@ -164,6 +166,16 @@ const modelFeatures = {
 const getApiConfig = (model) => {
     let apiKey, apiUrl;
     
+    // Handle Ollama models (prefixed with "ollama:")
+    if (model && model.startsWith("ollama:")) {
+        return {
+            apiKey: null, // Ollama doesn't require API key
+            apiUrl: `${apiUrls.ollama}/api/chat`,
+            ollamaUrl: apiUrls.ollama,
+            isOllama: true
+        };
+    }
+    
     switch (model) {
     case "gpt-4o":
         apiKey = apiKeys.gpt4o;
@@ -224,9 +236,45 @@ const getApiConfig = (model) => {
 };
 
 /**
+ * Get Ollama models if available
+ */
+const getOllamaModels = async () => {
+    try {
+        const OllamaAdapter = require("./modelAdapters/OllamaAdapter");
+        const isAvailable = await OllamaAdapter.isAvailable(apiUrls.ollama);
+        
+        if (!isAvailable) {
+            console.log("Ollama server not available");
+            return [];
+        }
+        
+        const models = await OllamaAdapter.getAvailableModels(apiUrls.ollama);
+        return models.map(model => ({
+            id: `ollama:${model.name}`,
+            name: `Ollama: ${model.name}`,
+            type: "ollama",
+            size: model.size,
+            modified_at: model.modified_at,
+            features: {
+                supportsFunctionCalls: false, // Most Ollama models don't support function calls
+                supportsSystemMessages: true,
+                supportsDeveloperMessages: false,
+                supportsReasoningSummary: false,
+                supportsReasoningEffort: false,
+                requiresMaxCompletionTokens: false
+            },
+            configured: true
+        }));
+    } catch (error) {
+        console.error("Error fetching Ollama models:", error);
+        return [];
+    }
+};
+
+/**
  * Get all available models that have valid API configuration
  */
-const getAvailableModels = () => {
+const getAvailableModels = async () => {
     const modelList = [
         { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
         { id: "gpt-4.1-mini", name: "GPT-4.1 Mini" },
@@ -244,12 +292,14 @@ const getAvailableModels = () => {
     
     const availableModels = [];
     
+    // Add configured cloud models
     modelList.forEach(model => {
         try {
             const config = getApiConfig(model.id);
             if (config && config.apiKey && config.apiUrl) {
                 availableModels.push({
                     ...model,
+                    type: "cloud",
                     features: modelFeatures[model.id] || {},
                     configured: true
                 });
@@ -258,6 +308,14 @@ const getAvailableModels = () => {
             // Model not configured, skip it
         }
     });
+    
+    // Add Ollama models
+    try {
+        const ollamaModels = await getOllamaModels();
+        availableModels.push(...ollamaModels);
+    } catch (error) {
+        console.error("Failed to fetch Ollama models:", error);
+    }
     
     return availableModels;
 };
@@ -269,6 +327,19 @@ const getAvailableModels = () => {
  * @returns {boolean} Whether the feature is supported
  */
 const supportsFeature = (model, feature) => {
+    // Handle Ollama models
+    if (model && model.startsWith("ollama:")) {
+        const ollamaFeatures = {
+            supportsFunctionCalls: false,
+            supportsSystemMessages: true,
+            supportsDeveloperMessages: false,
+            supportsReasoningSummary: false,
+            supportsReasoningEffort: false,
+            requiresMaxCompletionTokens: false
+        };
+        return !!ollamaFeatures[feature];
+    }
+    
     const features = modelFeatures[model] || modelFeatures["gpt-4o"]; // Default to gpt-4o features
     return !!features[feature];
 };
@@ -281,5 +352,6 @@ module.exports = {
     modelFeatures,
     getApiConfig,
     getAvailableModels,
+    getOllamaModels,
     supportsFeature
 };
