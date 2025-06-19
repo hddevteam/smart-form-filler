@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Form Filler",
+  "version": "1.0.0",
+  "description": "AI-powered form filling and data extraction browser extension",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "sidePanel",
+    "tabs",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "http://localhost:*/*",
+    "https://*.azurewebsites.net/*",
+    "https://login.microsoftonline.com/*"
+  ],
+  "action": {
+    "default_title": "Smart Form Filler"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/modules/formDetector.js",
+        "src/modules/formFiller.js",
+        "content-iframe.js",
+        "src/content-script.js",
+        "src/content-analyzer.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background-sidepanel.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/auth/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

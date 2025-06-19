@@ -1,0 +1,33 @@
+{
+  "name": "smart-form-filler",
+  "version": "1.0.0",
+  "description": "Smart Form Filler - AI-powered browser extension for intelligent data extraction and form filling",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:all": "npm run install:backend",
+    "dev:backend": "cd backend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "build:extension": "echo 'Extension build completed'",
+    "dev": "npm run dev:backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "browser-extension",
+    "form-filler",
+    "data-extraction",
+    "ai-powered",
+    "chrome-extension",
+    "edge-extension"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "sharp": "^0.34.2"
+  }
+}

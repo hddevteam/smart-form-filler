@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Form Filler</title>
+    <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+    <div class="analyzer">
+        <!-- Header -->
+        <div class="analyzer__header">
+            <div class="analyzer__brand">
+                <img src="icons/icon32.png" alt="Smart Form Filler" class="analyzer__icon">
+                <h1 class="analyzer__title">Smart Form Filler</h1>
+            </div>
+            <div class="analyzer__status" id="authStatus">
+                <div class="status-indicator" id="authIndicator"></div>
+                <span class="status-text" id="authText">Checking...</span>
+            </div>
+        </div>        <!-- Content -->
+        <div class="analyzer__content">
+            <!-- Main Navigation Tabs -->
+            <div class="main-tabs">
+                <button class="main-tab main-tab--active" data-tab="extraction">
+                    <span class="main-tab__icon">📊</span>
+                    <span class="main-tab__text">Data Extraction</span>
+                </button>
+                <button class="main-tab" data-tab="chat">
+                    <span class="main-tab__icon">💬</span>
+                    <span class="main-tab__text">Chat with Data</span>
+                </button>
+                <button class="main-tab" data-tab="formfiller">
+                    <span class="main-tab__icon">✍️</span>
+                    <span class="main-tab__text">Form Filler</span>
+                </button>
+            </div>
+
+            <!-- Data Extraction Tab Content -->
+            <div id="extractionTab" class="main-tab-content main-tab-content--active">
+                <!-- Model Selection Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">AI Model</h3>
+                    </div>
+                    <div class="section__content">
+                        <select id="modelSelect" class="select select--primary" title="Select AI Model" disabled>
+                            <option value="">Loading models...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Analysis Purpose Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Data Extraction</h3>
+                        <p class="section__description">Extract structured data sources (Markdown + HTML)</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="section">
+                    <div class="section__content">
+                        <div class="action-buttons action-buttons--single-button">
+                            <button id="extractDataBtn" class="btn btn--primary btn--large">
+                                <span class="btn__icon">📊</span>
+                                <span class="btn__text">Extract Data Sources</span>
+                            </button>
+                            <button id="loginBtn" class="btn btn--tertiary hidden">
+                                <span class="btn__icon">🔐</span>
+                                <span class="btn__text">Sign In</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="section hidden">
+                    <div class="section__header">
+                        <h3 class="section__title">Extraction History</h3>
+                        <div class="results-actions-header">
+                            <button id="clearAllBtn" class="btn btn--tertiary btn--small">
+                                <span class="btn__icon">🗑️</span>
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section__content">
+                        <!-- History List Container -->
+                        <div id="historyContainer" class="history-container">
+                            <!-- Dynamic history items will be inserted here -->
+                        </div>
+                        
+                        <!-- Current Results Detail View (Hidden by default) -->
+                        <div id="currentResultsDetail" class="results-detail hidden">
+                            <div class="results-container">
+                                <div class="results-tabs">
+                                    <button class="results-tab results-tab--active" data-tab="markdown" id="markdownTab">Markdown</button>
+                                    <button class="results-tab" data-tab="html" id="htmlTab">Raw HTML</button>
+                                    <button class="results-tab" data-tab="cleaned-html" id="cleanedHtmlTab">Cleaned HTML</button>
+                                    <button class="results-tab" data-tab="metadata" id="metadataTab">Metadata</button>
+                                </div>
+                                <div class="results-content">
+                                    <div class="results-panel results-panel--active" id="markdownPanel">
+                                        <div class="results-text" id="markdownText"></div>
+                                    </div>
+                                    <div class="results-panel" id="htmlPanel">
+                                        <div class="results-text" id="htmlText"></div>
+                                    </div>
+                                    <div class="results-panel" id="cleanedHtmlPanel">
+                                        <div class="results-text" id="cleanedHtmlText"></div>
+                                    </div>
+                                    <div class="results-panel" id="metadataPanel">
+                                        <pre class="results-code" id="metadataData"></pre>
+                                    </div>
+                                </div>
+                                <div class="results-actions">
+                                    <button id="copyBtn" class="btn btn--secondary btn--small">
+                                        <span class="btn__icon">📋</span>
+                                        Copy Results
+                                    </button>
+                                    <button id="chatBtn" class="btn btn--primary btn--small">
+                                        <span class="btn__icon">💬</span>
+                                        Switch to Chat
+                                    </button>
+                                    <button id="backToHistoryBtn" class="btn btn--tertiary btn--small">
+                                        <span class="btn__icon">←</span>
+                                        Back to List
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat with Data Tab Content -->
+            <div id="chatTab" class="main-tab-content">
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Chat Configuration</h3>
+                        <p class="section__description">Configure your chat settings and select data sources</p>
+                    </div>
+                    <div class="section__content">
+                        <!-- Chat Configuration -->
+                        <div class="chat-config">
+                            <div class="chat-config__row">
+                                <div class="chat-config__col">
+                                    <label class="chat-config__label">Chat Model:</label>
+                                    <select id="chatModelSelect" class="select select--secondary" title="Select chat model">
+                                        <option value="">Select model...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-config__row">
+                                <div class="chat-config__col">
+                                    <label class="chat-config__label">Data Source Type:</label>
+                                    <select id="dataSourceTypeSelect" class="select select--secondary" title="Select data source type">
+                                        <option value="markdown">Markdown</option>
+                                        <option value="cleaned">Cleaned HTML</option>
+                                        <option value="raw">Raw HTML</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-config__row">
+                                <div class="chat-config__col chat-config__col--full">
+                                    <label class="chat-config__label">Select Data Sources:</label>
+                                    <div id="dataSourceList" class="data-source-list">
+                                        <div class="data-source-empty">
+                                            <div class="data-source-empty__icon">📊</div>
+                                            <div class="data-source-empty__text">No data sources available</div>
+                                            <div class="data-source-empty__description">
+                                                Switch to the Data Extraction tab and extract some content first.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Messages Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Chat Messages</h3>
+                        <div class="results-actions-header">
+                            <button id="clearChatBtn" class="btn btn--tertiary btn--small">
+                                <span class="btn__icon">🗑️</span>
+                                Clear Chat
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section__content">
+                        <!-- Chat Messages -->
+                        <div id="chatMessages" class="chat-messages">
+                            <div class="chat-welcome">
+                                <div class="chat-welcome__icon">💬</div>
+                                <div class="chat-welcome__title">Start chatting with your data</div>
+                                <div class="chat-welcome__description">
+                                    Select data sources above and ask questions about the content.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input -->
+                        <div class="chat-input-container">
+                            <div class="chat-input">
+                                <textarea id="chatInput" class="chat-input__field" placeholder="Ask a question about the selected data sources..." rows="2"></textarea>
+                                <button id="sendChatBtn" class="chat-input__send" disabled>
+                                    <span class="btn__icon">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Filler Tab Content -->
+            <div id="formFillerTab" class="main-tab-content">
+                <!-- Model Selection Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">AI Model</h3>
+                    </div>
+                    <div class="section__content">
+                        <select id="formFillerModelSelect" class="select select--primary" title="Select AI Model" disabled>
+                            <option value="">Loading models...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Language Selection Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Output Language</h3>
+                        <p class="section__description">Language for form field values (auto-recommended after content analysis)</p>
+                    </div>
+                    <div class="section__content">
+                        <select id="languageSelect" class="select select--primary" title="Select Output Language">
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Content Input Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Content to Fill</h3>
+                        <p class="section__description">Enter content for AI-powered analysis and field mapping</p>
+                    </div>
+                    <div class="section__content">
+                        <textarea id="fillContentInput" class="form-filler__input" placeholder="Example: 上周末上午8点到10点，网络信息部安排了张明加班处理突发事件。" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Detection Section -->
+                <div class="section">
+                    <div class="section__header">
+                        <h3 class="section__title">Form Detection</h3>
+                        <p class="section__description">Detect forms on the current page</p>
+                    </div>
+                    <div class="section__content">
+                        <div class="action-buttons action-buttons--form-detection">
+                            <button id="detectFormsBtn" class="btn btn--secondary">
+                                <span class="btn__icon">🔍</span>
+                                <span class="btn__text">Detect Forms</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Form Detection Results -->
+                        <div id="formDetectionResults" class="form-detection-results hidden">
+                            <div class="form-detection-summary">
+                                <span class="summary-item">
+                                    <span class="summary-label">Forms Found:</span>
+                                    <span class="summary-value" id="formsFoundCount">0</span>
+                                </span>
+                                <span class="summary-item">
+                                    <span class="summary-label">Fields Found:</span>
+                                    <span class="summary-value" id="fieldsFoundCount">0</span>
+                                </span>
+                                <span class="summary-item hidden" id="iframeStatsContainer">
+                                    <span class="summary-label">Sources:</span>
+                                    <span class="summary-value" id="sourceStats">Main + 0 iframes</span>
+                                </span>
+                            </div>
+                            
+                            <div id="formsList" class="forms-list">
+                                <!-- Dynamic form list will be inserted here -->
+                            </div>
+                            
+                            <!-- Analyze Content Button - moved here -->
+                            <div class="action-buttons action-buttons--content-analysis">
+                                <button id="analyzeContentBtn" class="btn btn--primary" disabled>
+                                    <span class="btn__icon">🧠</span>
+                                    <span class="btn__text">Analyze Content</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Analysis Results -->
+                <div id="analysisResultsSection" class="section hidden">
+                    <div class="section__header">
+                        <h3 class="section__title">Content Analysis Results</h3>
+                        <p class="section__description">Stage 1: Form relevance analysis results</p>
+                    </div>
+                    <div class="section__content">
+                        <div id="analysisResults" class="analysis-results">
+                            <!-- Dynamic analysis results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field Mapping Section -->
+                <div id="fieldMappingSection" class="section hidden">
+                    <div class="section__header">
+                        <h3 class="section__title">Field Mapping</h3>
+                        <p class="section__description">Stage 2: Generate detailed field mappings for the selected form</p>
+                    </div>
+                    <div class="section__content">
+                        <div class="action-buttons action-buttons--mapping">
+                            <button id="generateMappingBtn" class="btn btn--primary" disabled>
+                                <span class="btn__icon">🗺️</span>
+                                <span class="btn__text">Generate Mapping</span>
+                            </button>
+                        </div>
+                        
+                        <div id="mappingResults" class="mapping-results hidden">
+                            <!-- Dynamic mapping results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Filling Actions -->
+                <div id="fillActionsSection" class="section hidden">
+                    <div class="section__header">
+                        <h3 class="section__title">Fill Forms</h3>
+                        <p class="section__description">Apply the mapped data to form fields</p>
+                    </div>
+                    <div class="section__content">
+                        <div class="action-buttons action-buttons--fill-actions">
+                            <button id="fillFormsBtn" class="btn btn--primary" disabled>
+                                <span class="btn__icon">✍️</span>
+                                <span class="btn__text">Fill Forms</span>
+                            </button>
+                        </div>
+                        
+                        <div id="fillResults" class="fill-results hidden">
+                            <!-- Dynamic fill results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-overlay hidden">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Processing...</div>
+                    <div class="loading-details" id="loadingDetails">Initializing</div>
+                </div>
+            </div>
+
+
+
+
+
+            <!-- Error State -->
+            <div id="errorState" class="error-container hidden">
+                <div class="error-content">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-message" id="errorMessage"></div>
+                    <button id="retryBtn" class="btn btn--secondary btn--small">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="analyzer__footer">
+            <div class="footer-info">
+                <span class="footer-version">v2.0.0</span>
+                <span class="footer-separator">•</span>
+                <span class="footer-mode" id="selectedMode">Data Extraction</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts - Load modules in order -->
+    <script src="src/auth/authManager.js"></script>
+    <script src="src/api/apiClient.js"></script>
+    
+    <!-- Load modules -->
+    <script src="src/modules/dataExtractor.js"></script>
+    <script src="src/modules/resultsHandler.js"></script>
+    <script src="src/modules/chatHandler.js"></script>
+    <script src="src/modules/copyHandler.js"></script>
+    <script src="src/modules/uiController.js"></script>
+    <!-- Form Filler Module Dependencies -->
+    <script src="src/modules/formUtils.js"></script>
+    <script src="src/modules/formDetectionService.js"></script>
+    <script src="src/modules/formAnalysisService.js"></script>
+    <script src="src/modules/formUIController.js"></script>
+    <script src="src/modules/formFillerHandler.js"></script>
+    
+    <!-- Main popup manager -->
+    <script src="src/popup-main.js"></script>
+    
+    <!-- Fallback error handler -->
+    <script>
+        // Global error handler to catch any uncaught errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error caught:', e.error);
+            console.error('Error details:', {
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                stack: e.error ? e.error.stack : 'No stack trace'
+            });
+            
+            // Show error in UI if possible
+            const body = document.body;
+            if (body && !document.querySelector('.global-error-display')) {
+                body.insertAdjacentHTML('beforeend', `
+                    <div class="global-error-display" style="position: fixed; top: 0; left: 0; right: 0; z-index: 10000; background: #ff4444; color: white; padding: 10px; font-family: monospace; font-size: 12px;">
+                        <strong>JavaScript Error:</strong> ${e.message}<br>
+                        <strong>File:</strong> ${e.filename}:${e.lineno}:${e.colno}<br>
+                        <button onclick="this.parentElement.remove()" style="float: right; background: white; color: black; border: none; padding: 2px 5px;">×</button>
+                    </div>
+                `);
+            }
+        });
+        
+        // Fallback initialization if DOMContentLoaded fails
+        setTimeout(function() {
+            if (!window.popupManager) {
+                console.warn('⚠️ PopupManager not initialized after 2 seconds, attempting fallback...');
+                try {
+                    window.popupManager = new PopupManager();
+                } catch (error) {
+                    console.error('❌ Fallback initialization also failed:', error);
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
