@@ -36,13 +36,13 @@ class FormUIController {
     getLanguageDisplayName(languageCode) {
         const languageNames = {
             "en": "English",
-            "zh": "中文",
-            "zh-CN": "中文",
-            "zh-TW": "繁體中文",
+            "zh": "Chinese (Simplified)",
+            "zh-CN": "Chinese (Simplified)",
+            "zh-TW": "Chinese (Traditional)",
             "fr": "Français",
             "de": "Deutsch",
             "es": "Español",
-            "ja": "日本語",
+            "ja": "Japanese",
             "ko": "한국어",
             "pt": "Português",
             "ru": "Русский",

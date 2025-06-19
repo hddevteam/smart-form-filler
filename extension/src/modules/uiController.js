@@ -23,7 +23,7 @@ class UIController {
             return;
         }
         
-        // 检查关键元素是否存在
+        // Check if key elements exist
         console.log("🔧 Copy button element:", this.elements.copyBtn);
         console.log("🔧 HTML text element:", this.elements.htmlText);
         console.log("🔧 Cleaned HTML text element:", this.elements.cleanedHtmlText);
@@ -32,7 +32,7 @@ class UIController {
         console.log("🔧 Main tabs element count:", this.elements.mainTabs ? this.elements.mainTabs.length : 0);
         console.log("🔧 Result tabs element count:", this.elements.resultsTabs ? this.elements.resultsTabs.length : 0);
         
-        // 直接查询DOM确认元素是否存在
+        // Directly query DOM to confirm element existence
         const copyBtnDirect = document.getElementById("copyBtn");
         console.log("🔧 Copy button found by direct query:", !!copyBtnDirect);
         if (copyBtnDirect) {
@@ -44,7 +44,7 @@ class UIController {
         const mainTabsDirect = document.querySelectorAll(".main-tab");
         console.log("🔧 Main tabs found by direct query:", mainTabsDirect.length);
         
-        // 确保所有关键元素都被找到
+        // Ensure all key elements are found
         const missingElements = [];
         Object.keys(this.elements).forEach(key => {
             if (!this.elements[key] && key !== "resultsTabs" && key !== "mainTabs") {

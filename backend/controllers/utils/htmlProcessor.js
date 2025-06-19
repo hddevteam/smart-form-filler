@@ -1,12 +1,12 @@
 // controllers/edgeExtension/utils/htmlProcessor.js
 /**
  * HTML Processing Utilities
- * 用于HTML内容处理、清理和iframe合并
+ * For HTML content processing, cleaning and iframe merging
  */
 
 class HTMLProcessor {
     /**
-     * 合并iframe内容到主页面HTML中
+     * Merge iframe content into main page HTML
      */
     mergeIframeContents($, htmlContent, iframeContents = []) {
         console.log("🔧 Merging iframe contents into main page...");
@@ -18,7 +18,7 @@ class HTMLProcessor {
         console.log(`🔧 Found ${mainPageIframes.length} iframes in main page HTML`);
         console.log(`🔧 Received ${iframeContents.length} iframe contents from frontend`);
         
-        // 处理主页面中的直接iframe标签
+        // Process direct iframe tags in main page
         const processedMainIframeSrcs = new Set();
         
         for (let i = 0; i < mainPageIframes.length; i++) {
@@ -26,7 +26,7 @@ class HTMLProcessor {
             const src = $(iframe).attr("src") || `iframe-${i}`;
             const name = $(iframe).attr("name") || `iframe-${i}`;
             
-            // 查找匹配的iframe内容
+            // Find matching iframe content
             let matchedIframeData = null;
             
             for (const iframeData of iframeContents) {
@@ -36,13 +36,13 @@ class HTMLProcessor {
                 }
             }
             
-            // 如果没有通过src匹配到，尝试通过索引匹配
+            // If no match found by src, try matching by index
             if (!matchedIframeData && iframeContents[i] && iframeContents[i].content) {
                 matchedIframeData = iframeContents[i];
             }
             
             if (matchedIframeData && matchedIframeData.content) {
-                // 使用前端提取的内容替换iframe标签
+                // Replace iframe tag with frontend-extracted content
                 const iframeMarker = `<!-- IFRAME_CONTENT_START: ${name} (${src}) -->`;
                 const iframeEndMarker = `<!-- IFRAME_CONTENT_END: ${name} -->`;
                 const iframeFullContent = `${iframeMarker}\n${matchedIframeData.content}\n${iframeEndMarker}`;
@@ -77,10 +77,10 @@ class HTMLProcessor {
             }
         }
         
-        // 获取当前合并后的内容
+        // Get current merged content
         mergedContent = $.html();
         
-        // 添加其他的iframe内容（包括嵌套的iframe）
+        // Add other iframe content (including nested iframes)
         let additionalIframeContent = "";
         
         for (const iframeData of iframeContents) {
@@ -103,7 +103,7 @@ class HTMLProcessor {
             }
         }
         
-        // 将额外的iframe内容添加到页面末尾
+        // Add additional iframe content to end of page
         if (additionalIframeContent) {
             mergedContent += additionalIframeContent;
         }
@@ -115,7 +115,7 @@ class HTMLProcessor {
     }
 
     /**
-     * 清理HTML内容
+     * Clean HTML content
      */
     cleanHTML($) {
         this.removeUnwantedElements($);
@@ -124,10 +124,10 @@ class HTMLProcessor {
     }
 
     /**
-     * 移除不需要的元素
+     * Remove unnecessary elements
      */
     removeUnwantedElements($) {
-        // 移除脚本、样式和其他不需要的元素
+        // Remove scripts, styles and other unnecessary elements
         $("script, style, noscript").remove();
         $("meta, link[rel='stylesheet']").remove();
         $(".advertisement, .ad, .ads, .sponsored").remove();
@@ -136,10 +136,10 @@ class HTMLProcessor {
     }
 
     /**
-     * 清理属性
+     * Clean attributes
      */
     cleanAttributes($) {
-        // 移除事件处理器和样式属性
+        // Remove event handlers and style attributes
         $("*").each(function() {
             const element = $(this);
             const attributes = this.attribs || {};
@@ -153,10 +153,10 @@ class HTMLProcessor {
     }
 
     /**
-     * 提取主要内容区域
+     * Extract main content areas
      */
     extractMainContent($) {
-        // 尝试找到主要内容区域
+        // Try to find main content area
         const contentSelectors = [
             "main", 
             "[role='main']", 
@@ -175,12 +175,12 @@ class HTMLProcessor {
             }
         }
         
-        // 如果没有找到主要内容区域，返回body内容
+        // If no main content area found, return body content
         return $("body").html() || $.html();
     }
 
     /**
-     * 提取结构化数据
+     * Extract structured data
      */
     extractStructuredData($) {
         const tables = $("table").length;

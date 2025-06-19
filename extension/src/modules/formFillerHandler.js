@@ -16,7 +16,7 @@ class FormFillerHandler {
      */
     constructor(apiClient, uiController) {
         this.apiClient = apiClient;
-        // 只有当 uiController 是 FormUIController 的实例时才使用它，否则创建一个新的
+        // Only use uiController if it's an instance of FormUIController, otherwise create a new one
         this.uiController = (uiController instanceof FormUIController) ? uiController : new FormUIController();
         console.log("🔧 FormFillerHandler initialized with", 
             (uiController instanceof FormUIController) ? "provided FormUIController" : "new FormUIController");

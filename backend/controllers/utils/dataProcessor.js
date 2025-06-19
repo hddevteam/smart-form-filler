@@ -1,12 +1,12 @@
 // controllers/edgeExtension/utils/dataProcessor.js
 /**
  * Data Processing Utilities
- * 用于数据分析、统计和内容处理
+ * For data analysis, statistics and content processing
  */
 
 class DataProcessor {
     /**
-     * 内容分块
+     * Content chunking
      */
     chunkContent(content, maxChunkSize = 4000) {
         if (!content || content.length <= maxChunkSize) {
@@ -36,38 +36,38 @@ class DataProcessor {
     }
 
     /**
-     * 后处理 Markdown
+     * Post-process Markdown
      */
     postProcessMarkdown(markdown) {
         if (!markdown) return "";
 
         let processed = markdown;
         
-        // 清理多余的空行
+        // Clean up extra blank lines
         processed = processed.replace(/\n{3,}/g, "\n\n");
         
-        // 修复表格格式
+        // Fix table formatting
         processed = processed.replace(/\|\s*\|\s*\|/g, "| | |");
         
-        // 清理HTML实体
+        // Clean HTML entities
         processed = processed.replace(/&nbsp;/g, " ");
         processed = processed.replace(/&amp;/g, "&");
         processed = processed.replace(/&lt;/g, "<");
         processed = processed.replace(/&gt;/g, ">");
         
-        // 修复链接格式
+        // Fix link formatting
         processed = processed.replace(/\[([^\]]*)\]\(\s*\)/g, "$1");
         
         return processed.trim();
     }
 
     /**
-     * 词数统计
+     * Word count
      */
     countWords(text) {
         if (!text) return 0;
         
-        // 移除Markdown标记
+        // Remove Markdown syntax
         const cleanText = text
             .replace(/[#*_`[\]()]/g, "")
             .replace(/!\[.*?\]\(.*?\)/g, "")
@@ -78,17 +78,17 @@ class DataProcessor {
     }
 
     /**
-     * 阅读时间估算
+     * Reading time estimation
      */
     estimateReadingTime(text) {
         const wordCount = this.countWords(text);
-        const wordsPerMinute = 200; // 平均阅读速度
+        const wordsPerMinute = 200; // Average reading speed
         const minutes = Math.ceil(wordCount / wordsPerMinute);
         return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
     }
 
     /**
-     * 生成分析信息
+     * Generate analysis information
      */
     generateAnalysisInfo(dataSources) {
         const raw = dataSources.raw;
@@ -168,7 +168,7 @@ class DataProcessor {
     }
 
     /**
-     * 优化内容大小
+     * Optimize content size
      */
     optimizeContentSize(content) {
         if (!content || content.length <= 100000) {
@@ -177,7 +177,7 @@ class DataProcessor {
 
         console.log(`🔧 Optimizing large content: ${content.length} characters`);
         
-        // 保留前80%的内容，丢弃末尾部分
+        // Keep first 80% of content, discard the end part
         const optimizedContent = content.substring(0, Math.floor(content.length * 0.8));
         
         console.log(`🔧 Content optimized: ${content.length} → ${optimizedContent.length} characters`);
@@ -186,14 +186,14 @@ class DataProcessor {
     }
 
     /**
-     * 优化iframe内容
+     * Optimize iframe content
      */
     optimizeIframeContents(iframeContents) {
         if (!iframeContents || iframeContents.length === 0) {
             return iframeContents;
         }
 
-        // 保持iframe内容完整，不进行截断优化
+        // Keep iframe content intact, no truncation optimization
         return iframeContents.map(iframe => {
             if (iframe.content && iframe.content.length > 50000) {
                 console.log(`🔧 Large iframe content detected (${iframe.content.length} chars) for ${iframe.src}, keeping full content`);

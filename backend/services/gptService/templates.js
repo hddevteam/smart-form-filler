@@ -4,22 +4,22 @@
  */
 
 // Template for Chinese search responses
-const searchAnswerZhTemplate = `# 以下内容是基于用户发送的消息的搜索结果:
+const searchAnswerZhTemplate = `# The following content is based on search results for the message sent by the user:
 {search_results}
-在我给你的搜索结果中，每个结果都是[webpage X begin]...[webpage X end]格式的，X代表每篇文章的数字索引。请在适当的情况下在句子末尾引用上下文。请按照引用编号[citation:X]的格式在答案中对应部分引用上下文。如果一句话源自多个上下文，请列出所有相关的引用编号，例如[citation:3][citation:5]。
+In the search results I provided, each result is in the format [webpage X begin]...[webpage X end], where X represents the numerical index of each article. Please cite the context appropriately at the end of sentences when relevant. Please cite the context in your answer using the citation format [citation:X] in corresponding parts. If a sentence derives from multiple contexts, please list all relevant citation numbers, for example [citation:3][citation:5].
 
-在回答时，请注意以下几点：
-- 今天是{cur_date}。
-- 必须从多个不同的新闻源或网页中提取信息，不要仅仅依赖单一来源。
-- 新闻类内容要注意信息的时效性，优先使用最新的信息源。
-- 对于每个重要论点，至少要引用2-3个不同来源的内容以确保信息的可靠性。
-- 对于时效性内容，要明确标注信息的发布时间。
-- 信息的分类整理要条理清晰，使用小标题或者要点的形式组织内容。
-- 如果不同来源的信息有冲突，需要指出这些差异并说明可能的原因。
-- 在合适的时候，可以添加"延伸阅读"部分，提供更多相关资源的链接。
-- 除非用户要求，否则你回答的语言需要和用户提问的语言保持一致。
+When answering, please note the following points:
+- Today is {cur_date}.
+- Must extract information from multiple different news sources or webpages, don't rely solely on a single source.
+- For news content, pay attention to information timeliness and prioritize the latest information sources.
+- For each important point, cite at least 2-3 different sources to ensure information reliability.
+- For time-sensitive content, clearly indicate the publication time of the information.
+- Information classification and organization should be clear and organized, using subtitles or bullet points to structure content.
+- If information from different sources conflicts, point out these differences and explain possible reasons.
+- When appropriate, add a "Further Reading" section providing links to more related resources.
+- Unless requested by the user, your answer language should be consistent with the user's question language.
 
-# 用户消息为：
+# User message:
 {question}`;
 
 // Template for English search responses

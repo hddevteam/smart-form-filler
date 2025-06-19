@@ -68,7 +68,7 @@ class PopupManager {
                 
                 // Initialize form filler handler if elements are available
                 if (this.elements.formFillerTab) {
-                    // 传递 apiClient，但不传递 uiController，让 FormFillerHandler 自己创建 FormUIController
+                    // Pass apiClient, but don't pass uiController, let FormFillerHandler create its own FormUIController
                     this.formFillerHandler = new FormFillerHandler(this.apiClient);
                     console.log("✅ FormFillerHandler initialized with its own FormUIController");
                 } else {
@@ -700,11 +700,11 @@ class PopupManager {
         // If switching to form filler, ensure it's properly initialized
         if (tabName === "formfiller" && this.formFillerHandler) {
             console.log("🔧 Initializing Form Filler tab");
-            // 重新初始化事件监听器，确保在DOM元素可用后绑定事件
+            // Re-initialize event listeners, ensuring event binding after DOM elements are available
             setTimeout(() => {
                 console.log("🔄 Re-initializing Form Filler event listeners");
                 this.formFillerHandler.initializeEventListeners();
-            }, 100); // 设置一个短的延迟，确保DOM完全渲染
+            }, 100); // Set a short delay to ensure DOM is fully rendered
         }
     }
 
