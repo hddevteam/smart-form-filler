@@ -4,11 +4,14 @@
   "description": "Smart Form Filler - AI-powered browser extension for intelligent data extraction and form filling",
   "scripts": {
     "install:backend": "cd backend && npm install",
-    "install:all": "npm run install:backend",
+    "install:demo": "cd demo && npm install",
+    "install:all": "npm run install:backend && npm run install:demo",
     "dev:backend": "cd backend && npm run dev",
+    "dev:demo": "cd demo && npm start",
     "start:backend": "cd backend && npm start",
     "build:extension": "echo 'Extension build completed'",
-    "dev": "npm run dev:backend"
+    "dev": "npm run dev:backend",
+    "demo": "npm run dev:demo"
   },
   "repository": {
     "type": "git",

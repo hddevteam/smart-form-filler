@@ -5,13 +5,14 @@ A standalone browser extension for intelligent data extraction and form filling 
 ## 🚀 Features
 
 - **Data Extraction**: Extract structured data from web pages
-- **Smart Form Filling**: AI-powered automatic form completion
+- **Smart Form Filling**: AI-powered automatic form completion with intelligent field mapping
 - **Multi-format Output**: Raw HTML, cleaned HTML, and Markdown formats
 - **Chat with Data**: Interactive Q&A with extracted content
 - **Local AI Models**: Full Ollama integration for privacy-focused AI
 - **Cloud AI Models**: Support for GPT-4, DeepSeek, and other cloud providers
 - **Backend Configuration**: Built-in settings interface for configuring backend connections
 - **Service Status Monitoring**: Real-time backend connection status and error handling
+- **Intelligent Field Analysis**: Enhanced field descriptions including available options for dropdowns, radio buttons, and checkboxes
 - **Browser Integration**: Works seamlessly with Chrome and other Chromium-based browsers
 
 ## 📁 Project Structure
@@ -51,6 +52,46 @@ npm run dev
 2. Enable "Developer mode"
 3. Click "Load unpacked" and select the `extension` folder
 4. The extension should now appear in your browser toolbar
+
+### 🎯 Demo Page
+Experience the extension features with our interactive demo:
+
+```bash
+# Install demo dependencies
+npm run install:demo
+
+# Start the demo server
+npm run demo
+```
+
+Then open http://localhost:3002 in your browser.
+
+The demo includes:
+- **Interactive walkthroughs** for all major features
+- **Sample data** for testing extraction and form filling  
+- **Realistic form scenarios** with specific prompt examples
+- **Step-by-step guides** with visual feedback
+- **Restaurant feedback form** for testing smart form filling
+
+#### Demo Features
+- **🍽️ Restaurant Feedback Form**: Complete with realistic scenarios
+- **📊 Data Extraction**: Interactive profile extraction demo  
+- **💬 AI Chat**: Chat with extracted data functionality
+- **🎯 Prompt Examples**: Specific scenarios like birthday celebrations, business dinners, family meals
+
+#### Prompt Examples for Testing
+```
+🍽️ Satisfied Customer:
+"Fill this restaurant feedback form as John Smith (john.smith@techcorp.com) who just had dinner at Mario's Italian Restaurant. Give a 5-star rating and positive detailed comments about the seafood pasta and excellent service."
+
+🎂 Birthday Celebration:  
+"Fill this feedback as someone who celebrated their birthday here. Mention the surprise dessert, decorations, and how the staff made the evening special."
+
+💼 Business Lunch:
+"Complete this form as a business professional who brought clients here. Focus on the quiet atmosphere, prompt service, and quality food that impressed the clients."
+```
+
+**Note**: If you get permission errors, the demo server method is recommended over direct file access.
 
 ## 🔧 Development
 

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Form Filler - Demo Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="demo-header">
+            <h1>🤖 Smart Form Filler Demo</h1>
+            <p class="subtitle">Experience AI-powered intelligent form filling in action</p>
+            <div class="demo-nav">
+                <button class="nav-btn active" data-step="intro">Introduction</button>
+                <button class="nav-btn" data-step="extraction">Data Extraction</button>
+                <button class="nav-btn" data-step="forms">Smart Forms</button>
+                <button class="nav-btn" data-step="chat">AI Chat</button>
+            </div>
+        </header>
+
+        <!-- Introduction Step -->
+        <section id="intro" class="demo-step active">
+            <div class="step-content">
+                <div class="info-panel">
+                    <h2>🚀 Welcome to Smart Form Filler</h2>
+                    <p>This demo showcases how our AI-powered browser extension revolutionizes web form filling and data extraction.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3>Data Extraction</h3>
+                            <p>Extract structured data from any webpage with AI precision</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">✍️</div>
+                            <h3>Smart Form Filling</h3>
+                            <p>Automatically fill forms using extracted data and AI intelligence</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💬</div>
+                            <h3>AI Chat</h3>
+                            <p>Chat with your extracted data to get insights and answers</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔧</div>
+                            <h3>Configurable Backend</h3>
+                            <p>Connect to local or cloud AI services with ease</p>
+                        </div>
+                    </div>
+
+                    <div class="getting-started">
+                        <h3>🎯 Getting Started</h3>
+                        <ol>
+                            <li>Install the Smart Form Filler extension</li>
+                            <li>Start the backend server: <code>npm run dev</code></li>
+                            <li>Start the demo server: <code>npm run demo</code> (recommended)</li>
+                            <li>Navigate through this demo to see features in action</li>
+                            <li>Try the extension on real websites!</li>
+                        </ol>
+                        
+                        <div class="demo-notice">
+                            <h4>📢 Important for Local File Access</h4>
+                            <p>If you opened this demo via file:// URL, the extension needs special permissions:</p>
+                            <ol>
+                                <li>Go to <code>chrome://extensions/</code> (or <code>edge://extensions/</code>)</li>
+                                <li>Find "Smart Form Filler" extension</li>
+                                <li>Click "Details"</li>
+                                <li>Enable "Allow access to file URLs"</li>
+                            </ol>
+                            <p><strong>Recommended:</strong> Use <code>npm run demo</code> to run the demo server at http://localhost:3002</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Extraction Step -->
+        <section id="extraction" class="demo-step">
+            <div class="step-content">
+                <div class="demo-layout">
+                    <div class="demo-panel">
+                        <h2>📊 Data Extraction Demo</h2>
+                        <p>See how the extension extracts structured data from web content.</p>
+                        
+                        <div class="sample-content">
+                            <h3>Sample Profile Information</h3>
+                            <div class="profile-card">
+                                <div class="profile-header">
+                                    <img src="https://via.placeholder.com/80x80/4f46e5/ffffff?text=JS" alt="Profile" class="profile-avatar">
+                                    <div class="profile-info">
+                                        <h4>John Smith</h4>
+                                        <p class="title">Senior Software Engineer</p>
+                                        <p class="company">TechCorp Solutions</p>
+                                    </div>
+                                </div>
+                                <div class="profile-details">
+                                    <div class="detail-item">
+                                        <span class="label">Email:</span>
+                                        <span class="value">john.smith@techcorp.com</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Phone:</span>
+                                        <span class="value">+1 (555) 123-4567</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Location:</span>
+                                        <span class="value">San Francisco, CA</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Department:</span>
+                                        <span class="value">Engineering</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Employee ID:</span>
+                                        <span class="value">EMP-2024-001</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Start Date:</span>
+                                        <span class="value">January 15, 2020</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="demo-btn" id="extractDataBtn">🔍 Extract Data</button>
+                    </div>
+
+                    <div class="instructions-panel">
+                        <h3>💡 How to Use Data Extraction</h3>
+                        <div class="instruction-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Open Extension</h4>
+                                    <p>Click the Smart Form Filler icon in your browser toolbar</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Select Purpose</h4>
+                                    <p>Choose analysis purpose: "Contact Information" or "Profile Data"</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Extract Data</h4>
+                                    <p>Click "Extract Data" to analyze the current page</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Review Results</h4>
+                                    <p>View extracted data in multiple formats (Markdown, HTML, Metadata)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prompt-guide">
+                            <h4>🎯 Extraction Prompts</h4>
+                            <div class="prompt-examples">
+                                <div class="prompt-item">
+                                    <strong>Contact Information:</strong>
+                                    <code>"Extract contact details including name, email, phone, and address"</code>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>Product Details:</strong>
+                                    <code>"Extract product information including name, price, specifications, and availability"</code>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>Event Information:</strong>
+                                    <code>"Extract event details including date, time, location, and description"</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Forms Step -->
+        <section id="forms" class="demo-step">
+            <div class="step-content">
+                <div class="demo-layout">
+                    <div class="demo-panel">
+                        <h2>✍️ Smart Form Filling Demo</h2>
+                        <p>Experience intelligent form filling using extracted data.</p>
+                        
+                        <form class="demo-form" id="feedbackForm">
+                            <h3>🍽️ Restaurant Feedback Form</h3>
+                            <p class="form-description">We value your feedback! Please share your dining experience with us.</p>
+                            
+                            <div class="form-group">
+                                <label for="customerName">Customer Name *</label>
+                                <input type="text" id="customerName" name="customerName" placeholder="Your full name">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customerEmail">Email Address *</label>
+                                    <input type="email" id="customerEmail" name="customerEmail" placeholder="your.email@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerPhone">Phone Number</label>
+                                    <input type="tel" id="customerPhone" name="customerPhone" placeholder="+1 (555) 123-4567">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="visitDate">Visit Date</label>
+                                    <input type="date" id="visitDate" name="visitDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="partySize">Party Size</label>
+                                    <select id="partySize" name="partySize">
+                                        <option value="">Select size</option>
+                                        <option value="1">1 person</option>
+                                        <option value="2">2 people</option>
+                                        <option value="3-4">3-4 people</option>
+                                        <option value="5-8">5-8 people</option>
+                                        <option value="9+">9+ people</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="overallRating">Overall Experience *</label>
+                                <select id="overallRating" name="overallRating">
+                                    <option value="">Rate your experience</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                                    <option value="3">⭐⭐⭐ Good</option>
+                                    <option value="2">⭐⭐ Fair</option>
+                                    <option value="1">⭐ Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="foodQuality">Food Quality</label>
+                                    <select id="foodQuality" name="foodQuality">
+                                        <option value="">Rate food quality</option>
+                                        <option value="excellent">Excellent</option>
+                                        <option value="very-good">Very Good</option>
+                                        <option value="good">Good</option>
+                                        <option value="fair">Fair</option>
+                                        <option value="poor">Poor</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="serviceQuality">Service Quality</label>
+                                    <select id="serviceQuality" name="serviceQuality">
+                                        <option value="">Rate service quality</option>
+                                        <option value="excellent">Excellent</option>
+                                        <option value="very-good">Very Good</option>
+                                        <option value="good">Good</option>
+                                        <option value="fair">Fair</option>
+                                        <option value="poor">Poor</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="favoriteItem">Favorite Menu Item</label>
+                                <input type="text" id="favoriteItem" name="favoriteItem" placeholder="What dish did you enjoy most?">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackComments">Detailed Comments</label>
+                                <textarea id="feedbackComments" name="feedbackComments" rows="4" placeholder="Please share your detailed feedback about your dining experience..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="recommendToFriends">Would you recommend us to friends?</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="recommendToFriends" value="definitely">
+                                        <span>Definitely</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="recommendToFriends" value="probably">
+                                        <span>Probably</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="recommendToFriends" value="maybe">
+                                        <span>Maybe</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="recommendToFriends" value="probably-not">
+                                        <span>Probably Not</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="demo-btn secondary" id="clearFormBtn">Clear Form</button>
+                                <button type="button" class="demo-btn" id="fillFormBtn">🤖 Smart Fill</button>
+                                <button type="submit" class="demo-btn primary">Submit Feedback</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="instructions-panel">
+                        <h3>💡 How to Use Smart Form Filling</h3>
+                        <div class="instruction-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Extract Data First</h4>
+                                    <p>Use data extraction on a page with relevant information</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Navigate to Form</h4>
+                                    <p>Go to any webpage with a form you want to fill</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Open Form Filler</h4>
+                                    <p>Switch to the "Form Filler" tab in the extension</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Analyze & Fill</h4>
+                                    <p>Click "Analyze Form" then "Fill Form" to complete automatically</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prompt-guide">
+                            <h4>🎯 Realistic Form Filling Scenarios</h4>
+                            <p class="prompt-intro">Try these specific scenarios to test the extension's capabilities:</p>
+                            <div class="prompt-examples">
+                                <div class="prompt-item highlight">
+                                    <strong>🍽️ Restaurant Review Scenario:</strong>
+                                    <div class="scenario-details">
+                                        <p><strong>Context:</strong> "As John Smith (john.smith@techcorp.com) who just had dinner at Mario's Italian Restaurant"</p>
+                                        <code>"Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff."</code>
+                                    </div>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>🎂 Birthday Celebration:</strong>
+                                    <div class="scenario-details">
+                                        <p><strong>Context:</strong> "As a customer celebrating a special occasion"</p>
+                                        <code>"Fill this feedback as someone who celebrated their birthday here. Mention the surprise dessert, decorations, and how the staff made the evening special. Rate 4-5 stars."</code>
+                                    </div>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>💼 Business Lunch:</strong>
+                                    <div class="scenario-details">
+                                        <p><strong>Context:</strong> "As a professional hosting clients"</p>
+                                        <code>"Complete this form as a business professional who brought clients here. Focus on the quiet atmosphere, prompt service, and quality food that impressed the clients. Professional tone."</code>
+                                    </div>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>👨‍👩‍👧‍👦 Family Dinner:</strong>
+                                    <div class="scenario-details">
+                                        <p><strong>Context:</strong> "As a parent with children"</p>
+                                        <code>"Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback."</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tips-section">
+                            <h4>💡 Extension Usage Tips</h4>
+                            <ul>
+                                <li><strong>Extract Profile Data:</strong> Use the extension on LinkedIn, company pages, or resume sites first</li>
+                                <li><strong>Context Matters:</strong> Provide specific scenarios and personas for realistic results</li>
+                                <li><strong>Review Before Submit:</strong> Always check the filled data for accuracy</li>
+                                <li><strong>Customize Tone:</strong> Specify if you want professional, casual, enthusiastic, or critical feedback</li>
+                                <li><strong>Real-world Testing:</strong> Try the extension on actual restaurant, hotel, or service feedback forms</li>
+                            </ul>
+                        </div>
+
+                        <div class="cta-section">
+                            <h4>🚀 Ready to Try the Real Extension?</h4>
+                            <p>Install the Smart Form Filler extension and experience intelligent form filling on any website!</p>
+                            <div class="cta-steps">
+                                <span class="cta-step">1. Install Extension</span>
+                                <span class="cta-arrow">→</span>
+                                <span class="cta-step">2. Visit Any Site</span>
+                                <span class="cta-arrow">→</span>
+                                <span class="cta-step">3. Extract Data</span>
+                                <span class="cta-arrow">→</span>
+                                <span class="cta-step">4. Fill Forms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Chat Step -->
+        <section id="chat" class="demo-step">
+            <div class="step-content">
+                <div class="demo-layout">
+                    <div class="demo-panel">
+                        <h2>💬 AI Chat Demo</h2>
+                        <p>Chat with your extracted data to gain insights and get answers.</p>
+                        
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="message system">
+                                    <div class="message-content">
+                                        <p>👋 Hello! I'm ready to help you analyze the extracted data. You can ask me questions about the information we've gathered.</p>
+                                    </div>
+                                    <div class="message-time">Now</div>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-input-container">
+                                <div class="chat-input-wrapper">
+                                    <input type="text" id="chatInput" placeholder="Ask me about the extracted data..." class="chat-input">
+                                    <button id="sendChatBtn" class="chat-send-btn">
+                                        <span>📤</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instructions-panel">
+                        <h3>💡 How to Use AI Chat</h3>
+                        <div class="instruction-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Extract Data</h4>
+                                    <p>First extract data from a webpage to provide context</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Open Chat</h4>
+                                    <p>Switch to the "Chat with Data" tab in the extension</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Ask Questions</h4>
+                                    <p>Type your questions about the extracted information</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Get Insights</h4>
+                                    <p>Receive AI-powered analysis and answers</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prompt-guide">
+                            <h4>🎯 Chat Prompt Examples</h4>
+                            <div class="prompt-examples">
+                                <div class="prompt-item">
+                                    <strong>Information Summary:</strong>
+                                    <code>"Summarize the key information from this page"</code>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>Contact Details:</strong>
+                                    <code>"What contact information is available?"</code>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>Professional Info:</strong>
+                                    <code>"Tell me about this person's professional background"</code>
+                                </div>
+                                <div class="prompt-item">
+                                    <strong>Data Analysis:</strong>
+                                    <code>"What are the most important details on this page?"</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-questions">
+                            <h4>🚀 Quick Questions</h4>
+                            <div class="question-buttons">
+                                <button class="question-btn" data-question="What is the person's name and job title?">👤 Name & Title</button>
+                                <button class="question-btn" data-question="What contact information is available?">📞 Contact Info</button>
+                                <button class="question-btn" data-question="Summarize the key information">📋 Summary</button>
+                                <button class="question-btn" data-question="What company does this person work for?">🏢 Company</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="demo-footer">
+            <div class="footer-content">
+                <p>🤖 Smart Form Filler - Powered by AI for intelligent web automation</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Documentation</a>
+                    <a href="#" class="footer-link">GitHub</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

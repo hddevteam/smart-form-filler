@@ -417,6 +417,19 @@ ${content}`;
                     fieldDesc += ` (${field.type})`;
                     if (field.required) fieldDesc += " [Required]";
                     if (field.category) fieldDesc += ` [Category: ${field.category}]`;
+                    
+                    // Add options for select fields
+                    if (field.options && field.options.length > 0) {
+                        const optionTexts = field.options.map(opt => `"${opt.text || opt.value}"`).join(", ");
+                        fieldDesc += ` [Options: ${optionTexts}]`;
+                    }
+                    
+                    // Add options for radio buttons (if grouped)
+                    if (field.type === "radio" && field.radioOptions) {
+                        const radioTexts = field.radioOptions.map(opt => `"${opt.label || opt.value}"`).join(", ");
+                        fieldDesc += ` [Radio options: ${radioTexts}]`;
+                    }
+                    
                     formInfo.push(fieldDesc);
                 });
             }
@@ -444,7 +457,7 @@ Please complete the following analysis tasks:
 1. **Form Relevance Analysis**: Based on page context and user content, analyze the relevance of each form
 2. **Target Form Selection**: Select the most relevant form
 3. **Form Description Generation**: Create a concise description of what the recommended form is for (its purpose, context, what it's used to apply for, etc.)
-4. **Field Description Generation**: Generate descriptions for each field in the target form
+4. **Field Description Generation**: Generate detailed descriptions for each field in the target form, including specific value options for selection fields
 
 Return JSON format:
 
@@ -457,12 +470,12 @@ Return JSON format:
   ],
   "recommendedForm": "recommended form ID",
   "confidence": 0.90,
-  "recommendedLanguage": "en or zh - recommended language for this form based on form content and page context",
+  "recommendedLanguage": "recommended language for this form based on form content and page context",
   "formDescription": "A concise description of what the recommended form is for, based on form title, purpose, and context",
   "fieldDescriptions": {
     "recommended_form_field_ID": {
       "fieldId": "field ID",
-      "description": "Field description based on page context"
+      "description": "Comprehensive field description that includes both purpose and available options. Examples: 'Country selection dropdown with options: United States, Canada, Mexico, Other' or 'Rating selection with options: Excellent (5), Good (4), Average (3), Poor (2), Very Poor (1)' or 'Gender selection with radio options: Male, Female, Other' or 'Newsletter subscription checkbox: Yes/No choice for receiving email updates'"
     }
   }
 }
@@ -470,9 +483,14 @@ Return JSON format:
 Analysis requirements:
 1. Prioritize page context information (titles, descriptions, text around forms)
 2. Combine field attributes like label, title, placeholder to understand field meaning
-3. Generate clear, practical descriptions for each field
+3. Generate clear, practical descriptions for each field that include:
+   - Field purpose and what it's used for
+   - For selection fields (select, radio, checkbox): List available options/values when detectable
+   - For text fields: Expected format or type of content
+   - For number fields: Expected range or unit if apparent
 4. Relevance scores should realistically reflect form-content matching
-5. Field descriptions should be based on page context, not just repeat field labels`;
+5. Field descriptions should be based on page context, not just repeat field labels
+6. When options are available in the HTML (option tags, radio values, etc.), include them in the description`;
     }
 
     /**
