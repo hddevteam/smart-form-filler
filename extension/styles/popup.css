@@ -2257,12 +2257,16 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1000;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    /* Ensure modal takes full extension popup area */
+    min-width: 100%;
+    min-height: 100%;
 }
 
 .modal.hidden {
@@ -2275,7 +2279,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: transparent; /* Remove duplicate background */
     -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
@@ -2291,6 +2295,9 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    /* Ensure content is centered within the modal */
+    margin: auto;
+    z-index: 1;
 }
 
 .modal__header {
@@ -2325,6 +2332,10 @@ body {
 /* Settings Styles */
 .settings-section {
     margin-bottom: 24px;
+    padding: 20px;
+    background: #fafbff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
 }
 
 .settings-section:last-child {
@@ -2336,6 +2347,14 @@ body {
     font-size: 16px;
     font-weight: 600;
     color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-section__title::before {
+    content: "⚙️";
+    font-size: 18px;
 }
 
 .form-group {
@@ -2357,52 +2376,124 @@ body {
 .input-group {
     display: flex;
     gap: 8px;
-    align-items: center;
+    align-items: stretch; /* Changed from center to stretch for better height alignment */
+}
+
+/* Input field styling */
+.input {
+    padding: 10px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #374151;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    min-height: 40px; /* Ensure consistent height with button */
+}
+
+.input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #fafbff;
+}
+
+.input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.input:disabled {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #6b7280;
+    cursor: not-allowed;
 }
 
 .input--full {
     flex: 1;
 }
 
+/* Test connection button in input group */
+.input-group .btn--secondary {
+    height: 40px; /* Match input height */
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.input-group .btn--secondary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    transform: translateY(0); /* Remove translateY to keep alignment */
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.input-group .btn--secondary:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.input-group .btn__icon {
+    margin-right: 4px;
+}
+
+.input-group .btn__text {
+    font-size: 13px;
+    font-weight: 500;
+}
+
 .help-text {
-    margin-top: 6px;
+    margin-top: 8px;
     font-size: 12px;
     color: #6b7280;
-    line-height: 1.4;
+    line-height: 1.5;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 4px;
+    border-left: 3px solid #e5e7eb;
 }
 
 /* Connection Status */
 .connection-status {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin-top: 8px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .connection-status.hidden {
     display: none;
 }
 
-.connection-status--success {
-    background: #d1fae5;
+.connection-status.success {
+    background: linear-gradient(135deg, #d1fae5, #ecfdf5);
     color: #065f46;
-    border: 1px solid #a7f3d0;
+    border-color: #a7f3d0;
 }
 
-.connection-status--error {
-    background: #fee2e2;
+.connection-status.error {
+    background: linear-gradient(135deg, #fee2e2, #fef2f2);
     color: #991b1b;
-    border: 1px solid #fca5a5;
+    border-color: #fca5a5;
 }
 
-.connection-status--testing {
-    background: #dbeafe;
+.connection-status.info {
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
     color: #1e40af;
-    border: 1px solid #93c5fd;
+    border-color: #93c5fd;
 }
 
 .connection-status__icon {

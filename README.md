@@ -32,6 +32,59 @@ smart-form-filler/
 └── package.json            # Root package configuration
 ```
 
+## 📁 Architecture & Code Organization
+
+### Modular Structure
+
+The Smart Form Filler extension has been refactored into a clean, modular architecture to improve maintainability and code organization. **All files are properly sized** for optimal maintainability.
+
+#### Core Modules
+
+**🎯 Main Entry Point:**
+- `popup-main.js` - Lightweight entry point that initializes the modular system
+
+**📦 Core Manager Modules:**
+- `popupManager.js` - Main coordinator orchestrating all popup functionality
+- `popupInitializer.js` - Handles DOM element initialization and validation
+- `popupEventHandlers.js` - Manages all user interactions and UI events
+- `popupModelManager.js` - AI model loading, selection, and management
+- `popupSettingsManager.js` - Backend configuration and settings persistence
+
+**🔧 Feature Modules:**
+- `formFillerHandler.js` - Form detection and filling functionality
+- `formAnalysisService.js` - Form content analysis and mapping
+- `uiController.js` - UI state management and visual feedback
+- `resultsHandler.js` - Results display and data management
+- `chatHandler.js` - Chat interface and AI interactions
+- `dataExtractor.js` - Page content extraction from web pages
+- `apiClient.js` - Backend API communication
+- `authManager.js` - User authentication handling
+
+#### Key Benefits of Modular Structure
+
+✅ **Maintainability**: Each module has a single responsibility  
+✅ **Modular Design**: Proper file sizes for easy navigation and maintenance  
+✅ **Testability**: Modules can be tested independently  
+✅ **Extensibility**: New features can be added as separate modules  
+✅ **Debugging**: Clear separation of concerns makes troubleshooting easier  
+
+#### Module Dependencies
+
+```
+popup-main.js
+    └── PopupManager
+        ├── PopupInitializer (DOM setup)
+        ├── PopupSettingsManager (backend config)
+        ├── PopupModelManager (AI models)
+        ├── PopupEventHandlers (user interactions)
+        └── Feature Modules
+            ├── FormFillerHandler
+            ├── UIController
+            ├── ResultsHandler
+            ├── ChatHandler
+            └── DataExtractor
+```
+
 ## 🛠️ Installation & Setup
 
 ### Prerequisites

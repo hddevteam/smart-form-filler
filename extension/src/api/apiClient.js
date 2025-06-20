@@ -132,11 +132,19 @@ class ApiClient {
 
     async testConnection() {
         try {
+            console.log("🔧 Testing connection to:", this.backendUrl);
             const response = await this.makeRequest("/extension/health");
-            return response.ok;
+            if (response.ok) {
+                const data = await response.json();
+                console.log("✅ Connection test successful:", data);
+                return { success: true, data };
+            } else {
+                console.warn("⚠️ Connection test failed with status:", response.status);
+                return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
+            }
         } catch (error) {
-            console.error("Connection test failed:", error);
-            return false;
+            console.error("❌ Connection test failed:", error);
+            return { success: false, error: error.message };
         }
     }
 

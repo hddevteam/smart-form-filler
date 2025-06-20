@@ -6,6 +6,13 @@
 
 class ResultsHandler {
     constructor(elements, uiController = null) {
+        console.log("🔧 ResultsHandler: Constructor called with elements:", {
+            elements: !!elements,
+            errorState: !!elements?.errorState,
+            errorMessage: !!elements?.errorMessage,
+            resultsSection: !!elements?.resultsSection
+        });
+        
         this.elements = elements;
         this.uiController = uiController; // Optional UI controller reference
         this.lastExtractionResult = null;
@@ -432,9 +439,34 @@ class ResultsHandler {
      * Show error message
      */
     showError(message) {
+        console.log("🔧 ResultsHandler: Showing error:", message);
+        
+        // Defensive check for elements
+        if (!this.elements) {
+            console.error("❌ ResultsHandler: elements not initialized");
+            return;
+        }
+        
+        if (!this.elements.errorMessage) {
+            console.error("❌ ResultsHandler: errorMessage element not found");
+            return;
+        }
+        
+        if (!this.elements.errorState) {
+            console.error("❌ ResultsHandler: errorState element not found");
+            return;
+        }
+        
+        if (!this.elements.resultsSection) {
+            console.error("❌ ResultsHandler: resultsSection element not found");
+            return;
+        }
+        
         this.elements.errorMessage.textContent = message;
         this.elements.errorState.classList.remove("hidden");
         this.elements.resultsSection.classList.add("hidden");
+        
+        console.log("✅ ResultsHandler: Error displayed successfully");
     }
 
     /**

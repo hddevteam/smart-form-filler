@@ -395,7 +395,7 @@
         <div class="modal__content">
             <div class="modal__header">
                 <h3 class="modal__title">Settings</h3>
-                <button id="settingsCloseBtn" class="btn btn--icon" title="Close">
+                <button id="settingsModalClose" class="btn btn--icon" title="Close">
                     <span class="btn__icon">×</span>
                 </button>
             </div>
@@ -403,11 +403,11 @@
                 <div class="settings-section">
                     <h4 class="settings-section__title">Backend Configuration</h4>
                     <div class="form-group">
-                        <label for="backendUrl" class="label">Backend URL:</label>
+                        <label for="backendUrlInput" class="label">Backend URL:</label>
                         <div class="input-group">
                             <input 
                                 type="text" 
-                                id="backendUrl" 
+                                id="backendUrlInput" 
                                 class="input input--full" 
                                 placeholder="http://localhost:3001"
                                 value="http://localhost:3001"
@@ -429,7 +429,7 @@
             </div>
             <div class="modal__footer">
                 <button id="settingsCancelBtn" class="btn btn--secondary">Cancel</button>
-                <button id="settingsSaveBtn" class="btn btn--primary">Save</button>
+                <button id="saveSettingsBtn" class="btn btn--primary">Save</button>
             </div>
         </div>
     </div>
@@ -450,6 +450,13 @@
     <script src="src/modules/formAnalysisService.js"></script>
     <script src="src/modules/formUIController.js"></script>
     <script src="src/modules/formFillerHandler.js"></script>
+    
+    <!-- Popup manager modules -->
+    <script src="src/modules/popupInitializer.js"></script>
+    <script src="src/modules/popupEventHandlers.js"></script>
+    <script src="src/modules/popupModelManager.js"></script>
+    <script src="src/modules/popupSettingsManager.js"></script>
+    <script src="src/modules/popupManager.js"></script>
     
     <!-- Main popup manager -->
     <script src="src/popup-main.js"></script>
