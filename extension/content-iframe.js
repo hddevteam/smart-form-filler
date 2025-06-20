@@ -4,14 +4,19 @@
  * Enhanced content script that can extract content from main page and iframes
  */
 
-// Avoid redefinition and ensure proper cleanup
-if (window.iframeExtractor) {
-    console.log("🔄 Iframe extractor already exists, cleaning up...");
-    // Remove existing listeners if any
+// Prevent redefinition and ensure proper cleanup
+if (window.IframeContentExtractor) {
+    console.log("🔄 IframeContentExtractor class already exists, reusing");
+    // Cleanup existing instances and listeners
     if (window.iframeExtractorCleanup) {
         window.iframeExtractorCleanup();
     }
-}
+    if (window.iframeExtractor) {
+        delete window.iframeExtractor;
+    }
+} else {
+    console.log("🆕 Defining IframeContentExtractor class");
+    // Only define the class if it doesn't exist
 
 class IframeContentExtractor {
     constructor() {
@@ -506,25 +511,29 @@ if (window.iframeExtractor) {
         window.iframeExtractorCleanup();
     }
     // Force cleanup the old instance
-    delete window.iframeExtractor;
 }
 
-// Create new fresh instance
+// Always create a fresh instance (whether class was just defined or already existed)
+console.log("🚀 Creating fresh IframeContentExtractor instance");
 window.iframeExtractor = new IframeContentExtractor();
-console.log("🚀 Iframe-aware content script loaded and ready (fresh instance)");
 
 // Create message listener with cleanup support
 let messageListener;
 
 // Cleanup function for removing listeners
 window.iframeExtractorCleanup = () => {
-    if (messageListener) {
-        chrome.runtime.onMessage.removeListener(messageListener);
+    if (window.iframeExtractorMessageListener) {
+        chrome.runtime.onMessage.removeListener(window.iframeExtractorMessageListener);
         console.log("🧹 Cleaned up iframe extractor message listener");
+        delete window.iframeExtractorMessageListener;
     }
 };
 
-// Create and register the message listener
+// Always create a fresh message listener (remove old one first if exists)
+if (window.iframeExtractorMessageListener) {
+    chrome.runtime.onMessage.removeListener(window.iframeExtractorMessageListener);
+}
+
 messageListener = (request, sender, sendResponse) => {
     console.log("📨 Content script received message:", request.action);
     
@@ -597,5 +606,9 @@ messageListener = (request, sender, sendResponse) => {
     }
 };
 
-// Register the message listener
+// Register the fresh message listener
 chrome.runtime.onMessage.addListener(messageListener);
+window.iframeExtractorMessageListener = messageListener;
+console.log("📨 Fresh message listener registered for iframe extractor");
+
+} // End of IframeContentExtractor class definition check

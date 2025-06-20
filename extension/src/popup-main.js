@@ -8,6 +8,9 @@ class PopupManager {
     constructor() {
         console.log("PopupManager: Starting initialization...");
         
+        // Track active operations for cancellation
+        this.activeOperations = new Set();
+        
         try {
             // Verify DOM is ready
             if (document.readyState === "loading") {
@@ -172,6 +175,7 @@ class PopupManager {
             // Loading and results
             loadingState: document.getElementById("loadingState"),
             loadingDetails: document.getElementById("loadingDetails"),
+            cancelLoadingBtn: document.getElementById("cancelLoadingBtn"),
             resultsSection: document.getElementById("resultsSection"),
             
             // History elements
@@ -338,6 +342,7 @@ class PopupManager {
                 clearAll: () => this.handleClearAll(),
                 backToHistory: () => this.handleBackToHistory(),
                 retry: () => this.handleRetry(),
+                cancelLoading: () => this.handleCancelLoading(),
                 switchTab: (tabName) => this.resultsHandler.switchResultTab(tabName),
                 switchMainTab: (tabName) => this.handleMainTabSwitch(tabName)
             };
@@ -545,8 +550,18 @@ class PopupManager {
                 return;
             }
             
+            // Create operation ID for cancellation tracking
+            const operationId = `extract-${Date.now()}`;
+            this.activeOperations.add(operationId);
+            
             this.uiController.showLoading("Extracting data sources...");
             this.uiController.updateLoadingDetails("Getting page content and iframe data");
+            
+            // Check if operation was cancelled
+            if (!this.activeOperations.has(operationId)) {
+                console.log("🚫 Operation cancelled before starting");
+                return;
+            }
             
             // Get current tab content and metadata
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -565,12 +580,30 @@ class PopupManager {
                 console.warn("Could not get page title:", error);
             }
             
+            // Check if operation was cancelled
+            if (!this.activeOperations.has(operationId)) {
+                console.log("🚫 Operation cancelled before content extraction");
+                return;
+            }
+            
             const content = await this.dataExtractor.getPageContent(tab);
+            
+            // Check if operation was cancelled
+            if (!this.activeOperations.has(operationId)) {
+                console.log("🚫 Operation cancelled after content extraction");
+                return;
+            }
             
             this.uiController.updateLoadingDetails("Extracting iframe contents...");
             
             // Extract iframe contents with enhanced processing
             const iframeContents = await this.dataExtractor.extractIframeContents(tab);
+            
+            // Check if operation was cancelled
+            if (!this.activeOperations.has(operationId)) {
+                console.log("🚫 Operation cancelled after iframe extraction");
+                return;
+            }
             
             // Enhanced logging for iframe extraction
             console.log("🔧 Iframe extraction results:", {
@@ -644,6 +677,9 @@ class PopupManager {
             console.error("Data extraction error:", error);
             this.uiController.hideLoading();
             this.resultsHandler.showError("Data extraction failed: " + error.message);
+        } finally {
+            // Always clean up the operation ID
+            this.activeOperations.delete(operationId);
         }
     }
 
@@ -689,7 +725,23 @@ class PopupManager {
         await this.handleExtractData();
     }
 
-
+    /**
+     * Handle cancel loading operation
+     */
+    handleCancelLoading() {
+        console.log("🚫 Cancelling active operations...");
+        
+        // Clear all active operations
+        this.activeOperations.clear();
+        
+        // Hide loading state
+        this.uiController.hideLoading();
+        
+        // Show cancellation message
+        this.showMessage("⚠️ Operation cancelled by user", "warning");
+        
+        console.log("✅ Active operations cancelled");
+    }
 
     /**
      * Handle main tab switching

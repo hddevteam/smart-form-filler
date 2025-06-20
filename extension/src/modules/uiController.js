@@ -140,6 +140,9 @@ class UIController {
             this.safeBindEvent(this.elements.clearAllBtn, "click", handlers.clearAll, "clearAllBtn");
             this.safeBindEvent(this.elements.backToHistoryBtn, "click", handlers.backToHistory, "backToHistoryBtn");
             
+            // Loading cancel button
+            this.safeBindEvent(this.elements.cancelLoadingBtn, "click", handlers.cancelLoading, "cancelLoadingBtn");
+            
             console.log("✅ Event binding completed");
         } catch (error) {
             console.error("❌ Critical error during event binding:", error);
