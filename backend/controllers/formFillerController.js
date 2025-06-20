@@ -438,7 +438,7 @@ ${content}`;
         }).join("\n\n");
 
         // Always use English prompts, with flexible language output instruction
-        const languageInstruction = language ? `Please respond in ${language} language` : "Please respond in the most appropriate language";
+        const languageInstruction = "Please respond in the most appropriate language";
         
         return `Please analyze webpage content and user input to identify the most relevant forms and generate field descriptions for the target form. ${languageInstruction}.
 

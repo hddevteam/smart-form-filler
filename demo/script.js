@@ -9,7 +9,7 @@ class DemoManager {
 
     init() {
         this.bindNavigation();
-        this.bindDemoActions();
+        this.bindDemoActions(); 
         this.bindChatActions();
         this.bindFormActions();
     }
