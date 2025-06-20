@@ -220,6 +220,7 @@ class PopupManager {
             analyzeContentBtn: document.getElementById("analyzeContentBtn"),
             generateMappingBtn: document.getElementById("generateMappingBtn"),
             fillFormsBtn: document.getElementById("fillFormsBtn"),
+            clearAllFormFillerBtn: document.getElementById("clearAllFormFillerBtn"),
             formDetectionResults: document.getElementById("formDetectionResults"),
             analysisResultsSection: document.getElementById("analysisResultsSection"),
             fieldMappingSection: document.getElementById("fieldMappingSection"),
@@ -354,6 +355,11 @@ class PopupManager {
             console.log("🔧 Binding settings events...");
             this.bindSettingsEvents();
             console.log("✅ Settings events bound");
+            
+            // Bind form filler events
+            console.log("🔧 Binding form filler events...");
+            this.bindFormFillerEvents();
+            console.log("✅ Form filler events bound");
             
             // Bind chat events
             console.log("🔧 Binding chat events...");
@@ -1030,6 +1036,122 @@ class PopupManager {
         
         // Show status
         this.elements.connectionStatus.classList.remove('hidden');
+    }
+
+    /**
+     * Bind form filler events
+     */
+    bindFormFillerEvents() {
+        // Clear All button
+        if (this.elements.clearAllFormFillerBtn) {
+            this.elements.clearAllFormFillerBtn.addEventListener("click", () => {
+                this.clearAllFormFillerData();
+            });
+        }
+    }
+
+    /**
+     * Clear all form filler data and reset UI state
+     */
+    clearAllFormFillerData() {
+        try {
+            console.log("🗑️ Clearing all form filler data...");
+            
+            // Clear content input
+            const fillContentInput = document.getElementById("fillContentInput");
+            if (fillContentInput) {
+                fillContentInput.value = "";
+            }
+            
+            // Reset language select to default
+            const languageSelect = document.getElementById("languageSelect");
+            if (languageSelect) {
+                languageSelect.value = "zh"; // Reset to default Chinese
+            }
+            
+            // Hide and clear all result sections
+            const sectionsToHide = [
+                this.elements.formDetectionResults,
+                this.elements.analysisResultsSection,
+                this.elements.fieldMappingSection,
+                this.elements.fillActionsSection
+            ];
+            
+            sectionsToHide.forEach(section => {
+                if (section) {
+                    section.classList.add('hidden');
+                }
+            });
+            
+            // Clear dynamic content containers
+            const containersToClear = [
+                'formsList',
+                'analysisResults', 
+                'mappingResults',
+                'fillResults'
+            ];
+            
+            containersToClear.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = "";
+                }
+            });
+            
+            // Clear user input fields
+            const inputFieldsToClear = [
+                'sourceText',           // Source text for analysis
+                'formDescription',      // Form description input
+                'userDataDescription'   // User data description
+            ];
+            
+            inputFieldsToClear.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = "";
+                }
+            });
+            
+            // Reset button states
+            const buttonsToDisable = [
+                this.elements.analyzeContentBtn,
+                this.elements.generateMappingBtn,
+                this.elements.fillFormsBtn
+            ];
+            
+            buttonsToDisable.forEach(button => {
+                if (button) {
+                    button.disabled = true;
+                }
+            });
+            
+            // Reset counters
+            const formsFoundCount = document.getElementById("formsFoundCount");
+            const fieldsFoundCount = document.getElementById("fieldsFoundCount");
+            const sourceStats = document.getElementById("sourceStats");
+            
+            if (formsFoundCount) formsFoundCount.textContent = "0";
+            if (fieldsFoundCount) fieldsFoundCount.textContent = "0";
+            if (sourceStats) sourceStats.textContent = "Main + 0 iframes";
+            
+            // Clear form filler handler state if available
+            if (this.formFillerHandler) {
+                this.formFillerHandler.currentForms = [];
+                this.formFillerHandler.analyzedData = null;
+                this.formFillerHandler.currentMappings = [];
+                this.formFillerHandler.selectedFormId = null;
+                this.formFillerHandler.lastAnalyzedContent = "";
+                this.formFillerHandler.currentAnalysisResult = null;
+                this.formFillerHandler.currentFormDescription = "";
+            }
+            
+            this.showMessage("✅ All form filler data cleared successfully", "success");
+            console.log("✅ Form filler data cleared successfully");
+            
+        } catch (error) {
+            console.error("❌ Error clearing form filler data:", error);
+            this.showMessage("❌ Error clearing form filler data", "error");
+        }
     }
 }
 

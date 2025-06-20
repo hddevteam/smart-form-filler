@@ -501,6 +501,34 @@ body {
     background: linear-gradient(135deg, #16a34a, #15803d) !important;
 }
 
+/* Danger button variant */
+.btn--danger {
+    background: #ef4444;
+    color: white;
+    border-color: #dc2626;
+}
+
+.btn--danger:hover {
+    background: #dc2626;
+    border-color: #b91c1c;
+}
+
+.btn--danger:active {
+    background: #b91c1c;
+}
+
+.btn--danger:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+}
+
+.btn--danger:disabled:hover {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
 /* Loading - responsive */
 .loading-overlay {
     position: fixed;
