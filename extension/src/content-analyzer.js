@@ -252,6 +252,6 @@
 
     // Initialize the content analyzer
     new ContentAnalyzer();
-    console.log("🚀 Content analyzer loaded");
+    
 
 })();

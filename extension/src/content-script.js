@@ -11,6 +11,17 @@
 
         setupMessageListener() {
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                // Add ping handler for debugging
+                if (request.action === "ping") {
+                    sendResponse({ 
+                        success: true, 
+                        message: "pong",
+                        timestamp: new Date().toISOString(),
+                        location: window.location.href
+                    });
+                    return true;
+                }
+                
                 if (request.action === "extractContent") {
                     try {
                         const content = this.extractPageContent();
@@ -410,6 +421,85 @@ Detected Language: ${language}`;
 
     // Initialize the content extractor
     new BasicContentExtractor();
+    
+    // Add page debug message handling
+    window.addEventListener('smartFormFillerDebugRequest', async (event) => {
+        const { messageId, type } = event.detail;
+        
+        try {
+            console.log('🔧 [CONTENT_DEBUG] Received debug request:', type);
+            
+            let responseData = null;
+            
+            switch (type) {
+                case 'getDebugInfo':
+                    // Send message to popup/background to get debug info
+                    responseData = await new Promise((resolve) => {
+                        chrome.runtime.sendMessage({
+                            action: 'getPopupDebugInfo'
+                        }, (response) => {
+                            resolve(response || { error: 'No response from popup' });
+                        });
+                    });
+                    break;
+                    
+                case 'openDataSourceModal':
+                    // Send message to popup to open modal
+                    chrome.runtime.sendMessage({
+                        action: 'openDataSourceModal'
+                    });
+                    responseData = { success: true, message: 'Modal open request sent' };
+                    break;
+                    
+                case 'getExtractionHistory':
+                    // Get extraction history from popup
+                    responseData = await new Promise((resolve) => {
+                        chrome.runtime.sendMessage({
+                            action: 'getExtractionHistory'
+                        }, (response) => {
+                            resolve(response || { error: 'No response from popup' });
+                        });
+                    });
+                    break;
+                    
+                case 'getDetailedHistory':
+                    // Get detailed extraction history analysis from popup
+                    responseData = await new Promise((resolve) => {
+                        chrome.runtime.sendMessage({
+                            action: 'getDetailedAnalysis'
+                        }, (response) => {
+                            resolve(response || { error: 'No response from popup' });
+                        });
+                    });
+                    break;
+                    
+                case 'forceUpdateDataSources':
+                    // Force update data sources in popup
+                    responseData = await new Promise((resolve) => {
+                        chrome.runtime.sendMessage({
+                            action: 'forceUpdateDataSources'
+                        }, (response) => {
+                            resolve(response || { error: 'No response from popup' });
+                        });
+                    });
+                    break;
+                    
+                default:
+                    responseData = { error: 'Unknown debug request type' };
+            }
+            
+            // Send response back to page
+            window.dispatchEvent(new CustomEvent('smartFormFillerDebugResponse', {
+                detail: { messageId, data: responseData }
+            }));
+            
+        } catch (error) {
+            console.error('❌ [CONTENT_DEBUG] Error handling debug request:', error);
+            window.dispatchEvent(new CustomEvent('smartFormFillerDebugResponse', {
+                detail: { messageId, data: { error: error.message } }
+            }));
+        }
+    });
     
     // Mark that content script is loaded
     window.contentScriptLoaded = true;

@@ -165,8 +165,10 @@ class DataAnalysisController {
             
             if (dataSources.length > 0) {
                 // Chat with data sources
+                console.log(`📊 Processing ${dataSources.length} data sources for context`);
                 const contextParts = [];
                 dataSources.forEach((source, index) => {
+                    console.log(`📄 Data Source ${index + 1}: ${source.title} (${source.type}) - ${source.content.length} chars`);
                     const sourceInfo = `Data Source ${index + 1} (${source.type}):
 Title: ${source.title}
 URL: ${source.url}
@@ -179,6 +181,8 @@ ${source.content}
                 });
                 
                 context = contextParts.join("\n");
+                console.log(`📝 Total context length: ${context.length} characters`);
+                
                 systemPrompt = `You are a helpful AI assistant that answers questions based on provided data sources. 
 
 You have access to the following data sources:

@@ -37,12 +37,14 @@ class PopupModelManager {
         try {
             console.log("🔧 Loading AI models...");
             console.log("🔧 API Client available:", !!this.popupManager.apiClient);
+            console.log("🔧 API Client base URL:", this.popupManager.apiClient?.baseUrl);
             console.log("🔧 Global model select element:", !!this.popupManager.elements?.globalModelSelect);
             
             if (!this.popupManager.apiClient) {
                 throw new Error("API client not initialized");
             }
             
+            console.log("🔧 Making API request to /extension/models...");
             const models = await this.popupManager.apiClient.getAvailableModels();
             console.log("🔧 Available models received:", models?.length || 0);
             console.log("🔧 First few models:", models?.slice(0, 3));
@@ -78,8 +80,10 @@ class PopupModelManager {
             // Enable UI controls when models are available
             console.log("🔧 UI Controller available:", !!this.popupManager.uiController);
             if (this.popupManager.uiController) {
-                this.popupManager.uiController.setButtonsEnabled(true);
-                console.log("🔧 Buttons enabled");
+                // Enable all buttons when models are successfully loaded
+                this.popupManager.uiController.setModelDependentButtonsEnabled(true);
+                this.popupManager.uiController.setSystemButtonsEnabled(true);
+                console.log("🔧 All buttons enabled after successful model loading");
             } else {
                 console.warn("⚠️ UI Controller not available, cannot enable buttons");
             }
@@ -89,6 +93,10 @@ class PopupModelManager {
         } catch (error) {
             console.error("❌ Failed to load models:", error);
             console.error("❌ Error stack:", error.stack);
+            console.error("❌ API Client details:", {
+                baseUrl: this.popupManager.apiClient?.baseUrl,
+                hasAuthManager: !!this.popupManager.apiClient?.authManager
+            });
             this.handleModelLoadError(error);
         }
     }
@@ -200,14 +208,20 @@ class PopupModelManager {
      */
     handleNoModelsAvailable() {
         if (this.popupManager.elements.globalModelSelect) {
-            this.popupManager.elements.globalModelSelect.innerHTML = '<option value="">Service unavailable</option>';
+            this.popupManager.elements.globalModelSelect.innerHTML = '<option value="">No models available</option>';
             this.popupManager.elements.globalModelSelect.disabled = true;
         }
         
-        // Disable main action buttons
-        this.popupManager.uiController?.setButtonsEnabled(false);
+        // Only disable model-dependent buttons, keep system buttons enabled
+        this.popupManager.uiController?.setModelDependentButtonsEnabled(false);
+        this.popupManager.uiController?.setSystemButtonsEnabled(true);
         
-        console.warn("⚠️ No AI models available - features disabled");
+        // Ensure authentication status is still set to Ready even when no models available
+        if (this.popupManager.updateAuthenticationStatus) {
+            this.popupManager.updateAuthenticationStatus();
+        }
+        
+        console.warn("⚠️ No AI models available - model-dependent features disabled, but system functions remain available");
     }
 
     /**
@@ -221,11 +235,20 @@ class PopupModelManager {
             this.popupManager.elements.globalModelSelect.disabled = true;
         }
         
-        // Disable main action buttons
-        this.popupManager.uiController?.setButtonsEnabled(false);
+        // DO NOT disable all buttons - users should still be able to use refresh and settings
+        // Only disable buttons that require AI models (extract, chat, etc.)
+        this.popupManager.uiController?.setModelDependentButtonsEnabled(false);
+        
+        // Always keep settings and refresh buttons enabled
+        this.popupManager.uiController?.setSystemButtonsEnabled(true);
+        
+        // Ensure authentication status is still set to Ready even on model loading failure
+        if (this.popupManager.updateAuthenticationStatus) {
+            this.popupManager.updateAuthenticationStatus();
+        }
         
         // Show error message
-        this.popupManager.resultsHandler?.showError("Failed to load AI models: " + error.message);
+        this.popupManager.resultsHandler?.showError("Failed to load AI models: " + error.message + ". You can still use Settings and Refresh buttons.");
     }
 
     /**

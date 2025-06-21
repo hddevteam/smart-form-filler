@@ -39,7 +39,6 @@ if (!window.FormDetector) {
             // Log summary results only
             this.logSummaryResults();
 
-            console.log(`✅ Detection completed: ${this.formElements.length} forms, ${this.getTotalFieldCount()} fields`);
             return this.getDetectionResult();
         }
 
@@ -104,7 +103,6 @@ if (!window.FormDetector) {
             } catch (error) {
                 // Only log actual errors
                 if (error.message && !error.message.includes("cross-origin") && !error.message.includes("Permission denied")) {
-                    console.log(`❌ Error processing iframe ${indexPath}:`, error.message);
                 }
             }
         }
@@ -148,7 +146,6 @@ if (!window.FormDetector) {
             // Only log for forms with multiple fields or in iframes
             const shouldLog = form.querySelectorAll("input, textarea, select").length > 5 || source === "iframe";
             if (shouldLog) {
-                console.log(`📝 Form found in ${source}${iframePath ? ` (${iframePath})` : ""}: ${formData.fields.length} fields`);
             }
 
             // Find all form fields within this form
@@ -184,7 +181,6 @@ if (!window.FormDetector) {
 
             // Only log if significant number of standalone inputs
             if (inputs.length > 10) {
-                console.log(`🔍 Processing ${inputs.length} standalone inputs in ${source}${iframePath ? ` (${iframePath})` : ""}`);
             }
 
             inputs.forEach((field, index) => {
@@ -904,7 +900,6 @@ if (!window.FormDetector) {
          */
         logSummaryResults() {
             if (this.formElements.length === 0) {
-                console.log("❌ No forms detected");
                 return;
             }
 
@@ -912,12 +907,10 @@ if (!window.FormDetector) {
             const mainForms = this.formElements.filter(f => f.source === "main");
             const iframeForms = this.formElements.filter(f => f.source === "iframe");
             
-            console.log(`📊 Found: ${mainForms.length} main page, ${iframeForms.length} iframe form(s)`);
             
             // Only log iframe forms since they're more important
             if (iframeForms.length > 0) {
                 iframeForms.forEach(form => {
-                    console.log(`   🖼️ ${form.name || form.id} (${form.iframePath}): ${form.fields.length} fields`);
                 });
             }
         }

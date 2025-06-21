@@ -72,7 +72,6 @@ exports.getRecentLogs = (req, res) => {
  */
 exports.testLogging = (req, res) => {
     try {
-        console.log("🔧 Test log entry - INFO level");
         console.warn("⚠️ Test log entry - WARNING level");
         console.error("❌ Test log entry - ERROR level");
         console.info("📝 Test log entry - INFO level with data:", { 

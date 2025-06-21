@@ -98,6 +98,7 @@ class PopupInitializer {
             // Chat elements
             dataSourceTypeSelect: document.getElementById("dataSourceTypeSelect"),
             dataSourceList: document.getElementById("dataSourceList"),
+            openDataSourceModalBtn: document.getElementById("openDataSourceModalBtn"),
             chatMessages: document.getElementById("chatMessages"),
             chatInput: document.getElementById("chatInput"),
             sendChatBtn: document.getElementById("sendChatBtn"),
@@ -128,6 +129,17 @@ class PopupInitializer {
             backendUrlInput: document.getElementById("backendUrlInput"),
             testConnectionBtn: document.getElementById("testConnectionBtn"),
             connectionStatus: document.getElementById("connectionStatus"),
+            
+            // Data Source modal elements
+            dataSourceModal: document.getElementById("dataSourceModal"),
+            dataSourceModalClose: document.getElementById("dataSourceModalClose"),
+            dataSourceCancelBtn: document.getElementById("dataSourceCancelBtn"),
+            dataSourceApplyBtn: document.getElementById("dataSourceApplyBtn"),
+            sourceTypeSelect: document.getElementById("sourceTypeSelect"),
+            sourceTextarea: document.getElementById("sourceTextarea"),
+            sourceFileInput: document.getElementById("sourceFileInput"),
+            sourceFileSection: document.getElementById("sourceFileSection"),
+            sourceTextSection: document.getElementById("sourceTextSection"),
             
             // Footer
             selectedMode: document.getElementById("selectedMode")

@@ -7,7 +7,7 @@
 
 class EnhancedIframeExtractor {
     constructor() {
-        console.log("🔧 EnhancedIframeExtractor initialized");
+        
         this.extractedIframes = new Map(); // 存储所有提取的iframe数据
         this.iframeHierarchy = []; // 存储iframe的层次结构
     }
@@ -18,27 +18,24 @@ class EnhancedIframeExtractor {
      */
     async enhancedExtractIframeContents(tab) {
         try {
-            console.log("🔧 Starting enhanced iframe extraction...");
+            
             
             // 检查content script是否ready
             const isReady = await this.waitForContentScript(tab);
             if (!isReady) {
-                console.log("🔧 Content script not ready, returning empty array");
+                
                 return [];
             }
 
             return new Promise((resolve) => {
-                console.log("🔧 Sending enhanced iframe extraction message to tab", tab.id);
                 chrome.tabs.sendMessage(tab.id, { action: "extractContentWithIframes" }, (response) => {
                     if (chrome.runtime.lastError || !response || !response.success) {
-                        console.log("🔧 Enhanced iframe extraction failed, returning empty array");
-                        console.log("🔧 Error details:", chrome.runtime.lastError?.message);
+                        
                         resolve([]);
                         return;
                     }
 
                     const enhancedIframeContents = this.processIframeExtractionResponse(response);
-                    console.log(`🔧 Enhanced extraction completed: ${enhancedIframeContents.length} iframes processed`);
                     resolve(enhancedIframeContents);
                 });
             });
@@ -56,16 +53,14 @@ class EnhancedIframeExtractor {
         const iframeContents = [];
         
         if (!response.data || !response.data.iframes) {
-            console.log("🔧 No iframe data in response");
+            
             return iframeContents;
         }
 
         const iframes = response.data.iframes;
-        console.log(`🔧 Processing ${iframes.length} iframes from response`);
 
         // 详细分析每个iframe
         iframes.forEach((iframe, index) => {
-            console.log(`🔧 Analyzing iframe ${index}:`, {
                 indexPath: iframe.indexPath,
                 src: iframe.src,
                 accessible: iframe.accessible,
@@ -110,14 +105,11 @@ class EnhancedIframeExtractor {
                     enhancedIframeData.metadata.url = iframe.content.url || "";
                     enhancedIframeData.metadata.domain = iframe.content.domain || "";
                     
-                    console.log(`✅ Enhanced processing: iframe ${iframe.indexPath || index} has ${contentLength} chars`);
                 } else {
                     enhancedIframeData.metadata.error = "Content is empty";
-                    console.log(`⚠️ Enhanced processing: iframe ${iframe.indexPath || index} has empty content`);
                 }
             } else {
                 enhancedIframeData.metadata.error = iframe.error || "No content object available";
-                console.log(`⚠️ Enhanced processing: iframe ${iframe.indexPath || index} has no content: ${iframe.error || "unknown reason"}`);
             }
 
             // 添加iframe层次信息
@@ -133,7 +125,6 @@ class EnhancedIframeExtractor {
 
         // 生成统计信息
         const stats = this.generateExtractionStats(iframeContents);
-        console.log("🔧 Enhanced extraction statistics:", stats);
 
         return iframeContents;
     }
@@ -201,20 +192,17 @@ class EnhancedIframeExtractor {
      * 等待content script准备就绪
      */
     async waitForContentScript(tab, maxRetries = 3, retryDelay = 500) {
-        console.log("🔧 Checking content script readiness for enhanced extraction...");
+        
         
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 const isReady = await new Promise((resolve) => {
                     chrome.tabs.sendMessage(tab.id, { action: "ping" }, (response) => {
                         if (chrome.runtime.lastError) {
-                            console.log(`🔧 Enhanced attempt ${attempt}: Content script not responding - ${chrome.runtime.lastError.message}`);
                             resolve(false);
                         } else if (response && response.success) {
-                            console.log(`🔧 Enhanced attempt ${attempt}: Content script ready ✅`);
                             resolve(true);
                         } else {
-                            console.log(`🔧 Enhanced attempt ${attempt}: Content script responded but not ready`);
                             resolve(false);
                         }
                     });
@@ -226,16 +214,14 @@ class EnhancedIframeExtractor {
                 
                 // 等待下次重试
                 if (attempt < maxRetries) {
-                    console.log(`🔧 Enhanced extraction waiting ${retryDelay}ms before retry...`);
                     await new Promise(resolve => setTimeout(resolve, retryDelay));
                 }
                 
             } catch (error) {
-                console.log(`🔧 Enhanced attempt ${attempt} failed:`, error);
             }
         }
         
-        console.log("🔧 Enhanced extraction: Content script not ready after all attempts");
+        
         return false;
     }
 

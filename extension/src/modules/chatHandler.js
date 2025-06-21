@@ -12,6 +12,7 @@ class ChatHandler {
         this.selectedDataSources = new Set(); // Selected data source IDs
         this.chatHistory = []; // Chat conversation history
         this.isLoading = false;
+        this.dataSourceConfig = null; // Data source configuration
         
         console.log("🔧 ChatHandler initialized");
     }
@@ -22,6 +23,29 @@ class ChatHandler {
     setExtractionHistory(history) {
         this.extractionHistory = history;
         this.refreshDataSourceList();
+    }
+
+    /**
+     * Handle data source configuration change
+     */
+    onDataSourceChanged(config) {
+        this.dataSourceConfig = config;
+        this.updateSendButtonState();
+        console.log("🔧 Data source configuration updated:", config);
+    }
+
+    /**
+     * Check if data source is configured
+     */
+    isDataSourceConfigured() {
+        // Allow chat even without data sources - user might want to ask general questions
+        // If data sources are configured, they will be included in the context
+        return true; // Always allow chat
+        
+        // Original logic (keeping for reference):
+        // return this.dataSourceConfig && 
+        //        this.dataSourceConfig.selectedItems && 
+        //        this.dataSourceConfig.selectedItems.length > 0;
     }
 
     /**
@@ -127,46 +151,122 @@ class ChatHandler {
      */
     updateSendButtonState() {
         const hasModel = this.getSelectedModel();
-        const hasMessage = this.elements.chatInput.value.trim();
+        const hasMessage = this.elements.chatInput?.value?.trim();
+        // Remove data source requirement - allow chat without data sources
         
-        // Allow sending message even without data sources for general conversation
-        this.elements.sendChatBtn.disabled = !hasModel || !hasMessage || this.isLoading;
+        console.log('[ChatHandler] [DEBUG] Send button state check:', {
+            hasModel: !!hasModel,
+            modelValue: hasModel,
+            hasMessage: !!hasMessage,
+            messageValue: hasMessage,
+            isLoading: this.isLoading,
+            sendBtnElement: !!this.elements.sendChatBtn,
+            chatInputElement: !!this.elements.chatInput,
+            chatInputValue: this.elements.chatInput?.value || 'NOT_FOUND'
+        });
+        
+        // Enable send button if we have model and message (data source is optional)
+        if (this.elements.sendChatBtn) {
+            const shouldEnable = !!(hasModel && hasMessage && !this.isLoading);
+            this.elements.sendChatBtn.disabled = !shouldEnable;
+            console.log('[ChatHandler] [DEBUG] Send button enabled:', shouldEnable);
+            console.log('[ChatHandler] [DEBUG] Send button disabled attribute:', this.elements.sendChatBtn.disabled);
+        } else {
+            console.warn('[ChatHandler] [DEBUG] Send button element not found');
+            console.log('[ChatHandler] [DEBUG] Available elements:', Object.keys(this.elements));
+        }
     }
 
     /**
      * Get selected data sources content
      */
     getSelectedDataSourcesContent() {
-        const selectedType = this.elements.dataSourceTypeSelect.value;
-        const content = [];
+        // Use PopupDataSourceManager for Chat data sources
+        if (window.popupManager && window.popupManager.dataSourceManager) {
+            const chatDataSources = window.popupManager.dataSourceManager.getChatDataSources();
+            if (chatDataSources && chatDataSources.sources.length > 0) {
+                console.log("📊 Using Chat data sources from PopupDataSourceManager:", {
+                    type: chatDataSources.type,
+                    sourceCount: chatDataSources.sources.length,
+                    totalContentLength: chatDataSources.combinedText.length
+                });
+                
+                return chatDataSources.sources.map(source => ({
+                    title: source.title,
+                    url: source.url,
+                    type: chatDataSources.type,
+                    content: source.content
+                }));
+            }
+        }
         
-        this.selectedDataSources.forEach(sourceId => {
-            const item = this.extractionHistory.find(h => h.id === sourceId);
-            if (item && item.dataSources) {
-                let sourceContent = "";
+        // Fallback to legacy dataSourceConfig if PopupDataSourceManager is not available
+        if (!this.dataSourceConfig || !this.dataSourceConfig.selectedItems) {
+            return [];
+        }
+
+        const content = [];
+        const selectedType = this.dataSourceConfig.type;
+        
+        this.dataSourceConfig.selectedItems.forEach(sourceId => {
+            // Parse source ID to get extraction index and type
+            const [, extractionIndex, sourceType, iframeIndex] = sourceId.split('-');
+            const extractionItem = this.extractionHistory[parseInt(extractionIndex)];
+            
+            if (!extractionItem) return;
+            
+            let sourceContent = "";
+            let title = "";
+            let url = "";
+            
+            if (sourceType === 'main' && extractionItem.analysis) {
+                // Main page content
+                title = extractionItem.analysis.title || `Page ${parseInt(extractionIndex) + 1}`;
+                url = extractionItem.analysis.url || 'Unknown URL';
                 
                 switch (selectedType) {
-                case "markdown":
-                    sourceContent = item.dataSources.markdown?.content || "";
-                    break;
-                case "cleaned":
-                    sourceContent = item.dataSources.cleaned?.content || "";
-                    break;
-                case "raw":
-                    sourceContent = item.dataSources.raw?.content || "";
-                    break;
-                default:
-                    sourceContent = item.dataSources.markdown?.content || "";
+                    case "markdown":
+                        sourceContent = extractionItem.analysis.markdown || "";
+                        break;
+                    case "cleaned":
+                        sourceContent = extractionItem.analysis.cleanedHtml || "";
+                        break;
+                    case "raw":
+                        sourceContent = extractionItem.analysis.content || "";
+                        break;
+                    default:
+                        sourceContent = extractionItem.analysis.markdown || "";
                 }
-                
-                if (sourceContent) {
-                    content.push({
-                        title: item.title,
-                        url: item.url,
-                        type: selectedType,
-                        content: sourceContent
-                    });
+            } else if (sourceType === 'iframe' && extractionItem.analysis && extractionItem.analysis.iframes) {
+                // Iframe content
+                const iframe = extractionItem.analysis.iframes[parseInt(iframeIndex)];
+                if (iframe) {
+                    title = iframe.title || `Iframe ${parseInt(iframeIndex) + 1}`;
+                    url = iframe.src || extractionItem.analysis.url || 'Unknown URL';
+                    
+                    switch (selectedType) {
+                        case "markdown":
+                            sourceContent = iframe.markdown || "";
+                            break;
+                        case "cleaned":
+                            sourceContent = iframe.cleanedHtml || "";
+                            break;
+                        case "raw":
+                            sourceContent = iframe.content || "";
+                            break;
+                        default:
+                            sourceContent = iframe.markdown || "";
+                    }
                 }
+            }
+            
+            if (sourceContent) {
+                content.push({
+                    title: title,
+                    url: url,
+                    type: selectedType,
+                    content: sourceContent
+                });
             }
         });
         
@@ -197,12 +297,14 @@ class ChatHandler {
         if (!message || this.isLoading) return;
         
         const model = this.getSelectedModel();
-        const dataSources = this.getSelectedDataSourcesContent();
         
         if (!model) {
             this.showError("❌ Service unavailable: Please check backend connection and try again");
             return;
         }
+        
+        // Data source configuration is now optional - if configured, it will be included in context
+        console.log('[ChatHandler] [DEBUG] Sending message, data source configured:', !!this.dataSourceConfig);
         
         // Add user message to chat
         this.addMessage("user", message);
@@ -223,12 +325,19 @@ class ChatHandler {
             // Always use official endpoint
             const endpoint = "/extension/chat-with-data";
             
+            // Get selected data sources content
+            const dataSources = this.getSelectedDataSourcesContent();
+            console.log('[ChatHandler] Data sources for chat:', {
+                count: dataSources.length,
+                sources: dataSources.map(ds => ({ title: ds.title, type: ds.type, contentLength: ds.content.length }))
+            });
+            
             const response = await this.apiClient.makeRequest(endpoint, {
                 method: "POST",
                 body: JSON.stringify({
                     message: message,
                     model: model,
-                    dataSources: dataSources, // Can be empty array for general conversation
+                    dataSources: dataSources, // Use configured data sources
                     chatHistory: this.chatHistory.slice(-10) // Last 10 messages for context
                 })
             });
@@ -530,6 +639,45 @@ class ChatHandler {
             console.error("❌ Critical error during chat event binding:", error);
             throw new Error(`Chat event binding failed: ${error.message}`);
         }
+    }
+
+    /**
+     * Handle data source configuration change
+     */
+    onDataSourceChanged(config) {
+        try {
+            console.log('[ChatHandler] Data source configuration changed:', config);
+            this.dataSourceConfig = config;
+            this.updateChatInterface();
+        } catch (error) {
+            console.error('[ChatHandler] Error handling data source change:', error);
+        }
+    }
+
+    /**
+     * Update chat interface based on current configuration
+     */
+    updateChatInterface() {
+        try {
+            // Update send button state
+            this.updateSendButtonState();
+            
+            // Clear previous chat if data source changed
+            if (this.chatHistory.length > 0) {
+                this.resetChat();
+            }
+            
+            console.log('[ChatHandler] Chat interface updated');
+        } catch (error) {
+            console.error('[ChatHandler] Error updating chat interface:', error);
+        }
+    }
+
+    /**
+     * Check if data source is properly configured
+     */
+    isDataSourceConfigured() {
+        return this.dataSourceConfig && this.dataSourceConfig.source && this.dataSourceConfig.source.trim();
     }
 }
 

@@ -175,7 +175,8 @@ class FormFillerController {
                 selectedForm,
                 model = "gpt-4.1-nano",
                 language = "zh",
-                analysisResult = null // Previous Analyze Content results
+                analysisResult = null, // Previous Analyze Content results
+                dataSources = null // Selected data sources for context
             } = req.body;
 
             if (!content || content.trim().length === 0) {
@@ -198,13 +199,17 @@ class FormFillerController {
             if (analysisResult) {
                 console.log("📊 Using previous Analyze Content results for enhanced mapping");
             }
+            if (dataSources && dataSources.sources && dataSources.sources.length > 0) {
+                console.log(`📊 Using selected data sources for context - Type: ${dataSources.type}, Sources: ${dataSources.sources.length}, Content length: ${dataSources.combinedText.length}`);
+            }
 
-            // Create enhanced field mapping prompt that includes both user content and analysis results
+            // Create enhanced field mapping prompt that includes user content, analysis results, and data sources
             const mappingPrompt = this.createEnhancedFieldMappingPrompt(
                 content, 
                 targetForm, 
                 analysisResult, 
-                language
+                language,
+                dataSources // Pass data sources to prompt generation
             );
 
             const messages = [
@@ -494,9 +499,9 @@ Analysis requirements:
     }
 
     /**
-     * Create enhanced field mapping prompt that uses both user content and analysis results
+     * Create enhanced field mapping prompt that uses user content, analysis results, and data sources
      */
-    createEnhancedFieldMappingPrompt(content, targetForm, analysisResult, language) {
+    createEnhancedFieldMappingPrompt(content, targetForm, analysisResult, language, dataSources = null) {
         // Use the language directly as provided by user selection
         const targetLanguage = language || "English";
         
@@ -511,6 +516,13 @@ Analysis requirements:
 
         // Add user content
         promptParts.push(`\nUser input content:\n"${content}"\n`);
+
+        // Add data sources if available
+        if (dataSources && dataSources.sources && dataSources.sources.length > 0) {
+            promptParts.push(`\nAdditional context from selected data sources (${dataSources.type} format):`);
+            promptParts.push(`${dataSources.combinedText}\n`);
+            promptParts.push("Note: Use this additional context to enhance field mapping accuracy and provide more relevant information.\n");
+        }
 
         // Add form description - prioritize analysis result over original form description
         let formDesc = null;
@@ -555,15 +567,19 @@ Analysis requirements:
         promptParts.push(`Target form structure:\n${JSON.stringify(simplifiedForm, null, 2)}\n`);
 
         // Add simplified instructions
+        const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
         promptParts.push(`Analysis instructions:
 1. User content may contain:
    - Direct field values (e.g., "Name: John, Phone: 123456")
    - Instructional guidance (e.g., "please help fill this form based on my info to make it persuasive")
    - A combination of both
 
-2. Processing strategy:
+2. ${hasDataSources ? 'Additional data sources are provided for context:' : 'Processing strategy:'}
+   ${hasDataSources ? '- Use the additional context from data sources to enhance field mapping accuracy' : ''}
+   ${hasDataSources ? '- Combine user input with relevant information from data sources' : ''}
+   ${hasDataSources ? '- Prioritize user input but supplement with data source information when appropriate' : ''}
    - For direct information: extract exact field values
-   - For instructional content: generate appropriate values based on field descriptions
+   - For instructional content: generate appropriate values based on field descriptions${hasDataSources ? ' and available data sources' : ''}
    - Consider user intent and form context
 
 3. **CRITICAL LANGUAGE REQUIREMENT**: ALL field values MUST be generated in ${targetLanguage}. This is mandatory.

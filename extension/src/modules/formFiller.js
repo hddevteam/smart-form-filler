@@ -16,7 +16,6 @@ if (!window.FormFiller) {
          * @param {Array} mappingData - Array of field mappings
          */
         fillFormFields(mappingData) {
-            console.log("🚀 Starting form filling...", { count: mappingData?.length || 0 });
 
             if (!Array.isArray(mappingData)) {
                 console.error("❌ Invalid mapping data:", mappingData);
@@ -56,7 +55,6 @@ if (!window.FormFiller) {
                         
                         // Only log iframe fields for debugging
                         if (fieldInfo.source === "iframe") {
-                            console.log(`🖼️ Processing iframe field: ${fieldInfo.name || fieldInfo.id}`);
                         }
                     } else {
                         console.warn("⚠️ Invalid mapping structure:", mapping);
@@ -82,7 +80,6 @@ if (!window.FormFiller) {
                             xpath: fieldInfo.xpath,
                             confidence: mapping.confidence
                         });
-                        console.log(`✅ Filled: ${fieldInfo.name || fieldInfo.id}`);
                     } else {
                         const error = `Field not found or no value: ${fieldInfo?.name || fieldInfo?.id || fieldInfo?.label || "unknown"}`;
                         console.warn("⚠️", error);
@@ -120,7 +117,6 @@ if (!window.FormFiller) {
                 errors: errors.length > 0 ? errors : undefined
             };
 
-            console.log(`✅ Form filling completed: ${successCount}/${mappingData.length} fields filled`);
             return result;
         }
 
@@ -296,11 +292,10 @@ if (!window.FormFiller) {
          */
         getIframeDocument(iframePath) {
             if (!iframePath) {
-                console.warn("⚠️ No iframe path provided");
+                
                 return null;
             }
             
-            console.log(`🔍 Processing iframe path: ${iframePath}`);
             
             // Parse iframe path (e.g., "iframe-1.1.0" means first iframe, then its second iframe, then its first iframe)
             const pathParts = iframePath.split(".");
@@ -310,7 +305,6 @@ if (!window.FormFiller) {
             
             for (let i = 0; i < pathParts.length; i++) {
                 const part = pathParts[i];
-                console.log(`🔍 Processing part ${i + 1}/${pathParts.length}: ${part}`);
                 
                 let iframeIndex;
                 
@@ -334,7 +328,6 @@ if (!window.FormFiller) {
                 }
                 
                 const iframes = currentDoc.querySelectorAll("iframe");
-                console.log(`🖼️ Found ${iframes.length} iframes in current document, looking for index ${iframeIndex}`);
                 
                 if (iframeIndex >= iframes.length) {
                     console.warn("⚠️ Iframe index out of bounds:", iframeIndex, "total:", iframes.length);
@@ -355,7 +348,6 @@ if (!window.FormFiller) {
                     
                     // Verify accessibility by trying to access domain
                     iframeDoc.domain;
-                    console.log(`✅ Successfully accessed iframe document for part: ${part}`);
                     
                     currentDoc = iframeDoc;
                 } catch (error) {
@@ -364,7 +356,7 @@ if (!window.FormFiller) {
                 }
             }
             
-            console.log("✅ Final iframe document obtained successfully");
+            
             return currentDoc;
         }
 
@@ -401,7 +393,6 @@ if (!window.FormFiller) {
                 // Trigger change events
                 this.triggerChangeEvents(element);
 
-                console.log("✅ Field filled:", fieldInfo?.name || fieldInfo?.id, "=>", value);
 
             } catch (error) {
                 console.error("❌ Error filling field:", error);
@@ -425,7 +416,7 @@ if (!window.FormFiller) {
                 break;
             case "file":
                 // File inputs cannot be programmatically set for security reasons
-                console.warn("⚠️ File input cannot be filled programmatically");
+                
                 break;
             default:
                 element.value = String(value);
@@ -508,7 +499,7 @@ if (!window.FormFiller) {
             });
 
             this.filledFields.clear();
-            console.log("✅ All fields cleared");
+            
         }
 
         /**

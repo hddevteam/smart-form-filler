@@ -26,7 +26,15 @@ class DataExtractor {
                     // CRITICAL FIX: Return ONLY the main page HTML, not merged content
                     // The backend will handle iframe merging to avoid double-merging
                     const mainPageHtml = response.data.mainPage?.html || "";
-                    resolve(mainPageHtml);
+                    
+                    // Validate that we actually got content
+                    if (!mainPageHtml || mainPageHtml.trim().length === 0) {
+                        console.warn("Content script returned empty content, falling back to direct extraction");
+                        this.getPageContentDirect(tab).then(resolve).catch(reject);
+                    } else {
+                        console.log(`✅ Content script extraction successful: ${mainPageHtml.length} characters`);
+                        resolve(mainPageHtml);
+                    }
                 } else {
                     console.warn("Content script extraction failed, falling back to direct extraction");
                     this.getPageContentDirect(tab).then(resolve).catch(reject);
@@ -46,12 +54,28 @@ class DataExtractor {
                     return {
                         html: document.documentElement.outerHTML,
                         title: document.title,
-                        url: window.location.href
+                        url: window.location.href,
+                        bodyLength: document.body ? document.body.innerHTML.length : 0
                     };
                 }
             });
             
-            return results[0].result.html;
+            const result = results[0].result;
+            const html = result.html;
+            
+            // Validate that we got valid HTML content
+            if (!html || html.trim().length === 0) {
+                throw new Error("Page returned empty HTML content");
+            }
+            
+            // Basic HTML validation - should at least have html tags
+            if (!html.includes('<html') && !html.includes('<body')) {
+                throw new Error("Page content does not appear to be valid HTML");
+            }
+            
+            console.log(`✅ Direct extraction successful: ${html.length} characters (body: ${result.bodyLength} chars)`);
+            return html;
+            
         } catch (error) {
             console.error("Direct content extraction failed:", error);
             throw new Error("Failed to extract page content: " + error.message);

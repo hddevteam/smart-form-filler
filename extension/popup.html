@@ -134,74 +134,58 @@
 
             <!-- Chat with Data Tab Content -->
             <div id="chatTab" class="main-tab-content">
+                <!-- Data Source Selection Section -->
                 <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">Chat Configuration</h3>
-                        <p class="section__description">Configure your chat settings and select data sources</p>
+                    <div class="section__header section__header--with-action">
+                        <div>
+                            <h3 class="section__title">Data Sources</h3>
+                            <p class="section__description">Configure your chat data sources</p>
+                        </div>
+                        <button id="openDataSourceModalBtn" class="btn btn--secondary btn--small">
+                            <span class="btn__icon">⚙️</span>
+                            <span class="btn__text">Configure Sources</span>
+                        </button>
                     </div>
                     <div class="section__content">
-                        <!-- Chat Configuration -->
-                        <div class="chat-config">
-                            <div class="chat-config__row">
-                                <div class="chat-config__col">
-                                    <label class="chat-config__label">Data Source Type:</label>
-                                    <select id="dataSourceTypeSelect" class="select select--secondary" title="Select data source type">
-                                        <option value="markdown">Markdown</option>
-                                        <option value="cleaned">Cleaned HTML</option>
-                                        <option value="raw">Raw HTML</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="chat-config__row">
-                                <div class="chat-config__col chat-config__col--full">
-                                    <label class="chat-config__label">Select Data Sources:</label>
-                                    <div id="dataSourceList" class="data-source-list">
-                                        <div class="data-source-empty">
-                                            <div class="data-source-empty__icon">📊</div>
-                                            <div class="data-source-empty__text">No data sources available</div>
-                                            <div class="data-source-empty__description">
-                                                Switch to the Data Extraction tab and extract some content first.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="data-source-summary">
+                            <div class="data-source-summary__info">
+                                <span id="dataSourceSummaryText">Selected: 0 sources, No type selected</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Chat Messages Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">Chat Messages</h3>
-                        <div class="results-actions-header">
-                            <button id="clearChatBtn" class="btn btn--tertiary btn--small">
-                                <span class="btn__icon">🗑️</span>
-                                Clear Chat
-                            </button>
+                <div class="section section--chat-container">
+                    <div class="section__header section__header--with-action">
+                        <div>
+                            <h3 class="section__title">Chat Messages</h3>
                         </div>
+                        <button id="clearChatBtn" class="btn btn--tertiary btn--small">
+                            <span class="btn__icon">🗑️</span>
+                            <span class="btn__text">Clear Chat</span>
+                        </button>
                     </div>
-                    <div class="section__content">
+                    <div class="section__content section__content--chat">
                         <!-- Chat Messages -->
                         <div id="chatMessages" class="chat-messages">
                             <div class="chat-welcome">
                                 <div class="chat-welcome__icon">💬</div>
                                 <div class="chat-welcome__title">Start chatting with your data</div>
                                 <div class="chat-welcome__description">
-                                    Select data sources above and ask questions about the content.
+                                    Click "Configure Sources" to select data sources, then ask questions about the content.
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Chat Input -->
-                        <div class="chat-input-container">
-                            <div class="chat-input">
-                                <textarea id="chatInput" class="chat-input__field" placeholder="Ask a question about the selected data sources..." rows="2"></textarea>
-                                <button id="sendChatBtn" class="chat-input__send" disabled>
-                                    <span class="btn__icon">→</span>
-                                </button>
-                            </div>
+                    </div>
+                    
+                    <!-- Chat Input - Fixed at bottom -->
+                    <div class="chat-input-container">
+                        <div class="chat-input">
+                            <textarea id="chatInput" class="chat-input__field" placeholder="Ask a question about the selected data sources..." rows="2"></textarea>
+                            <button id="sendChatBtn" class="chat-input__send" disabled>
+                                <span class="btn__icon">→</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -209,28 +193,33 @@
 
             <!-- Form Filler Tab Content -->
             <div id="formFillerTab" class="main-tab-content">
-                <!-- Language Selection Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">Output Language</h3>
-                        <p class="section__description">Language for form field values (auto-recommended after content analysis)</p>
-                    </div>
-                    <div class="section__content">
-                        <select id="languageSelect" class="select select--primary" title="Select Output Language">
-                            <option value="zh">Chinese</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Content Input Section -->
                 <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">Content to Fill</h3>
-                        <p class="section__description">Enter content for AI-powered analysis and field mapping</p>
+                    <div class="section__header section__header--with-action">
+                        <div>
+                            <h3 class="section__title">Content to Fill</h3>
+                            <p class="section__description">Enter content for AI-powered analysis and field mapping</p>
+                        </div>
+                        <div class="section__header-actions">
+                            <select id="languageSelect" class="select select--primary select--compact" title="Select Output Language">
+                                <option value="zh">Chinese</option>
+                                <option value="en">English</option>
+                            </select>
+                            <button id="openFormFillerDataSourceModalBtn" class="btn btn--secondary btn--small">
+                                <span class="btn__icon">⚙️</span>
+                                <span class="btn__text">Configure Sources</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="section__content">
                         <textarea id="fillContentInput" class="form-filler__input" placeholder="Example: Last weekend from 8 AM to 10 AM, the Network Information Department arranged for Zhang Ming to work overtime to handle an emergency incident." rows="4"></textarea>
+                        
+                        <!-- Data Source Summary for Form Filler -->
+                        <div id="formFillerDataSourceSummary" class="data-source-summary hidden">
+                            <div class="data-source-summary__info">
+                                <span id="formFillerDataSourceSummaryText">Selected: 0 sources, No type selected</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -434,6 +423,75 @@
         </div>
     </div>
 
+    <!-- Data Source Selection Modal -->
+    <div id="dataSourceModal" class="modal hidden">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="modal__title">Configure Data Sources</h3>
+                <button id="dataSourceModalClose" class="btn btn--icon" title="Close">
+                    <span class="btn__icon">×</span>
+                </button>
+            </div>
+            <div class="modal__body">
+                <!-- Data Source Type Selection -->
+                <div class="data-source-section">
+                    <h4 class="data-source-section__title">Data Source Type</h4>
+                    <div class="data-source-type-options">
+                        <label class="data-source-option">
+                            <input type="radio" name="dataSourceType" value="markdown" checked>
+                            <div class="data-source-option__content">
+                                <div class="data-source-option__icon">📝</div>
+                                <div class="data-source-option__info">
+                                    <div class="data-source-option__title">Markdown</div>
+                                    <div class="data-source-option__description">Clean, formatted text ideal for Q&A</div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="data-source-option">
+                            <input type="radio" name="dataSourceType" value="cleaned">
+                            <div class="data-source-option__content">
+                                <div class="data-source-option__icon">🧹</div>
+                                <div class="data-source-option__info">
+                                    <div class="data-source-option__title">Cleaned HTML</div>
+                                    <div class="data-source-option__description">Structured HTML with enhanced formatting</div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="data-source-option">
+                            <input type="radio" name="dataSourceType" value="raw">
+                            <div class="data-source-option__content">
+                                <div class="data-source-option__icon">🔧</div>
+                                <div class="data-source-option__info">
+                                    <div class="data-source-option__title">Raw HTML</div>
+                                    <div class="data-source-option__description">Complete page source including all elements</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Data Source Selection -->
+                <div class="data-source-section">
+                    <h4 class="data-source-section__title">Available Data Sources</h4>
+                    <div id="dataSourceList" class="data-source-list">
+                        <div class="data-source-empty">
+                            <div class="data-source-empty__icon">📊</div>
+                            <div class="data-source-empty__text">No data sources available</div>
+                            <div class="data-source-empty__description">
+                                Switch to the Data Extraction tab and extract some content first.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button id="dataSourceCancelBtn" class="btn btn--secondary">Cancel</button>
+                <button id="dataSourceApplyBtn" class="btn btn--primary">Apply Selection</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts - Load modules in order -->
     <script src="src/auth/authManager.js"></script>
     <script src="src/api/apiClient.js"></script>
@@ -456,6 +514,7 @@
     <script src="src/modules/popupEventHandlers.js"></script>
     <script src="src/modules/popupModelManager.js"></script>
     <script src="src/modules/popupSettingsManager.js"></script>
+    <script src="src/modules/popupDataSourceManager.js"></script>
     <script src="src/modules/popupManager.js"></script>
     
     <!-- Main popup manager -->

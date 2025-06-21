@@ -258,13 +258,27 @@ class FormFillerHandler {
             
             const selectedLanguage = this.uiController.getSelectedLanguage();
             
+            // Get selected Form Filler data sources
+            let dataSources = null;
+            if (window.popupManager && window.popupManager.dataSourceManager) {
+                dataSources = window.popupManager.dataSourceManager.getFormFillerDataSources();
+                if (dataSources) {
+                    console.log("📊 Including Form Filler data sources in mapping generation:", {
+                        type: dataSources.type,
+                        sourceCount: dataSources.sources.length,
+                        totalContentLength: dataSources.combinedText.length
+                    });
+                }
+            }
+            
             // Perform field mapping analysis (Stage 2)
             const mappingData = await this.analysisService.analyzeFieldMapping(
                 content,
                 selectedForm,
                 model,
                 this.currentAnalysisResult, // Pass Analyze Content results
-                selectedLanguage // Pass selected language
+                selectedLanguage, // Pass selected language
+                dataSources // Pass selected data sources
             );
             
             // Store results

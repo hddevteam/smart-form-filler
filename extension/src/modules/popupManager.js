@@ -28,18 +28,70 @@ class PopupManager {
      * Set initial loading state for models
      */
     setInitialLoadingState() {
+        console.log("🔧 Setting initial loading state...");
+        
         // Show loading state in model dropdown
         if (this.elements.globalModelSelect) {
             this.elements.globalModelSelect.innerHTML = '<option value="">Loading models...</option>';
             this.elements.globalModelSelect.disabled = true;
+            console.log("✅ Model select set to loading state");
         }
         
-        // Disable buttons initially until models are loaded
-        if (this.elements.extractDataBtn) {
-            this.elements.extractDataBtn.disabled = true;
+        // Use UIController to properly manage button states
+        if (this.uiController) {
+            // Disable model-dependent buttons initially until models are loaded
+            this.uiController.setModelDependentButtonsEnabled(false);
+            // Always keep system buttons enabled
+            this.uiController.setSystemButtonsEnabled(true);
+            console.log("✅ Button states set via UIController: model-dependent disabled, system enabled");
+        } else {
+            // Fallback: direct button management if UIController not available
+            const modelDependentButtons = [
+                'extractDataBtn',
+                'mainChatBtn',
+                'detectFormsBtn',
+                'analyzeContentBtn', 
+                'generateMappingBtn',
+                'fillFormsBtn'
+            ];
+            
+            modelDependentButtons.forEach(btnId => {
+                const btn = this.elements[btnId] || document.getElementById(btnId);
+                if (btn) {
+                    btn.disabled = true;
+                    console.log(`✅ Disabled model-dependent button: ${btnId}`);
+                }
+            });
+            
+            // Ensure system buttons are ALWAYS enabled from the start
+            const systemButtons = [
+                { element: this.elements.settingsBtn, name: 'settingsBtn' },
+                { element: this.elements.globalRefreshModelsBtn, name: 'globalRefreshModelsBtn' }
+            ];
+            
+            systemButtons.forEach(({ element, name }) => {
+                if (element) {
+                    element.disabled = false;
+                    console.log(`✅ Enabled system button: ${name}`);
+                }
+            });
+            
+            // Enable data source configuration buttons (these are system features)
+            const configButtons = [
+                'openDataSourceModalBtn',
+                'openFormFillerDataSourceModalBtn'
+            ];
+            
+            configButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.disabled = false;
+                    console.log(`✅ Enabled config button: ${btnId}`);
+                }
+            });
         }
         
-        console.log("⏳ Initial loading state set");
+        console.log("✅ Initial loading state set - system buttons enabled, model-dependent buttons disabled");
     }
 
     /**
@@ -99,17 +151,10 @@ class PopupManager {
             // Initialize core services (AuthManager, ApiClient)
             await this.initializer.initializeCoreServices();
             
-            this.settingsManager = new PopupSettingsManager(this);
-            this.modelManager = new PopupModelManager(this);
-            this.eventHandlers = new PopupEventHandlers(this);
-
             // Setup DOM elements first
             await this.initializer.initializeElements();
             
-            // Set initial loading state for models
-            this.setInitialLoadingState();
-            
-            // Initialize UI modules AFTER DOM elements are ready
+            // Initialize core UI modules first (needed by other managers)
             console.log("🔧 Initializing UIController and ResultsHandler...");
             console.log("🔧 Elements object status:", {
                 hasElements: !!this.elements,
@@ -124,6 +169,21 @@ class PopupManager {
             this.dataExtractor = new DataExtractor();
             this.formFillerHandler = new FormFillerHandler(this.apiClient);
             this.formAnalysisService = new FormAnalysisService();
+            this.chatHandler = new ChatHandler(this.elements, this.apiClient);
+            
+            // Initialize managers after core services are ready
+            this.settingsManager = new PopupSettingsManager(this);
+            this.modelManager = new PopupModelManager(this);
+            this.dataSourceManager = new PopupDataSourceManager(this.elements, this);
+            this.eventHandlers = new PopupEventHandlers(this);
+            
+            // Set initial loading state for models
+            this.setInitialLoadingState();
+
+            // Update authentication status to Ready immediately (no auth required for this extension)
+            console.log("🔧 Setting initial authentication status...");
+            this.updateAuthenticationStatus();
+            console.log("✅ Initial authentication status set to Ready");
 
             // Initialize settings (must be before models)
             console.log("🔧 Initializing settings manager...");
@@ -140,10 +200,20 @@ class PopupManager {
             this.eventHandlers.setupUI();
             console.log("✅ Event handlers setup completed");
             
-            // Update authentication status to Ready (no auth required)
-            console.log("🔧 Updating authentication status...");
-            this.uiController.updateAuthStatus();
-            console.log("✅ Authentication status updated");
+            // Setup chat handler events
+            console.log("🔧 Setting up chat handler events...");
+            this.chatHandler.bindEvents();
+            console.log("✅ Chat handler events setup completed");
+            
+            // Initialize data source manager
+            console.log("🔧 Initializing data source manager...");
+            await this.dataSourceManager.init();
+            console.log("✅ Data source manager initialized");
+            console.log("🔧 Data source manager elements check:", {
+                hasElements: !!this.dataSourceManager.elements,
+                hasModal: !!this.dataSourceManager.elements?.dataSourceModal,
+                modalId: this.dataSourceManager.elements?.dataSourceModal?.id
+            });
 
             this.isInitialized = true;
             console.log("✅ PopupManager initialized successfully");
@@ -158,6 +228,22 @@ class PopupManager {
      * Handle initialization errors gracefully
      */
     handleInitializationError(error) {
+        console.error("❌ Initialization failed:", error);
+        
+        // Update authentication status to show error
+        try {
+            if (this.elements.authIndicator) {
+                this.elements.authIndicator.classList.remove("auth-indicator--authenticated", "auth-indicator--ready");
+                this.elements.authIndicator.classList.add("auth-indicator--unauthenticated");
+            }
+            
+            if (this.elements.authText) {
+                this.elements.authText.textContent = "Error";
+            }
+        } catch (statusError) {
+            console.error("❌ Failed to update status in error handler:", statusError);
+        }
+        
         // Show basic error in UI if possible
         const errorElement = document.querySelector('.error-message');
         if (errorElement) {
@@ -165,12 +251,44 @@ class PopupManager {
             errorElement.style.display = 'block';
         }
         
-        // Disable all interactive elements
-        const buttons = document.querySelectorAll('button');
-        const selects = document.querySelectorAll('select');
+        // CRITICAL: Keep system buttons enabled even on initialization failure
+        try {
+            // Enable system buttons directly
+            const systemButtons = ['settingsBtn', 'globalRefreshModelsBtn'];
+            systemButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.disabled = false;
+                    console.log(`🔧 Force-enabled system button during error: ${btnId}`);
+                }
+            });
+            
+            // Enable data source config buttons
+            const configButtons = ['openDataSourceModalBtn', 'openFormFillerDataSourceModalBtn'];
+            configButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.disabled = false;
+                    console.log(`🔧 Force-enabled config button during error: ${btnId}`);
+                }
+            });
+        } catch (buttonError) {
+            console.error("❌ Failed to enable system buttons during error handling:", buttonError);
+        }
         
-        buttons.forEach(btn => btn.disabled = true);
-        selects.forEach(select => select.disabled = true);
+        // Disable only the model-dependent buttons and selects
+        try {
+            const modelDependentElements = document.querySelectorAll('#extractDataBtn, #mainChatBtn, #globalModelSelect');
+            modelDependentElements.forEach(element => {
+                if (element) {
+                    element.disabled = true;
+                }
+            });
+        } catch (disableError) {
+            console.error("❌ Failed to disable model-dependent elements:", disableError);
+        }
+        
+        console.log("🔧 Error handling completed - system buttons kept enabled");
     }
 
     /**
@@ -275,6 +393,46 @@ class PopupManager {
             this.hideLoadingOverlay();
             this.uiController?.setButtonsEnabled(true);
             this.operationTracker.endOperation(operationId);
+        }
+    }
+
+    /**
+     * Update authentication status to Ready
+     */
+    updateAuthenticationStatus() {
+        try {
+            console.log("🔧 Updating authentication status to Ready...");
+            
+            // Update auth indicator
+            if (this.elements.authIndicator) {
+                this.elements.authIndicator.classList.remove("auth-indicator--authenticated", "auth-indicator--unauthenticated");
+                this.elements.authIndicator.classList.add("auth-indicator--ready");
+                console.log("✅ Auth indicator updated to ready state");
+            } else {
+                console.warn("⚠️ Auth indicator element not found");
+            }
+            
+            // Update auth text
+            if (this.elements.authText) {
+                this.elements.authText.textContent = "Ready";
+                console.log("✅ Auth text updated to 'Ready'");
+            } else {
+                console.warn("⚠️ Auth text element not found");
+            }
+            
+            // Hide login button since auth is not required
+            if (this.elements.loginBtn) {
+                this.elements.loginBtn.classList.add("hidden");
+                console.log("✅ Login button hidden");
+            }
+            
+            // Also call UIController's method as backup
+            if (this.uiController) {
+                this.uiController.updateAuthStatus();
+            }
+            
+        } catch (error) {
+            console.error("❌ Failed to update authentication status:", error);
         }
     }
 

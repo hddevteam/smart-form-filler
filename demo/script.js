@@ -421,6 +421,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatMessages) {
             // Initial system message is already in HTML
             console.log('Demo page loaded successfully!');
+            
+            // Load extension debug interface if available
+            try {
+                const debugScript = document.createElement('script');
+                debugScript.src = '../extension/debug-page-interface.js';
+                debugScript.onload = () => {
+                    console.log('🔧 Extension debug interface loaded');
+                    console.log('🔧 Available debug functions:');
+                    console.log('  - debugExtensionDataSource()');
+                    console.log('  - openExtensionDataSourceModal()');
+                    console.log('  - getExtensionHistory()');
+                };
+                debugScript.onerror = () => {
+                    console.warn('⚠️ Could not load extension debug interface');
+                };
+                document.head.appendChild(debugScript);
+            } catch (error) {
+                console.warn('⚠️ Error loading extension debug interface:', error);
+            }
         }
     }, 500);
 });

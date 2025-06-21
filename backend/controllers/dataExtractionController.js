@@ -39,6 +39,23 @@ class DataExtractionController {
                 iframeContents = []  // Receive iframe contents from frontend
             } = req.body;
             
+            // Validate input content
+            if (!content || typeof content !== 'string' || content.trim().length === 0) {
+                console.error("❌ Invalid or empty content received from frontend");
+                return res.status(400).json({
+                    success: false,
+                    error: "No valid HTML content was provided. Please ensure the page is fully loaded and try again.",
+                    extractionMethod: "code-based",
+                    details: {
+                        contentProvided: !!content,
+                        contentType: typeof content,
+                        contentLength: content ? content.length : 0,
+                        url: url,
+                        iframeContentsCount: iframeContents.length
+                    }
+                });
+            }
+            
             console.log(`🔧 Code-based extraction started - Model: ${model}`);
             console.log(`🔧 Content length: ${content.length} characters`);
             console.log(`🔧 URL: ${url}`);

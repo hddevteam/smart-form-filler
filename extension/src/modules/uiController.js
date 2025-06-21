@@ -143,6 +143,18 @@ class UIController {
             // Loading cancel button
             this.safeBindEvent(this.elements.cancelLoadingBtn, "click", handlers.cancelLoading, "cancelLoadingBtn");
             
+            // Global model selector change event
+            const globalModelSelect = document.getElementById("globalModelSelect");
+            if (globalModelSelect) {
+                this.safeBindEvent(globalModelSelect, "change", () => {
+                    console.log("🔧 Global model selection changed, updating chat send button state");
+                    // Notify chat handler if it exists
+                    if (handlers.updateChatSendButtonState) {
+                        handlers.updateChatSendButtonState();
+                    }
+                }, "globalModelSelect");
+            }
+            
             console.log("✅ Event binding completed");
         } catch (error) {
             console.error("❌ Critical error during event binding:", error);
@@ -272,6 +284,70 @@ class UIController {
         if (this.elements.copyBtn) {
             this.elements.copyBtn.disabled = !enabled;
         }
+    }
+
+    /**
+     * Enable/disable only model-dependent buttons (extract, chat, etc.)
+     * Keep system buttons (settings, refresh) always enabled
+     */
+    setModelDependentButtonsEnabled(enabled) {
+        // Extract button needs models
+        if (this.elements.extractDataBtn) {
+            this.elements.extractDataBtn.disabled = !enabled;
+        }
+        
+        // Chat button needs models (if exists)
+        if (this.elements.mainChatBtn) {
+            this.elements.mainChatBtn.disabled = !enabled;
+        }
+        
+        // Form filler buttons need models
+        const formFillerButtons = [
+            'detectFormsBtn',
+            'analyzeContentBtn', 
+            'generateMappingBtn',
+            'fillFormsBtn'
+        ];
+        
+        formFillerButtons.forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.disabled = !enabled;
+            }
+        });
+        
+        // Copy button doesn't need models, keep it enabled
+        if (this.elements.copyBtn) {
+            this.elements.copyBtn.disabled = false;
+        }
+    }
+
+    /**
+     * Ensure system buttons (settings, refresh) are always enabled
+     */
+    setSystemButtonsEnabled(enabled) {
+        // Settings button should always be enabled
+        if (this.elements.settingsBtn) {
+            this.elements.settingsBtn.disabled = !enabled;
+        }
+        
+        // Refresh models button should always be enabled
+        if (this.elements.globalRefreshModelsBtn) {
+            this.elements.globalRefreshModelsBtn.disabled = !enabled;
+        }
+        
+        // Data source configuration buttons should be enabled
+        const configButtons = [
+            'openDataSourceModalBtn',
+            'openFormFillerDataSourceModalBtn'
+        ];
+        
+        configButtons.forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.disabled = !enabled;
+            }
+        });
     }
 
     /**

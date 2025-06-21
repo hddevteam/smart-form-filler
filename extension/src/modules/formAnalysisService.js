@@ -78,9 +78,10 @@ class FormAnalysisService {
      * @param {string} model - Selected AI model
      * @param {Object} analysisResult - Previous Analyze Content results (optional)
      * @param {string} language - Selected language for output
+     * @param {Object} dataSources - Selected data sources for context (optional)
      * @returns {Promise<Object>} Mapping results
      */
-    async analyzeFieldMapping(content, selectedForm, model, analysisResult = null, language = "zh") {
+    async analyzeFieldMapping(content, selectedForm, model, analysisResult = null, language = "zh", dataSources = null) {
         if (!this.apiClient) {
             throw new Error("API client is not initialized");
         }
@@ -90,15 +91,29 @@ class FormAnalysisService {
         
         console.log("🚀 Using official endpoint:", endpoint);
         
+        const requestPayload = {
+            content: content,
+            selectedForm: selectedForm,
+            model: model,
+            language: language,
+            analysisResult: analysisResult, // Include previous analysis results
+            dataSources: dataSources // Include selected data sources
+        };
+        
+        // Log request info
+        console.log("🚀 Making API request to analyze field mapping with payload:", {
+            contentLength: content?.length || 0,
+            selectedForm: selectedForm?.id || 'unknown',
+            model: model,
+            language: language,
+            hasAnalysisResult: !!analysisResult,
+            hasDataSources: !!dataSources,
+            dataSourceCount: dataSources?.sources?.length || 0
+        });
+        
         const response = await this.apiClient.makeRequest(endpoint, {
             method: "POST",
-            body: JSON.stringify({
-                content: content,
-                selectedForm: selectedForm,
-                model: model,
-                language: language,
-                analysisResult: analysisResult // Include previous analysis results
-            })
+            body: JSON.stringify(requestPayload)
         });
 
         if (!response.ok) {

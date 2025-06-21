@@ -322,8 +322,46 @@ class IframeContentExtractor {
      * Extract content from a document (main page or iframe)
      */
     extractPageContent(doc) {
+        // Validate document
+        if (!doc || !doc.documentElement) {
+            console.warn("⚠️ Invalid document passed to extractPageContent");
+            return {
+                html: "",
+                title: "",
+                url: "",
+                domain: "",
+                tables: [],
+                forms: [],
+                lists: [],
+                links: [],
+                images: [],
+                metadata: { error: "Invalid document" }
+            };
+        }
+        
+        const outerHTML = doc.documentElement.outerHTML;
+        
+        // Validate HTML content
+        if (!outerHTML || outerHTML.trim().length === 0) {
+            console.warn("⚠️ Document has empty outerHTML");
+            return {
+                html: "",
+                title: doc.title || "",
+                url: doc.URL || doc.location?.href || "",
+                domain: this.extractDomain(doc.URL || doc.location?.href || ""),
+                tables: [],
+                forms: [],
+                lists: [],
+                links: [],
+                images: [],
+                metadata: { error: "Empty HTML content" }
+            };
+        }
+        
+        console.log(`✅ extractPageContent: ${outerHTML.length} characters from ${doc.URL || 'unknown URL'}`);
+        
         const content = {
-            html: doc.documentElement.outerHTML,
+            html: outerHTML,
             title: doc.title,
             url: doc.URL || doc.location?.href || "",
             domain: this.extractDomain(doc.URL || doc.location?.href || ""),

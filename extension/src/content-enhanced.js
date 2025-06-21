@@ -293,22 +293,19 @@
         extractPageHTML() {
             // Extract the full HTML structure of the page for intelligent processing
             try {
-                console.log("🔧 Content script: Starting HTML extraction...");
+                
                 
                 // Method 1: Try to get full document HTML
                 let fullHTML = null;
                 if (document.documentElement && document.documentElement.outerHTML) {
                     fullHTML = document.documentElement.outerHTML;
-                    console.log("✅ Content script: Full HTML extracted, length:", fullHTML.length);
                 }
                 
                 // Method 2: Get clean HTML without unwanted elements
                 const cleanHTML = this.extractCleanHTML();
-                console.log("✅ Content script: Clean HTML extracted, length:", cleanHTML?.length || 0);
                 
                 // Method 3: Get structured content HTML as fallback
                 const structuredHTML = this.extractStructuredHTML();
-                console.log("✅ Content script: Structured HTML extracted, length:", structuredHTML?.length || 0);
                 
                 const result = {
                     fullHTML: fullHTML,
@@ -328,7 +325,6 @@
                     }
                 };
                 
-                console.log("✅ Content script: HTML extraction completed:", result.extractionMethods);
                 return result;
                 
             } catch (error) {
@@ -387,7 +383,7 @@
         extractStructuredHTML() {
             // Extract main content and convert to structured HTML
             try {
-                console.log("🔧 Content script: Extracting structured HTML...");
+                
                 
                 const contentParts = [];
                 
@@ -414,7 +410,6 @@
                     const element = document.querySelector(selector);
                     if (element && element.innerHTML && element.innerHTML.trim().length > 200) {
                         mainContentHTML = element.innerHTML;
-                        console.log("✅ Content script: Found main content in", selector);
                         break;
                     }
                 }
@@ -422,7 +417,7 @@
                 // Fallback to body content if no main content found
                 if (!mainContentHTML && document.body) {
                     mainContentHTML = document.body.innerHTML;
-                    console.log("✅ Content script: Using full body content");
+                    
                 }
 
                 if (mainContentHTML) {
@@ -436,7 +431,6 @@
 ${mainContentHTML}
 </body>
 </html>`;
-                    console.log("✅ Content script: Structured HTML created, length:", structuredHTML.length);
                     return structuredHTML;
                 }
 
@@ -461,11 +455,9 @@ ${mainContentHTML}
 ${htmlParagraphs}
 </body>
 </html>`;
-                    console.log("✅ Content script: Fallback structured HTML created, length:", fallbackHTML.length);
                     return fallbackHTML;
                 }
 
-                console.log("⚠️ Content script: No content available for structured HTML");
                 return null;
                 
             } catch (error) {

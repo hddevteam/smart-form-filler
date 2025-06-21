@@ -27,11 +27,9 @@ class FormDetectionService {
                         iframeExtractor: typeof window.iframeExtractor !== "undefined"
                     };
                     
-                    console.log("🔍 Content script components check:", components);
                     
                     // If FormDetector is missing, we need full initialization
                     if (!components.FormDetector) {
-                        console.log("⚠️ FormDetector not found, need to inject all scripts");
                         return { 
                             initialized: false, 
                             reason: "FormDetector not found",
@@ -41,7 +39,6 @@ class FormDetectionService {
                     
                     // If iframe extractor is missing, content-iframe.js needs injection
                     if (!components.iframeExtractor) {
-                        console.log("⚠️ Iframe extractor not found, need to inject content scripts");
                         return { 
                             initialized: false, 
                             reason: "Iframe extractor not found",
@@ -49,7 +46,7 @@ class FormDetectionService {
                         };
                     }
                     
-                    console.log("✅ All required components are available");
+                    
                     window.__formDetectorInitialized = true;
                     return { initialized: true, components: components };
                 }
@@ -57,11 +54,11 @@ class FormDetectionService {
             
             // Check if initialization was successful
             if (results && results[0] && results[0].result && results[0].result.initialized) {
-                console.log("✅ Content script initialization confirmed via executeScript");
+                console.log("✅ Form detection components initialized successfully");
                 return true;
             } else {
                 const result = results && results[0] && results[0].result;
-                console.log("⚠️ Content script initialization needed. Reason:", 
+                console.log("❌ Form detection initialization failed:", 
                     result ? result.reason : "Unknown");
                 console.log("📋 Component status:", result ? result.components : "Unknown");
                 return false;
@@ -96,7 +93,6 @@ class FormDetectionService {
                         target: { tabId },
                         files: [scriptPath]
                     });
-                    console.log(`✅ Successfully injected ${scriptPath}`);
                 } catch (scriptError) {
                     console.error(`❌ Error injecting ${scriptPath}:`, scriptError);
                     // For form detector and filler, this is critical
@@ -119,7 +115,6 @@ class FormDetectionService {
                         contentScriptLoaded: typeof window.contentScriptLoaded !== "undefined"
                     };
                     
-                    console.log("🔍 Script verification results:", results);
                     
                     // FormDetector is critical
                     if (!results.FormDetector) {
@@ -131,7 +126,7 @@ class FormDetectionService {
                         };
                     }
                     
-                    console.log("✅ Critical scripts successfully loaded");
+                    
                     return { success: true, results: results };
                 }
             });
@@ -143,7 +138,7 @@ class FormDetectionService {
                 return false;
             }
             
-            console.log("✅ All content scripts successfully loaded and verified");
+            
             return true;
         } catch (error) {
             console.error("❌ Content script injection failed:", error);
@@ -159,7 +154,7 @@ class FormDetectionService {
      * @returns {Promise<Object>} Detection results
      */
     async detectForms(setLoading, showInfo, showError) {
-        console.log("🔍 Starting form detection...");
+        
         
         try {
             // Show loading state with informative message
@@ -173,11 +168,10 @@ class FormDetectionService {
             }
 
             // First, try force initialization
-            console.log("🔧 Attempting force initialization...");
+            
             const initSuccess = await this.forceContentScriptInitialization(tabs[0].id);
             
             if (!initSuccess) {
-                console.log("⚠️ Force initialization failed, trying standard approach...");
                 showInfo("Retrying script initialization...");
                 // Fallback to standard injection
                 const injectionSuccess = await this.ensureContentScriptsLoaded(tabs[0].id);
@@ -213,7 +207,6 @@ class FormDetectionService {
                     throw new Error(errorMsg);
                 }
                 
-                console.log("✅ Form detection successful:", results);
                 return results;
             } catch (msgError) {
                 console.error("❌ Message error:", msgError);
@@ -247,11 +240,11 @@ class FormDetectionService {
             try {
                 const testResponse = await chrome.tabs.sendMessage(tabId, { action: "ping" });
                 if (!testResponse || !testResponse.success) {
-                    console.warn("⚠️ Content script not responding, attempting reinitialization...");
+                    
                     await this.forceContentScriptInitialization(tabId);
                 }
             } catch (error) {
-                console.warn("⚠️ Content script test failed, attempting reinitialization...");
+                
                 await this.forceContentScriptInitialization(tabId);
             }
             
@@ -290,7 +283,6 @@ class FormDetectionService {
             
             throw new Error("Invalid HTML extraction response");
         } catch (error) {
-            console.log("⚠️ Enhanced HTML extraction failed, using basic approach:", error.message);
             
             try {
                 const basicHtml = await chrome.scripting.executeScript({
