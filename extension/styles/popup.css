@@ -242,6 +242,7 @@ body {
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -305,6 +306,7 @@ body {
     line-height: 1.2;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1972,28 +1974,6 @@ body {
     border-radius: 6px;
 }
 
-.enhanced-info__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-}
-
-.enhanced-info__title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1e40af;
-}
-
-.enhanced-info__badge {
-    font-size: 10px;
-    color: #059669;
-    background: #dcfce7;
-    padding: 2px 6px;
-    border-radius: 8px;
-    font-weight: 500;
-}
-
 /* Analysis Results */
 .analysis-results {
     border: 1px solid #e5e7eb;
@@ -2577,47 +2557,7 @@ body {
     color: #6b7280;
 }
 
-/* Responsive adjustments for data source modal */
-@media (max-width: 480px) {
-    .data-source-summary {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-    
-    .data-source-type-options {
-        gap: 6px;
-        flex-direction: column; /* Stack vertically on small screens */
-    }
-    
-    .data-source-option {
-        padding: 10px;
-    }
-    
-    .data-source-option__content {
-        gap: 6px;
-        flex-direction: row; /* Switch back to row on small screens */
-        text-align: left;
-    }
-    
-    .data-source-option__icon {
-        font-size: 16px;
-    }
-    
-    .data-source-option__description {
-        display: block; /* Show descriptions on mobile for clarity */
-    }
-    
-    .data-source-list {
-        max-height: 350px; /* Slightly smaller on mobile */
-    }
-    
-    .data-source-item {
-        padding: 12px;
-    }
-}
-
-/* Modal Styles */
+/* Modal positioning improvements */
 .modal {
     position: fixed;
     top: 0;
@@ -2665,11 +2605,11 @@ body {
     z-index: 1;
 }
 
+/* Modal header with close button positioning */
 .modal__header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 12px; /* Reduced padding to save space */
+    padding: 16px 16px; /* 减少左右内边距 */
     border-bottom: 1px solid #e5e7eb;
     flex-shrink: 0;
 }
@@ -2679,6 +2619,76 @@ body {
     font-size: 16px; /* Slightly reduced from 18px */
     font-weight: 600;
     color: #111827;
+    flex: 1;
+    padding-right: 8px; /* Give some space for the close button */
+}
+
+/* Icon button styles for close button */
+.btn--icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px; /* Use min-width instead of width */
+    min-height: 28px; /* Use min-height instead of height */
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 18px; /* Increased for better visibility */
+    line-height: 1;
+    flex: 0 0 28px; /* Fixed flex basis to prevent shrinking or growing */
+}
+
+/* 增加关闭按钮中X号的样式，确保居中对齐 */
+.btn--icon .btn__icon {
+    display: block;
+    line-height: 1;
+    position: relative;
+    top: -1px; /* 微调X号的垂直位置 */
+}
+
+/* Input group styles for Backend URL input and Test button */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.input-group:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group .input {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+    background: transparent;
+}
+
+.input-group .input:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+.input-group .btn {
+    border: none;
+    border-radius: 0;
+    border-left: 1px solid #e5e7eb;
+    margin: 0;
 }
 
 .modal__body {
@@ -2699,95 +2709,119 @@ body {
     flex-shrink: 0;
 }
 
-/* Button icons in header */
-.btn--icon {
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 18px;
-    width: 32px;
-    height: 32px;
+/* Improve button styling in input group */
+.input-group .btn--secondary {
+    white-space: nowrap;
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    gap: 4px;
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
-/* Chat specific optimizations */
-.section__header--with-action .btn--small {
-    padding: 4px 8px;
-    font-size: 11px;
-    border-radius: 4px;
-    min-width: auto;
-    max-width: fit-content; /* Add max-width constraint */
-    width: fit-content; /* Ensure button width matches content */
-    height: auto;
-    flex: none !important; /* Force no flex growth */
-    flex-shrink: 0; /* Prevent shrinking */
-    white-space: nowrap; /* Prevent text wrapping */
+.input-group .btn--secondary .btn__icon {
+    font-size: 14px;
 }
 
-.section__header--with-action .btn--small .btn__icon {
-    font-size: 12px;
-}
-
-.section__header--with-action .btn--small .btn__text {
-    font-size: 11px;
-    margin-left: 2px;
-}
-
-/* Chat Clear button specific styling */
-#clearChatBtn {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    color: #6b7280;
-    padding: 3px 6px;
-    font-size: 10px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    min-width: auto;
-    max-width: fit-content; /* Add max-width constraint */
-    width: fit-content; /* Ensure button width matches content */
-    height: 24px;
-    flex: none !important; /* Force no flex growth */
-    flex-shrink: 0; /* Prevent shrinking */
-    white-space: nowrap; /* Prevent text wrapping */
-}
-
-#clearChatBtn:hover {
-    background: #e5e7eb;
-    border-color: #9ca3af;
-    color: #374151;
-}
-
-#clearChatBtn .btn__icon {
-    font-size: 11px;
-}
-
-#clearChatBtn .btn__text {
-    font-size: 10px;
+.input-group .btn--secondary .btn__text {
+    font-size: 13px;
     font-weight: 500;
 }
 
-/* Configure Sources button specific styling */
-#openDataSourceModalBtn {
-    max-width: fit-content; /* Add max-width constraint */
-    width: fit-content; /* Ensure button width matches content */
-    flex: none !important; /* Force no flex growth */
-    flex-shrink: 0; /* Prevent shrinking */
-    white-space: nowrap; /* Prevent text wrapping */
+/* Connection status improvements */
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 8px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
 }
 
-/* Data Source Summary button styling */
-.data-source-summary button {
-    max-width: fit-content;
-    width: fit-content;
-    flex: none !important;
-    flex-shrink: 0;
+.connection-status:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.connection-status.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.connection-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.connection-status.info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.connection-status.success::before {
+    content: "✅";
+    margin-right: 4px;
+}
+
+.connection-status.error::before {
+    content: "❌";
+    margin-right: 4px;
+}
+
+.connection-status.info::before {
+    content: "ℹ️";
+    margin-right: 4px;
+}
+
+/* Enhanced hover effects for close button */
+.btn--icon:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #374151;
+}
+
+.btn--icon:active {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+/* Focus improvements */
+.input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.btn:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Accessibility improvements */
+.modal__header .btn--icon[title] {
+    position: relative;
+}
+
+.modal__header .btn--icon[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -30px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
     white-space: nowrap;
+    z-index: 1000;
 }
