@@ -1,17 +1,101 @@
-// Demo Page JavaScript
+// 演示页面 JavaScript - 模块化版本
 
+// 导入模块 (注意：在实际环境中，这些需要通过模块系统导入)
+// 由于演示页面使用传统的脚本加载方式，我们将模块直接包含在这里
+
+// 主演示管理器
 class DemoManager {
     constructor() {
-        this.currentStep = 'intro';
         this.extractedData = null;
         this.init();
     }
 
     init() {
+        // 首先初始化UI修复工具
+        this.initializeUIFixes();
+        
+        // 初始化所有管理器
+        this.navigationManager = new NavigationManager();
+        this.notificationManager = new NotificationManager();
+        this.dataExtractionManager = new DataExtractionManager(this);
+        this.formManager = new FormManager(this);
+        this.chatManager = new ChatManager(this);
+        this.copyManager = new CopyManager();
+
+        console.log('🚀 演示页面已初始化，所有模块已加载');
+    }
+
+    // 初始化UI修复
+    initializeUIFixes() {
+        // 加载UI工具脚本
+        this.loadUIUtils().then(() => {
+            console.log('✅ UI修复工具已加载');
+        }).catch((error) => {
+            console.warn('⚠️ UI修复工具加载失败:', error);
+        });
+    }
+
+    // 动态加载UI工具
+    async loadUIUtils() {
+        try {
+            // 如果UIUtils还没有被定义，动态加载它
+            if (typeof UIUtils === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'modules/uiUtils.js';
+                script.type = 'module';
+                document.head.appendChild(script);
+                
+                // 等待脚本加载
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                });
+            }
+        } catch (error) {
+            console.warn('UIUtils加载失败，使用内联修复方案');
+            this.applyInlineFixes();
+        }
+    }
+
+    // 内联修复方案（fallback）
+    applyInlineFixes() {
+        setTimeout(() => {
+            // 修复图片问题
+            const profileAvatar = document.querySelector('.profile-avatar');
+            if (profileAvatar) {
+                const img = profileAvatar.querySelector('img');
+                if (img && !img.complete) {
+                    img.addEventListener('error', () => {
+                        profileAvatar.innerHTML = 'JS';
+                        profileAvatar.style.display = 'flex';
+                        profileAvatar.style.alignItems = 'center';
+                        profileAvatar.style.justifyContent = 'center';
+                        profileAvatar.style.fontSize = '1.5rem';
+                        profileAvatar.style.color = 'white';
+                    });
+                }
+            }
+            
+            console.log('✅ 内联UI修复已应用');
+        }, 100);
+    }
+
+    // 获取当前步骤
+    getCurrentStep() {
+        return this.navigationManager.getCurrentStep();
+    }
+
+    // 显示通知（代理到 NotificationManager）
+    showNotification(type, message) {
+        this.notificationManager.showNotification(type, message);
+    }
+}
+
+// 导航管理器
+class NavigationManager {
+    constructor() {
+        this.currentStep = 'intro';
         this.bindNavigation();
-        this.bindDemoActions(); 
-        this.bindChatActions();
-        this.bindFormActions();
     }
 
     bindNavigation() {
@@ -25,13 +109,13 @@ class DemoManager {
     }
 
     switchToStep(step) {
-        // Update navigation
+        // 更新导航
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         document.querySelector(`[data-step="${step}"]`).classList.add('active');
 
-        // Update content
+        // 更新内容
         document.querySelectorAll('.demo-step').forEach(section => {
             section.classList.remove('active');
         });
@@ -40,8 +124,85 @@ class DemoManager {
         this.currentStep = step;
     }
 
+    getCurrentStep() {
+        return this.currentStep;
+    }
+}
+
+// 通知管理器
+class NotificationManager {
+    showNotification(type, message) {
+        // 移除现有通知
+        const existing = document.querySelector('.demo-notification');
+        if (existing) {
+            existing.remove();
+        }
+
+        // 创建通知
+        const notification = document.createElement('div');
+        notification.className = `demo-notification demo-notification--${type}`;
+        
+        const icons = {
+            success: '✅',
+            warning: '⚠️',
+            error: '❌',
+            info: 'ℹ️'
+        };
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${icons[type]}</span>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+
+        // 添加样式
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: type === 'success' ? '#10b981' : 
+                       type === 'warning' ? '#f59e0b' :
+                       type === 'error' ? '#ef4444' : '#3b82f6',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            borderRadius: '8px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            zIndex: '1000',
+            transform: 'translateX(100%)',
+            transition: 'transform 0.3s ease',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            maxWidth: '400px'
+        });
+
+        document.body.appendChild(notification);
+
+        // 动画进入
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // 自动移除
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 5000);
+    }
+}
+
+// 数据提取管理器
+class DataExtractionManager {
+    constructor(demoManager) {
+        this.demoManager = demoManager;
+        this.bindDemoActions();
+    }
+
     bindDemoActions() {
-        // Data extraction demo
         const extractBtn = document.getElementById('extractDataBtn');
         if (extractBtn) {
             extractBtn.addEventListener('click', () => {
@@ -54,13 +215,13 @@ class DemoManager {
         const btn = document.getElementById('extractDataBtn');
         const originalText = btn.innerHTML;
         
-        // Show loading state
-        btn.innerHTML = '⏳ Extracting...';
+        // 显示加载状态
+        btn.innerHTML = '⏳ 提取中...';
         btn.disabled = true;
 
-        // Simulate extraction process
+        // 模拟提取过程
         setTimeout(() => {
-            this.extractedData = {
+            this.demoManager.extractedData = {
                 name: 'John Smith',
                 firstName: 'John',
                 lastName: 'Smith',
@@ -72,25 +233,25 @@ class DemoManager {
                 department: 'engineering',
                 employeeId: 'EMP-2024-001',
                 startDate: 'January 15, 2020',
-                // Restaurant feedback specific data
+                // 餐厅反馈特定数据
                 visitDate: '2024-01-20',
                 partySize: '2',
                 overallRating: '5',
                 foodQuality: 'excellent',
                 serviceQuality: 'excellent',
                 favoriteItem: 'Seafood Linguine with marinara sauce',
-                feedbackComments: 'Had an absolutely wonderful dining experience! The seafood linguine was perfectly cooked and the marinara sauce was authentic and flavorful. Our server was attentive without being intrusive, and the romantic ambiance made for a perfect date night. The wine selection was excellent and reasonably priced. Will definitely be returning and highly recommend to friends!',
+                feedbackComments: '用餐体验非常棒！海鲜意面烹饪完美，番茄酱正宗美味。服务员细心周到但不打扰，浪漫的氛围营造了完美的约会夜晚。酒单选择丰富且价格合理。一定会再来，强烈推荐给朋友们！',
                 recommendToFriends: 'definitely'
             };
 
-            // Show success state
-            btn.innerHTML = '✅ Data Extracted!';
+            // 显示成功状态
+            btn.innerHTML = '✅ 数据已提取！';
             btn.style.background = '#10b981';
 
-            // Show extracted data notification
-            this.showNotification('success', 'Data successfully extracted! You can now use it for form filling and chat.');
+            // 显示提取数据通知
+            this.demoManager.showNotification('success', '数据提取成功！您现在可以使用它进行聊天分析。');
 
-            // Reset button after delay
+            // 延迟后重置按钮
             setTimeout(() => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -98,17 +259,18 @@ class DemoManager {
             }, 3000);
         }, 2000);
     }
+}
+
+// 表单管理器
+class FormManager {
+    constructor(demoManager) {
+        this.demoManager = demoManager;
+        this.bindFormActions();
+    }
 
     bindFormActions() {
-        const fillBtn = document.getElementById('fillFormBtn');
         const clearBtn = document.getElementById('clearFormBtn');
         const form = document.getElementById('feedbackForm');
-
-        if (fillBtn) {
-            fillBtn.addEventListener('click', () => {
-                this.simulateFormFilling();
-            });
-        }
 
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -124,138 +286,24 @@ class DemoManager {
         }
     }
 
-    simulateFormFilling() {
-        if (!this.extractedData) {
-            this.showNotification('warning', 'Please extract data first from the Data Extraction tab!');
-            return;
-        }
-
-        const btn = document.getElementById('fillFormBtn');
-        const originalText = btn.innerHTML;
-        
-        // Show loading state
-        btn.innerHTML = '⏳ Filling...';
-        btn.disabled = true;
-
-        // Simulate form filling with animation
-        setTimeout(() => {
-            this.fillFormWithAnimation();
-            
-            // Show success state
-            btn.innerHTML = '✅ Form Filled!';
-            btn.style.background = '#10b981';
-
-            this.showNotification('success', 'Form successfully filled with extracted data!');
-
-            // Reset button after delay
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.style.background = '';
-            }, 3000);
-        }, 1500);
-    }
-
-    fillFormWithAnimation() {
-        const fields = [
-            { id: 'customerName', value: this.extractedData.name, delay: 0 },
-            { id: 'customerEmail', value: this.extractedData.email, delay: 200 },
-            { id: 'customerPhone', value: this.extractedData.phone, delay: 400 },
-            { id: 'visitDate', value: this.extractedData.visitDate, delay: 600 },
-            { id: 'partySize', value: this.extractedData.partySize, delay: 800 },
-            { id: 'overallRating', value: this.extractedData.overallRating, delay: 1000 },
-            { id: 'foodQuality', value: this.extractedData.foodQuality, delay: 1200 },
-            { id: 'serviceQuality', value: this.extractedData.serviceQuality, delay: 1400 },
-            { id: 'favoriteItem', value: this.extractedData.favoriteItem, delay: 1600 },
-            { id: 'feedbackComments', value: this.extractedData.feedbackComments, delay: 1800 }
-        ];
-
-        fields.forEach(field => {
-            setTimeout(() => {
-                const element = document.getElementById(field.id);
-                if (element) {
-                    if (element.tagName === 'SELECT') {
-                        this.selectOptionWithAnimation(element, field.value);
-                    } else if (element.tagName === 'TEXTAREA') {
-                        this.typeTextArea(element, field.value);
-                    } else {
-                        this.typeText(element, field.value);
-                    }
-                }
-            }, field.delay);
-        });
-
-        // Handle radio button separately
-        setTimeout(() => {
-            const radioButton = document.querySelector(`input[name="recommendToFriends"][value="${this.extractedData.recommendToFriends}"]`);
-            if (radioButton) {
-                radioButton.checked = true;
-                radioButton.parentElement.style.background = '#dbeafe';
-                setTimeout(() => {
-                    radioButton.parentElement.style.background = '';
-                }, 1000);
-            }
-        }, 2000);
-    }
-
-    selectOptionWithAnimation(selectElement, value) {
-        selectElement.focus();
-        selectElement.style.background = '#dbeafe';
-        
-        setTimeout(() => {
-            selectElement.value = value;
-            selectElement.style.background = '';
-            selectElement.blur();
-        }, 500);
-    }
-
-    typeTextArea(element, text) {
-        element.value = '';
-        element.focus();
-        element.style.background = '#dbeafe';
-        
-        let i = 0;
-        const typeInterval = setInterval(() => {
-            if (i < text.length) {
-                element.value += text.charAt(i);
-                element.scrollTop = element.scrollHeight; // Auto scroll
-                i++;
-            } else {
-                clearInterval(typeInterval);
-                element.style.background = '';
-                element.blur();
-            }
-        }, 30); // Slower for textarea to be readable
-    }
-
-    typeText(element, text) {
-        element.value = '';
-        element.focus();
-        element.style.background = '#dbeafe';
-        
-        let i = 0;
-        const typeInterval = setInterval(() => {
-            if (i < text.length) {
-                element.value += text.charAt(i);
-                i++;
-            } else {
-                clearInterval(typeInterval);
-                element.style.background = '';
-                element.blur();
-            }
-        }, 50);
-    }
-
     clearForm() {
         const form = document.getElementById('feedbackForm');
         if (form) {
             form.reset();
-            this.showNotification('info', 'Form cleared successfully!');
+            this.demoManager.showNotification('info', '表单已清空！');
         }
     }
 
     handleFormSubmit() {
-        this.showNotification('success', 'Form submitted successfully! (This is a demo - no actual submission)');
+        this.demoManager.showNotification('success', '表单提交成功！（这是演示页面，不会实际提交数据）');
+    }
+}
+
+// 聊天管理器
+class ChatManager {
+    constructor(demoManager) {
+        this.demoManager = demoManager;
+        this.bindChatActions();
     }
 
     bindChatActions() {
@@ -292,17 +340,17 @@ class DemoManager {
         
         if (!message) return;
 
-        if (!this.extractedData) {
-            this.addChatMessage('system', '⚠️ Please extract data first from the Data Extraction tab to enable chat functionality!');
+        if (!this.demoManager.extractedData) {
+            this.addChatMessage('system', '⚠️ 请先从数据提取页面提取数据，以启用聊天功能！');
             input.value = '';
             return;
         }
 
-        // Add user message
+        // 添加用户消息
         this.addChatMessage('user', message);
         input.value = '';
 
-        // Simulate AI response
+        // 模拟 AI 回复
         setTimeout(() => {
             const response = this.generateAIResponse(message);
             this.addChatMessage('assistant', response);
@@ -329,116 +377,143 @@ class DemoManager {
 
     generateAIResponse(question) {
         const q = question.toLowerCase();
+        const data = this.demoManager.extractedData;
         
         if (q.includes('name') && q.includes('title')) {
-            return `📋 The person's name is ${this.extractedData.name} and they work as a ${this.extractedData.jobTitle} at ${this.extractedData.company}.`;
+            return `📋 此人的姓名是 ${data.name}，职位是 ${data.company} 的 ${data.jobTitle}。`;
         }
         
         if (q.includes('contact')) {
-            return `📞 Contact information available:\n• Email: ${this.extractedData.email}\n• Phone: ${this.extractedData.phone}\n• Location: ${this.extractedData.location}`;
+            return `📞 联系信息如下：\n• 邮箱：${data.email}\n• 电话：${data.phone}\n• 地址：${data.location}`;
         }
         
         if (q.includes('company')) {
-            return `🏢 ${this.extractedData.name} works for ${this.extractedData.company} in the ${this.extractedData.department} department.`;
+            return `🏢 ${data.name} 在 ${data.company} 的 ${data.department} 部门工作。`;
         }
         
         if (q.includes('summary') || q.includes('key information')) {
-            return `📋 Key Information Summary:\n• Name: ${this.extractedData.name}\n• Position: ${this.extractedData.jobTitle}\n• Company: ${this.extractedData.company}\n• Department: ${this.extractedData.department}\n• Contact: ${this.extractedData.email}\n• Location: ${this.extractedData.location}`;
+            return `📋 关键信息摘要：\n• 姓名：${data.name}\n• 职位：${data.jobTitle}\n• 公司：${data.company}\n• 部门：${data.department}\n• 联系方式：${data.email}\n• 地址：${data.location}`;
         }
         
-        // Default response
-        return `🤖 I can help you analyze the extracted data about ${this.extractedData.name}. You can ask me about their contact information, professional background, or request a summary of the key details.`;
-    }
-
-    showNotification(type, message) {
-        // Remove existing notifications
-        const existing = document.querySelector('.demo-notification');
-        if (existing) {
-            existing.remove();
-        }
-
-        // Create notification
-        const notification = document.createElement('div');
-        notification.className = `demo-notification demo-notification--${type}`;
-        
-        const icons = {
-            success: '✅',
-            warning: '⚠️',
-            error: '❌',
-            info: 'ℹ️'
-        };
-        
-        notification.innerHTML = `
-            <div class="notification-content">
-                <span class="notification-icon">${icons[type]}</span>
-                <span class="notification-message">${message}</span>
-            </div>
-        `;
-
-        // Add styles
-        Object.assign(notification.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: type === 'success' ? '#10b981' : 
-                       type === 'warning' ? '#f59e0b' :
-                       type === 'error' ? '#ef4444' : '#3b82f6',
-            color: 'white',
-            padding: '1rem 1.5rem',
-            borderRadius: '8px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-            zIndex: '1000',
-            transform: 'translateX(100%)',
-            transition: 'transform 0.3s ease'
-        });
-
-        document.body.appendChild(notification);
-
-        // Animate in
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-
-        // Auto remove
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 300);
-        }, 5000);
+        // 默认回复
+        return `🤖 我可以帮您分析关于 ${data.name} 的提取数据。您可以询问他们的联系信息、专业背景，或请求关键信息摘要。`;
     }
 }
 
-// Initialize demo when page loads
+// 复制功能管理器
+class CopyManager {
+    constructor() {
+        this.bindCopyButtons();
+    }
+
+    bindCopyButtons() {
+        // 为所有复制按钮绑定事件
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('copy-btn')) {
+                const prompt = e.target.dataset.prompt;
+                this.copyToClipboard(prompt, e.target);
+            }
+        });
+    }
+
+    async copyToClipboard(text, button) {
+        try {
+            // 使用现代 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // 降级方案：使用传统方法
+                this.fallbackCopyTextToClipboard(text);
+            }
+            
+            this.showCopySuccess(button);
+        } catch (err) {
+            console.error('复制失败:', err);
+            this.showCopyError(button);
+        }
+    }
+
+    fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        
+        // 避免滚动到页面底部
+        textArea.style.top = '0';
+        textArea.style.left = '0';
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (!successful) {
+                throw new Error('execCommand 失败');
+            }
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
+    showCopySuccess(button) {
+        const originalText = button.innerHTML;
+        
+        // 显示成功状态
+        button.innerHTML = '✅';
+        button.classList.add('copied');
+        
+        // 恢复原始状态
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    }
+
+    showCopyError(button) {
+        const originalText = button.innerHTML;
+        
+        // 显示错误状态
+        button.innerHTML = '❌';
+        button.style.background = '#ef4444';
+        
+        // 恢复原始状态
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.style.background = '';
+        }, 2000);
+    }
+}
+
+// 页面加载时初始化演示
 document.addEventListener('DOMContentLoaded', () => {
     new DemoManager();
     
-    // Add some demo data to chat on load
+    // 添加一些演示数据到聊天
     setTimeout(() => {
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) {
-            // Initial system message is already in HTML
-            console.log('Demo page loaded successfully!');
+            // 初始系统消息已在 HTML 中
+            console.log('🚀 演示页面加载成功！');
             
-            // Load extension debug interface if available
+            // 如果可用，加载扩展调试界面
             try {
                 const debugScript = document.createElement('script');
                 debugScript.src = '../extension/debug-page-interface.js';
                 debugScript.onload = () => {
-                    console.log('🔧 Extension debug interface loaded');
-                    console.log('🔧 Available debug functions:');
+                    console.log('🔧 扩展调试界面已加载');
+                    console.log('🔧 可用的调试函数：');
                     console.log('  - debugExtensionDataSource()');
                     console.log('  - openExtensionDataSourceModal()');
                     console.log('  - getExtensionHistory()');
                 };
                 debugScript.onerror = () => {
-                    console.warn('⚠️ Could not load extension debug interface');
+                    console.warn('⚠️ 无法加载扩展调试界面');
                 };
                 document.head.appendChild(debugScript);
             } catch (error) {
-                console.warn('⚠️ Error loading extension debug interface:', error);
+                console.warn('⚠️ 加载扩展调试界面时出错:', error);
             }
         }
     }, 500);

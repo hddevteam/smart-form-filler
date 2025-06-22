@@ -87,7 +87,9 @@
                             <h3>Sample Profile Information</h3>
                             <div class="profile-card">
                                 <div class="profile-header">
-                                    <img src="https://via.placeholder.com/80x80/4f46e5/ffffff?text=JS" alt="Profile" class="profile-avatar">
+                                    <div class="profile-avatar">
+                                        <img src="https://via.placeholder.com/90x90/4f46e5/ffffff?text=JS" alt="JS" onerror="this.style.display='none'; this.parentNode.innerHTML='JS';">
+                                    </div>
                                     <div class="profile-info">
                                         <h4>John Smith</h4>
                                         <p class="title">Senior Software Engineer</p>
@@ -164,15 +166,24 @@
                             <div class="prompt-examples">
                                 <div class="prompt-item">
                                     <strong>Contact Information:</strong>
-                                    <code>"Extract contact details including name, email, phone, and address"</code>
+                                    <div class="prompt-content">
+                                        <code>"Extract contact details including name, email, phone, and address"</code>
+                                        <button class="copy-btn" data-prompt="Extract contact details including name, email, phone, and address">📋</button>
+                                    </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>Product Details:</strong>
-                                    <code>"Extract product information including name, price, specifications, and availability"</code>
+                                    <div class="prompt-content">
+                                        <code>"Extract product information including name, price, specifications, and availability"</code>
+                                        <button class="copy-btn" data-prompt="Extract product information including name, price, specifications, and availability">📋</button>
+                                    </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>Event Information:</strong>
-                                    <code>"Extract event details including date, time, location, and description"</code>
+                                    <div class="prompt-content">
+                                        <code>"Extract event details including date, time, location, and description"</code>
+                                        <button class="copy-btn" data-prompt="Extract event details including date, time, location, and description">📋</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -298,7 +309,6 @@
                             
                             <div class="form-actions">
                                 <button type="button" class="demo-btn secondary" id="clearFormBtn">Clear Form</button>
-                                <button type="button" class="demo-btn" id="fillFormBtn">🤖 Smart Fill</button>
                                 <button type="submit" class="demo-btn primary">Submit Feedback</button>
                             </div>
                         </form>
@@ -345,28 +355,20 @@
                                     <strong>🍽️ Restaurant Review Scenario:</strong>
                                     <div class="scenario-details">
                                         <p><strong>Context:</strong> "As John Smith (john.smith@techcorp.com) who just had dinner at Mario's Italian Restaurant"</p>
-                                        <code>"Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff."</code>
-                                    </div>
-                                </div>
-                                <div class="prompt-item">
-                                    <strong>🎂 Birthday Celebration:</strong>
-                                    <div class="scenario-details">
-                                        <p><strong>Context:</strong> "As a customer celebrating a special occasion"</p>
-                                        <code>"Fill this feedback as someone who celebrated their birthday here. Mention the surprise dessert, decorations, and how the staff made the evening special. Rate 4-5 stars."</code>
-                                    </div>
-                                </div>
-                                <div class="prompt-item">
-                                    <strong>💼 Business Lunch:</strong>
-                                    <div class="scenario-details">
-                                        <p><strong>Context:</strong> "As a professional hosting clients"</p>
-                                        <code>"Complete this form as a business professional who brought clients here. Focus on the quiet atmosphere, prompt service, and quality food that impressed the clients. Professional tone."</code>
+                                        <div class="prompt-content">
+                                            <code>"Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff."</code>
+                                            <button class="copy-btn" data-prompt="Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff.">📋</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>👨‍👩‍👧‍👦 Family Dinner:</strong>
                                     <div class="scenario-details">
                                         <p><strong>Context:</strong> "As a parent with children"</p>
-                                        <code>"Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback."</code>
+                                        <div class="prompt-content">
+                                            <code>"Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback."</code>
+                                            <button class="copy-btn" data-prompt="Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback.">📋</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -468,19 +470,31 @@
                             <div class="prompt-examples">
                                 <div class="prompt-item">
                                     <strong>Information Summary:</strong>
-                                    <code>"Summarize the key information from this page"</code>
+                                    <div class="prompt-content">
+                                        <code>"Summarize the key information from this page"</code>
+                                        <button class="copy-btn" data-prompt="Summarize the key information from this page">📋</button>
+                                    </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>Contact Details:</strong>
-                                    <code>"What contact information is available?"</code>
+                                    <div class="prompt-content">
+                                        <code>"What contact information is available?"</code>
+                                        <button class="copy-btn" data-prompt="What contact information is available?">📋</button>
+                                    </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>Professional Info:</strong>
-                                    <code>"Tell me about this person's professional background"</code>
+                                    <div class="prompt-content">
+                                        <code>"Tell me about this person's professional background"</code>
+                                        <button class="copy-btn" data-prompt="Tell me about this person's professional background">📋</button>
+                                    </div>
                                 </div>
                                 <div class="prompt-item">
                                     <strong>Data Analysis:</strong>
-                                    <code>"What are the most important details on this page?"</code>
+                                    <div class="prompt-content">
+                                        <code>"What are the most important details on this page?"</code>
+                                        <button class="copy-btn" data-prompt="What are the most important details on this page?">📋</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -511,6 +525,8 @@
         </footer>
     </div>
 
+    <!-- 加载模块化脚本 -->
+    <script type="module" src="modules/uiUtils.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
