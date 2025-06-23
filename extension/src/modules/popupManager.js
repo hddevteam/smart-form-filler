@@ -175,7 +175,7 @@ class PopupManager {
             // Initialize managers after core services are ready
             this.settingsManager = new PopupSettingsManager(this);
             this.modelManager = new PopupModelManager(this);
-            this.dataSourceManager = new PopupDataSourceManager(this.elements, this);
+            this.dataSourceManager = new PopupDataSourceManagerRefactored(this.elements, this);
             this.eventHandlers = new PopupEventHandlers(this);
             
             // Set initial loading state for models

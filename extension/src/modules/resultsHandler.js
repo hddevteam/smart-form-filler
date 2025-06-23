@@ -49,6 +49,9 @@ class ResultsHandler {
         // Store the last extraction result for copy functionality
         this.lastExtractionResult = dataSources;
         
+        // Notify data source manager about extraction history update
+        this.notifyExtractionHistoryUpdated();
+        
         // Refresh the history display
         this.refreshHistoryDisplay();
         
@@ -334,6 +337,9 @@ class ResultsHandler {
         // Remove item from history
         this.extractionHistory.splice(index, 1);
         
+        // Notify data source manager about extraction history update
+        this.notifyExtractionHistoryUpdated();
+        
         // Update main chat button state
         this.updateMainChatButtonState();
         
@@ -357,6 +363,10 @@ class ResultsHandler {
         this.extractionHistory = [];
         this.currentViewIndex = -1;
         this.lastExtractionResult = null;
+        
+        // Notify data source manager about extraction history update
+        this.notifyExtractionHistoryUpdated();
+        
         this.refreshHistoryDisplay();
         this.updateMainChatButtonState();
         console.log("🗑️ Cleared all extraction history");
@@ -755,6 +765,31 @@ class ResultsHandler {
             }
         } catch (error) {
             console.error("❌ Error switching to Form Filler tab:", error);
+        }
+    }
+
+    /**
+     * Notify data source manager about extraction history updates
+     */
+    notifyExtractionHistoryUpdated() {
+        try {
+            // Dispatch custom event for data source manager
+            const event = new CustomEvent('extractionHistoryUpdated', {
+                detail: {
+                    historyLength: this.extractionHistory.length,
+                    lastItem: this.extractionHistory[0]
+                }
+            });
+            document.dispatchEvent(event);
+            
+            // Also try to directly notify the data source manager if available
+            if (window.popupManager?.dataSourceManager?.updateAvailableDataSources) {
+                window.popupManager.dataSourceManager.updateAvailableDataSources();
+            }
+            
+            console.log('🔄 Extraction history update notification sent');
+        } catch (error) {
+            console.error('❌ Error notifying extraction history update:', error);
         }
     }
 }
