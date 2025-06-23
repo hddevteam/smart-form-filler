@@ -160,6 +160,7 @@ body {
     gap: 8px; /* Space between select and button */
     flex: none; /* Prevent growing */
     flex-shrink: 0; /* Prevent shrinking */
+    height: 32px; /* Fixed height for consistent alignment */
 }
 
 .section__header--with-action > button,
@@ -397,9 +398,10 @@ body {
     border-radius: 4px;
     min-width: 100px;
     max-width: 120px;
-    height: 28px; /* Match button height */
+    height: 32px; /* Match button height exactly */
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #d1d5db;
+    box-sizing: border-box; /* Ensure consistent sizing */
 }
 
 .select--secondary {
@@ -501,6 +503,11 @@ body {
 .btn--small {
     padding: 4px 8px;
     font-size: 11px;
+    height: 32px; /* Match select height exactly */
+    box-sizing: border-box; /* Ensure consistent sizing */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn--header {
@@ -1571,17 +1578,21 @@ body {
     /* Header actions - ensure compact layout on small screens */
     .section__header-actions {
         gap: 6px; /* Reduced gap on mobile */
+        height: 32px; /* Maintain consistent height */
+        align-items: center; /* Ensure vertical alignment */
     }
     
     .section__header-actions .select--compact {
         min-width: 80px; /* Reduce min width on mobile */
         max-width: 100px;
         font-size: 11px; /* Slightly smaller font */
+        height: 32px; /* Ensure consistent height */
+        padding: 4px 6px; /* Adjust padding for smaller screens */
     }
     
     #clearChatBtn {
         padding: 2px 4px;
-        height: 20px;
+        height: 32px; /* Match other elements */
         max-width: fit-content; /* Add max-width constraint */
         width: fit-content; /* Ensure button width matches content even on mobile */
         flex: none !important; /* Force no flex growth */
@@ -1602,13 +1613,19 @@ body {
         width: fit-content;
         flex: none !important;
         white-space: nowrap;
+        height: 32px; /* Ensure consistent height */
+        padding: 4px 8px; /* Consistent padding */
     }
     
-    /* Ensure all buttons in header maintain content width */
+    /* Ensure all buttons in header maintain content width and alignment */
     .section__header--with-action .btn--small,
     .section__header-actions .btn--small {
         flex: none !important;
         max-width: fit-content;
+        height: 32px; /* Consistent height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
@@ -1733,6 +1750,7 @@ body {
 
 /* Action Buttons Layout */
 .action-buttons--form-detection,
+.action-buttons--content-analysis,
 .action-buttons--mapping,
 .action-buttons--fill-actions {
     display: flex;
@@ -1742,6 +1760,7 @@ body {
 }
 
 .action-buttons--form-detection .btn,
+.action-buttons--content-analysis .btn,
 .action-buttons--mapping .btn,
 .action-buttons--fill-actions .btn {
     flex: 1;

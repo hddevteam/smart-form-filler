@@ -27,13 +27,20 @@ class CollapsibleManager {
      */
     setupEventListeners() {
         document.addEventListener('click', (event) => {
+            // Check if clicked on collapsible header or its children
+            const collapsibleHeader = event.target.closest('.section__header--collapsible');
             const collapseBtn = event.target.closest('.section__collapse-btn');
-            if (collapseBtn) {
+            
+            if (collapsibleHeader) {
                 event.preventDefault();
                 event.stopPropagation();
                 
-                const targetSection = collapseBtn.dataset.target;
-                this.toggleSection(targetSection);
+                // Find the collapse button within this header to get the target
+                const targetCollapseBtn = collapsibleHeader.querySelector('.section__collapse-btn');
+                if (targetCollapseBtn) {
+                    const targetSection = targetCollapseBtn.dataset.target;
+                    this.toggleSection(targetSection);
+                }
             }
         });
 
