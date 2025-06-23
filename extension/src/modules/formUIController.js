@@ -519,34 +519,64 @@ class FormUIController {
         const confidenceClass = confidence >= 0.8 ? "high" : confidence >= 0.5 ? "medium" : "low";
         const confidencePercent = Math.round(confidence * 100);
         
+        // Generate mapping fields HTML using same format as content analysis
+        const mappingFieldsHtml = mappings.map(mapping => {
+            // Support both new simplified format and legacy format
+            const fieldValue = mapping.suggestedValue || mapping.value || "";
+            const fieldType = mapping.fieldType || "";
+            const xpath = mapping.xpath || "";
+            
+            // Use the same field title logic as Content Analysis Results
+            // Priority: mapping.fieldLabel > mapping.fieldName > mapping.fieldId (same as field.label || field.name || field.id)
+            const friendlyFieldName = mapping.fieldLabel || mapping.fieldName || mapping.fieldId || "Unlabeled field";
+            
+            // Build field display exactly like content analysis field items
+            const fieldTypeDisplay = fieldType ? ` (${fieldType})` : "";
+            const fieldSource = mapping.source && mapping.source !== "main" ? 
+                ` [${mapping.iframePath || mapping.source}]` : "";
+            
+            // Use field.title equivalent as caption (like Content Analysis Results)
+            const fieldCaption = mapping.title ? 
+                `<div class="field-item__caption">${FormUtils.escapeHtml(mapping.title)}</div>` : "";
+            
+            // Suggested value display
+            const valueHtml = fieldValue ? 
+                `<div class="field-item__value">
+                    <span class="value-text">${FormUtils.escapeHtml(fieldValue)}</span>
+                </div>` : "";
+                
+            return `
+                <div class="field-item field-item--mapping" data-field-id="${FormUtils.escapeHtml(mapping.fieldId)}" data-xpath="${FormUtils.escapeHtml(xpath)}">
+                    <div class="field-item__main">${FormUtils.escapeHtml(friendlyFieldName)}${fieldTypeDisplay}${fieldSource}</div>
+                    ${fieldCaption}
+                    ${valueHtml}
+                </div>
+            `;
+        }).join("");
+        
+        // Use similar layout to content analysis results
         mappingResultsEl.innerHTML = `
             <div class="mapping-results">
-                <div class="mapping-results__header">
-                    <span class="mapping-results__title">Field Mapping Results</span>
-                    <span class="mapping-results__confidence confidence--${confidenceClass}">
-                        Confidence: ${confidencePercent}%
+                <div class="mapping-results__summary">
+                    <span class="summary-item">
+                        <span class="summary-label">映射结果:</span>
+                        <span class="summary-value">${mappings.length} 个字段</span>
+                    </span>
+                    <span class="summary-item">
+                        <span class="summary-label">置信度:</span>
+                        <span class="summary-value confidence--${confidenceClass}">${confidencePercent}%</span>
                     </span>
                 </div>
-                <div class="mapping-results__list">
-                    ${mappings.map(mapping => {
-        // Support both new simplified format and legacy format
-        const fieldName = mapping.fieldName || mapping.fieldId;
-        const fieldValue = mapping.suggestedValue || mapping.value || "";
-        const fieldType = mapping.fieldType || "";
-        const xpath = mapping.xpath ? ` [${mapping.xpath}]` : "";
-        
-        return `
-                        <div class="mapping-item" data-field-id="${FormUtils.escapeHtml(mapping.fieldId)}" data-xpath="${FormUtils.escapeHtml(mapping.xpath || "")}">
-                            <div class="mapping-item__field">
-                                <span class="mapping-item__field-name">${FormUtils.escapeHtml(fieldName)}</span>
-                                ${fieldType ? `<span class="mapping-item__field-type">${fieldType}</span>` : ""}
-                                ${xpath ? `<span class="mapping-item__xpath" title="XPath: ${FormUtils.escapeHtml(mapping.xpath || "")}">${xpath}</span>` : ""}
-                            </div>
-                            <div class="mapping-item__arrow">→</div>
-                            <div class="mapping-item__value">${FormUtils.escapeHtml(fieldValue)}</div>
-                        </div>
-                        `;
-    }).join("")}
+                
+                <div class="form-item form-item--mapping">
+                    <div class="form-item__header">
+                        <span class="form-item__title">字段映射结果</span>
+                        <span class="form-item__count">${mappings.length} 个映射</span>
+                        <span class="form-item__badge form-item__badge--mapping">已生成</span>
+                    </div>
+                    <div class="form-item__fields">
+                        ${mappingFieldsHtml}
+                    </div>
                 </div>
             </div>
         `;

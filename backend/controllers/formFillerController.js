@@ -288,9 +288,10 @@ class FormFillerController {
                     fieldSource: originalField?.source || "main",
                     fieldIframePath: originalField?.iframePath || "",
                     fieldOriginalId: originalField?.originalId || "",
-                    // Preserve additional field attributes
+                    // Preserve additional field attributes for friendly display
                     fieldLabel: originalField?.label || "",
-                    fieldType: originalField?.type || ""
+                    fieldType: originalField?.type || "",
+                    title: originalField?.title || "" // Include title for caption display
                 };
                 
                 // Simplified debug log for iframe fields
