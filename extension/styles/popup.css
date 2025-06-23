@@ -2825,3 +2825,177 @@ body {
     white-space: nowrap;
     z-index: 1000;
 }
+
+/* ========================================
+   Collapsible Section Styles
+   ======================================== */
+
+/* Collapsible header styles */
+.section__header--collapsible {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+   
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.section__header--collapsible:hover {
+    background: #f1f5f9;
+    border-color: #d1d5db;
+}
+
+.section__header--collapsible.collapsed {
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.section__header--results {
+    background: #f0f9ff;
+    border-color: #0ea5e9;
+}
+
+.section__header--results:hover {
+    background: #e0f2fe;
+}
+
+/* Header content */
+.section__header-content {
+    flex: 1;
+}
+
+.section__header--collapsible .section__title {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.section__header--collapsible .section__description {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Collapse button */
+.section__collapse-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    height: 32px;
+}
+
+.section__collapse-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.collapse-icon {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+    color: #6b7280;
+}
+
+.section__collapse-btn.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* Collapsible content */
+.section__content--collapsible {
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 16px;
+}
+
+.section__content--collapsible.collapsed {
+    max-height: 0;
+    padding: 0 16px;
+    border: none;
+    opacity: 0;
+}
+
+/* Form detection summary in collapsible header */
+.section__header--collapsible .form-detection-summary {
+    display: flex;
+    gap: 16px;
+    margin: 4px 0 0 0;
+    flex-wrap: wrap;
+}
+
+.section__header--collapsible .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.section__header--collapsible .summary-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.section__header--collapsible .summary-value {
+    color: #1f2937;
+    font-weight: 600;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* Auto-collapse animation states */
+.section--auto-collapsing {
+    transition: all 0.4s ease;
+}
+
+.section--newly-expanded .section__header--collapsible {
+    background: linear-gradient(90deg, #dbeafe 0%, #f8fafc 100%);
+    border-color: #3b82f6;
+    animation: newSectionHighlight 2s ease-out;
+}
+
+@keyframes newSectionHighlight {
+    0% {
+        background: linear-gradient(90deg, #dbeafe 0%, #f8fafc 100%);
+        border-color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    100% {
+        background: #f8fafc;
+        border-color: #e5e7eb;
+        transform: translateY(0);
+        box-shadow: none;
+    }
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 400px) {
+    .section__header--collapsible {
+        padding: 10px 12px;
+    }
+    
+    .section__header--collapsible .form-detection-summary {
+        gap: 12px;
+    }
+    
+    .section__content--collapsible {
+        padding: 12px;
+    }
+}
+
+/* End of Collapsible Section Styles */

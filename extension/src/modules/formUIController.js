@@ -12,6 +12,9 @@ class FormUIController {
     constructor() {
         // Initialize Generate Mapping button state
         this.initializeGenerateMappingButton();
+        
+        // Listen for data source changes
+        this.setupDataSourceListener();
     }
 
     /**
@@ -24,6 +27,37 @@ class FormUIController {
             mappingButton.disabled = true;
             console.log('📊 Generate Mapping button initialized with custom logic (disabled initially)');
         }
+    }
+
+    /**
+     * Setup data source change listener
+     */
+    setupDataSourceListener() {
+        document.addEventListener('formFillerDataSourceChanged', (event) => {
+            console.log('📊 Form Filler received data source change event:', event.detail);
+            
+            // Update button states when data sources change
+            const hasAnalyzed = this.isAnalysisCompleted();
+            const content = this.getCurrentUserContent();
+            this.updateMappingButtonState(hasAnalyzed, content);
+        });
+    }
+
+    /**
+     * Check if analysis has been completed
+     */
+    isAnalysisCompleted() {
+        // Check if analysis results section is visible
+        const analysisSection = document.getElementById("analysisResultsSection");
+        return analysisSection && !analysisSection.classList.contains("hidden");
+    }
+
+    /**
+     * Get current user content
+     */
+    getCurrentUserContent() {
+        const contentInput = document.getElementById("fillContentInput");
+        return contentInput ? contentInput.value.trim() : "";
     }
 
     /**
@@ -182,6 +216,7 @@ class FormUIController {
         if (analyzeButton) {
             // Form detection must be done, but content is optional
             analyzeButton.disabled = false;
+            console.log('[FormUIController] Analyze Content button enabled after form detection');
         }
     }
     
@@ -393,6 +428,12 @@ class FormUIController {
         }
 
         resultsContainer.classList.remove("hidden");
+        
+        // Show Content Analysis section after form detection
+        const analysisSection = document.getElementById("analysisResultsSection");
+        if (analysisSection) {
+            analysisSection.classList.remove("hidden");
+        }
     }
     
     /**
@@ -559,20 +600,20 @@ class FormUIController {
             <div class="mapping-results">
                 <div class="mapping-results__summary">
                     <span class="summary-item">
-                        <span class="summary-label">映射结果:</span>
-                        <span class="summary-value">${mappings.length} 个字段</span>
+                        <span class="summary-label">Mapping Results:</span>
+                        <span class="summary-value">${mappings.length} fields</span>
                     </span>
                     <span class="summary-item">
-                        <span class="summary-label">置信度:</span>
+                        <span class="summary-label">Confidence:</span>
                         <span class="summary-value confidence--${confidenceClass}">${confidencePercent}%</span>
                     </span>
                 </div>
                 
                 <div class="form-item form-item--mapping">
                     <div class="form-item__header">
-                        <span class="form-item__title">字段映射结果</span>
-                        <span class="form-item__count">${mappings.length} 个映射</span>
-                        <span class="form-item__badge form-item__badge--mapping">已生成</span>
+                        <span class="form-item__title">Field Mapping Results</span>
+                        <span class="form-item__count">${mappings.length} mappings</span>
+                        <span class="form-item__badge form-item__badge--mapping">Generated</span>
                     </div>
                     <div class="form-item__fields">
                         ${mappingFieldsHtml}

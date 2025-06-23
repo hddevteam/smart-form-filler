@@ -162,6 +162,7 @@ class ResultsHandler {
                 </div>
             </div>
             <div class="history-item__actions">
+                <button class="history-item__action-btn" data-action="select" title="Select as Data Source">📌</button>
                 <button class="history-item__action-btn" data-action="view" title="View Details">👁️</button>
                 <button class="history-item__action-btn history-item__action-btn--delete" data-action="delete" title="Delete">🗑️</button>
             </div>
@@ -172,7 +173,13 @@ class ResultsHandler {
             if (e.target.dataset.action === "delete") {
                 e.stopPropagation();
                 this.deleteHistoryItem(index);
-            } else if (e.target.dataset.action === "view" || !e.target.closest(".history-item__actions")) {
+            } else if (e.target.dataset.action === "view") {
+                e.stopPropagation();
+                this.viewHistoryItem(index);
+            } else if (e.target.dataset.action === "select") {
+                e.stopPropagation();
+                this.selectDataSource(index);
+            } else if (!e.target.closest(".history-item__actions")) {
                 e.stopPropagation();
                 this.viewHistoryItem(index);
             }
@@ -470,6 +477,61 @@ class ResultsHandler {
     }
 
     /**
+     * Show success message
+     */
+    showSuccess(message) {
+        console.log("✅ ResultsHandler: Success:", message);
+        
+        // Create success notification element
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10000;
+            font-size: 14px;
+            max-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        // Add CSS animation if not already added
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    /**
      * Get the last extraction result
      */
     getLastExtractionResult() {
@@ -482,6 +544,217 @@ class ResultsHandler {
     updateMainChatButtonState() {
         if (this.uiController && this.uiController.updateMainChatButtonState) {
             this.uiController.updateMainChatButtonState(this.extractionHistory.length > 0);
+        }
+    }
+
+    /**
+     * Select a data source from history and sync across tabs
+     */
+    selectDataSource(index) {
+        if (index < 0 || index >= this.extractionHistory.length) {
+            console.warn("Invalid history index:", index);
+            this.showError("Invalid data source selection");
+            return;
+        }
+
+        const item = this.extractionHistory[index];
+        console.log("📌 Selecting data source:", item.title);
+
+        try {
+            // Create data source configuration with consistent ID format
+            // Use the same ID format as generated in popupDataSourceManager.js
+            const consistentId = `extraction-${index}-main`;
+            const dataSourceConfig = {
+                type: 'markdown',
+                selectedItems: [{
+                    id: consistentId,
+                    title: item.title,
+                    url: item.url,
+                    timestamp: item.timestamp,
+                    content: this.combineDataSourceContent(item.dataSources)
+                }]
+            };
+
+            console.log("📋 Data source config created:", {
+                itemsCount: dataSourceConfig.selectedItems.length,
+                contentLength: dataSourceConfig.selectedItems[0].content.length,
+                title: dataSourceConfig.selectedItems[0].title
+            });
+
+            // Sync selection across all tabs
+            const syncSuccess = this.syncDataSourceSelection(dataSourceConfig);
+
+            if (syncSuccess) {
+                // Show success message with data source type
+                this.showSuccess(`✅ Selected "${item.title}" as Markdown data source`);
+                
+                // Add visual feedback to the selected item
+                this.highlightSelectedItem(index);
+                
+                // Switch to Form Filler tab if available
+                setTimeout(() => {
+                    this.switchToFormFillerTab();
+                }, 500);
+            } else {
+                this.showSuccess(`📌 Markdown data source "${item.title}" selected (manual sync may be needed)`);
+            }
+            
+        } catch (error) {
+            console.error("❌ Error selecting data source:", error);
+            this.showError("Failed to select data source: " + error.message);
+        }
+    }
+
+    /**
+     * Highlight selected item with visual feedback
+     */
+    highlightSelectedItem(index) {
+        // Remove previous selections
+        document.querySelectorAll('.history-item--selected').forEach(item => {
+            item.classList.remove('history-item--selected');
+        });
+        
+        // Add selection to current item
+        const selectedItem = document.querySelector(`[data-index="${index}"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('history-item--selected');
+            
+            // Add CSS for selection if not already added
+            if (!document.getElementById('selection-styles')) {
+                const style = document.createElement('style');
+                style.id = 'selection-styles';
+                style.textContent = `
+                    .history-item--selected {
+                        border: 2px solid #28a745 !important;
+                        background: #f8fff9 !important;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2) !important;
+                    }
+                    .history-item--selected .history-item__action-btn[data-action="select"] {
+                        background: #28a745 !important;
+                        color: white !important;
+                    }
+                    .history-item--selected .history-item__action-btn[data-action="select"]::after {
+                        content: " Selected" !important;
+                        font-size: 10px;
+                        font-weight: bold;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Auto-remove selection highlight after 3 seconds
+            setTimeout(() => {
+                if (selectedItem) {
+                    selectedItem.classList.remove('history-item--selected');
+                }
+            }, 3000);
+        }
+    }
+
+    /**
+     * Combine data source content into markdown text
+     */
+    combineDataSourceContent(dataSources) {
+        if (!dataSources) {
+            return '';
+        }
+
+        // Handle single dataSources object (not array)
+        if (dataSources.markdown && dataSources.markdown.content) {
+            return dataSources.markdown.content;
+        }
+        
+        if (dataSources.cleaned && dataSources.cleaned.content) {
+            return dataSources.cleaned.content;
+        }
+        
+        if (dataSources.raw && dataSources.raw.content) {
+            return dataSources.raw.content;
+        }
+
+        // Handle array format (legacy support)
+        if (Array.isArray(dataSources)) {
+            const markdownParts = [];
+            dataSources.forEach((source, index) => {
+                if (source.markdown) {
+                    markdownParts.push(`## Data Source ${index + 1}\n\n${source.markdown}`);
+                } else if (source.text) {
+                    markdownParts.push(`## Data Source ${index + 1}\n\n${source.text}`);
+                }
+            });
+            return markdownParts.join('\n\n---\n\n');
+        }
+
+        return '';
+    }
+
+    /**
+     * Sync data source selection across Chat and Form Filler tabs
+     */
+    syncDataSourceSelection(config) {
+        try {
+            // Try multiple ways to access the popup manager
+            let popupManager = null;
+            
+            // Method 1: Global window reference
+            if (window.popupManager) {
+                popupManager = window.popupManager;
+            }
+            // Method 2: Through UI controller
+            else if (this.uiController?.popupManager) {
+                popupManager = this.uiController.popupManager;
+            }
+            // Method 3: Through direct property
+            else if (this.popupManager) {
+                popupManager = this.popupManager;
+            }
+            // Method 4: Try to find through DOM
+            else {
+                const popupElement = document.querySelector('[data-popup-manager]');
+                if (popupElement?.popupManager) {
+                    popupManager = popupElement.popupManager;
+                }
+            }
+            
+            if (popupManager?.dataSourceManager) {
+                // Update Chat tab configuration
+                popupManager.dataSourceManager.updateChatConfiguration(config);
+                
+                // Update Form Filler configuration 
+                popupManager.dataSourceManager.updateFormFillerConfiguration(config);
+                
+                console.log("🔄 Data source selection synced across tabs");
+                return true;
+            } else {
+                console.warn("⚠️ PopupManager or DataSourceManager not available for sync");
+                
+                // Fallback: try to dispatch custom event for manual handling
+                const event = new CustomEvent('dataSourceSelected', {
+                    detail: config
+                });
+                document.dispatchEvent(event);
+                console.log("📡 Dispatched dataSourceSelected event as fallback");
+                return false;
+            }
+        } catch (error) {
+            console.error("❌ Error syncing data source selection:", error);
+            return false;
+        }
+    }
+
+    /**
+     * Switch to Form Filler tab for streamlined workflow
+     */
+    switchToFormFillerTab() {
+        try {
+            const formFillerTab = document.getElementById('formFillerTab');
+            if (formFillerTab) {
+                formFillerTab.click();
+                console.log("🔄 Switched to Form Filler tab");
+            }
+        } catch (error) {
+            console.error("❌ Error switching to Form Filler tab:", error);
         }
     }
 }

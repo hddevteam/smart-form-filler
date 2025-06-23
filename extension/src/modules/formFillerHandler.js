@@ -3,7 +3,7 @@
  * Form Filler Handler - Manages the form filling workflow in the UI
  */
 
-/* global chrome, FormDetectionService, FormAnalysisService, FormUIController, FormUtils */
+/* global chrome, FormDetectionService, FormAnalysisService, FormUIController, FormUtils, CollapsibleManager */
 
 /**
  * Main controller class for form filling workflow
@@ -22,6 +22,9 @@ class FormFillerHandler {
             (uiController instanceof FormUIController) ? "provided FormUIController" : "new FormUIController");
         this.detectionService = new FormDetectionService();
         this.analysisService = new FormAnalysisService(apiClient);
+        
+        // Initialize collapsible manager
+        this.collapsibleManager = new CollapsibleManager();
         
         // State management
         this.currentForms = [];
@@ -100,6 +103,18 @@ class FormFillerHandler {
         } else {
             console.warn("⚠️ 'Content Input' field not found in DOM");
         }
+
+        // Clear All button
+        const clearAllBtn = document.getElementById("clearAllFormFillerBtn");
+        if (clearAllBtn) {
+            console.log("✅ 'Clear All' button found, binding click event");
+            clearAllBtn.addEventListener("click", () => {
+                console.log("🔍 'Clear All' button clicked!");
+                this.clearAllFormFillerState();
+            });
+        } else {
+            console.warn("⚠️ 'Clear All' button not found in DOM");
+        }
         
         // Listen for Form Filler data source configuration changes
         document.addEventListener('formFillerDataSourcesChanged', (event) => {
@@ -111,9 +126,9 @@ class FormFillerHandler {
     }
 
     /**
-     * Detect forms on the current page
+     * Detect forms on the current page and optionally trigger batch execution
      */
-    async detectForms() {
+    async detectForms(enableBatchExecution = true) {
         console.log("🔍 Starting form detection...");
         
         try {
@@ -132,10 +147,114 @@ class FormFillerHandler {
             // Clear any previous messages
             this.uiController.clearMessages();
             
+            // Trigger form detection completed event for collapsible manager
+            document.dispatchEvent(new CustomEvent('formDetectionCompleted', {
+                detail: { formsCount: this.currentForms.length }
+            }));
+            
+            // Check for batch execution conditions
+            if (enableBatchExecution && this.canEnableBatchExecution()) {
+                console.log("🚀 Batch execution conditions met, starting automated workflow...");
+                await this.executeBatchWorkflow();
+            }
+            
         } catch (error) {
             console.error("❌ Form detection error:", error);
             this.uiController.showError("Form detection failed: " + error.message);
         }
+    }
+
+    /**
+     * Check if batch execution can be enabled
+     */
+    canEnableBatchExecution() {
+        // Check if we have forms detected
+        if (!this.currentForms || this.currentForms.length === 0) {
+            console.log("❌ Batch execution: No forms detected");
+            return false;
+        }
+
+        // Check if we have either user content or data sources
+        const hasUserContent = this.hasUserContent();
+        const hasDataSources = this.hasDataSources();
+        
+        if (!hasUserContent && !hasDataSources) {
+            console.log("❌ Batch execution: No user content or data sources available");
+            return false;
+        }
+
+        console.log("✅ Batch execution conditions met:", {
+            forms: this.currentForms.length,
+            userContent: hasUserContent,
+            dataSources: hasDataSources
+        });
+        
+        return true;
+    }
+
+    /**
+     * Execute the batch workflow: Analyze Content → Generate Mapping
+     */
+    async executeBatchWorkflow() {
+        try {
+            this.uiController.showInfo("🚀 Executing batch workflow...");
+            
+            // Step 1: Analyze Content
+            console.log("🔍 Batch execution - Step 1: Analyzing content...");
+            await this.analyzeContentWithFormStructure();
+            
+            // Wait a moment for analysis to complete
+            await this.delay(500);
+            
+            // Step 2: Generate Mapping
+            if (this.currentAnalysisResult) {
+                console.log("🔍 Batch execution - Step 2: Generating mapping...");
+                await this.generateMapping();
+                
+                // Show success message
+                this.uiController.showSuccess("🎉 Batch execution completed! You can now click 'Fill Forms' to complete the process.");
+            } else {
+                console.warn("⚠️ Batch execution: Analysis result not available, skipping mapping generation");
+                this.uiController.showInfo("Analysis completed. Please manually click 'Generate Mapping' to continue.");
+            }
+            
+        } catch (error) {
+            console.error("❌ Batch execution error:", error);
+            this.uiController.showError("Batch execution failed: " + error.message);
+        }
+    }
+
+    /**
+     * Check if user content is available
+     */
+    hasUserContent() {
+        const content = document.getElementById("fillContentInput")?.value?.trim();
+        return content && content.length > 0;
+    }
+
+    /**
+     * Check if data sources are configured
+     */
+    hasDataSources() {
+        try {
+            // Check if we have access to data source manager
+            const popupManager = window.popupManager;
+            if (popupManager?.dataSourceManager) {
+                const dataSources = popupManager.dataSourceManager.getFormFillerDataSources();
+                return dataSources && dataSources.sources && dataSources.sources.length > 0;
+            }
+            return false;
+        } catch (error) {
+            console.error("Error checking data sources:", error);
+            return false;
+        }
+    }
+
+    /**
+     * Utility function to add delay
+     */
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     /**
@@ -219,6 +338,14 @@ class FormFillerHandler {
             } else {
                 this.uiController.showSuccess("Page context analysis completed! To generate field mappings, please enter content to fill and try again.");
             }
+            
+            // Trigger analysis completed event for collapsible manager
+            document.dispatchEvent(new CustomEvent('analysisCompleted', {
+                detail: { 
+                    selectedFormId: this.selectedFormId,
+                    hasContent: !!content
+                }
+            }));
             
         } catch (error) {
             console.error("❌ Stage 1 analysis error:", error);
@@ -315,6 +442,14 @@ class FormFillerHandler {
             this.uiController.clearMessages();
             this.uiController.showSuccess("Field mapping analysis completed! You can now fill the forms.");
             
+            // Trigger mapping completed event for collapsible manager
+            document.dispatchEvent(new CustomEvent('mappingCompleted', {
+                detail: { 
+                    mappingsCount: this.currentMappings.length,
+                    selectedFormId: this.selectedFormId
+                }
+            }));
+            
         } catch (error) {
             console.error("❌ Stage 2 analysis error:", error);
             this.uiController.showError("Field mapping analysis failed: " + error.message);
@@ -342,12 +477,44 @@ class FormFillerHandler {
             const results = await this.detectionService.fillForms(this.currentMappings);
             this.uiController.displayFillResults(results);
             
+            // Trigger fill completed event for collapsible manager
+            document.dispatchEvent(new CustomEvent('fillCompleted', {
+                detail: { 
+                    results: results,
+                    mappingsCount: this.currentMappings.length
+                }
+            }));
+            
         } catch (error) {
             console.error("❌ Form filling error:", error);
             this.uiController.showError("Form filling failed: " + error.message);
         } finally {
             this.uiController.setFillLoading(false);
         }
+    }
+
+    /**
+     * Clear all form filler state and reset collapsible sections
+     */
+    clearAllFormFillerState() {
+        // Reset all internal state
+        this.currentForms = [];
+        this.analyzedData = null;
+        this.currentMappings = [];
+        this.selectedFormId = null;
+        this.lastAnalyzedContent = "";
+        this.currentAnalysisResult = null;
+        this.currentFormDescription = "";
+        
+        // Reset UI state
+        this.uiController.resetAllStates();
+        
+        // Reset collapsible manager
+        if (this.collapsibleManager) {
+            this.collapsibleManager.reset();
+        }
+        
+        console.log("🔄 All Form Filler state cleared and collapsible sections reset");
     }
 
     /**

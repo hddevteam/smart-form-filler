@@ -404,7 +404,10 @@ class PopupDataSourceManager {
             const config = isFormFiller ? this.formFillerConfig : this.currentConfig;
             
             const html = this.availableDataSources.map(source => {
-                const isSelected = config.selectedItems.includes(source.id);
+                // Fix: Check selectedItems properly (it contains objects with id property)
+                const isSelected = config.selectedItems.some(item => 
+                    (typeof item === 'object' && item.id === source.id) || item === source.id
+                );
                 const content = source[config.type] || source.markdown || '';
                 
                 console.log('[PopupDataSourceManager] [DEBUG] Processing source:', {
@@ -483,18 +486,42 @@ class PopupDataSourceManager {
             const sourceId = item.dataset.sourceId;
             const checkbox = item.querySelector('input[type="checkbox"]');
             const isSelected = checkbox.checked;
+            
+            const isFormFiller = this.currentModalContext === 'formFiller';
+            const config = isFormFiller ? this.formFillerConfig : this.currentConfig;
 
             if (isSelected) {
-                if (!this.currentConfig.selectedItems.includes(sourceId)) {
-                    this.currentConfig.selectedItems.push(sourceId);
+                // Find the full data source object
+                const dataSource = this.availableDataSources.find(source => source.id === sourceId);
+                if (dataSource) {
+                    // Check if not already selected (comparing by ID for consistency)
+                    const alreadySelected = config.selectedItems.some(selectedItem => 
+                        (typeof selectedItem === 'object' && selectedItem.id === sourceId) || selectedItem === sourceId
+                    );
+                    
+                    if (!alreadySelected) {
+                        // Store as object for consistency with sync operations
+                        const selectedItemObject = {
+                            id: dataSource.id,
+                            title: dataSource.title,
+                            url: dataSource.url,
+                            timestamp: dataSource.timestamp,
+                            content: dataSource[config.type] || dataSource.markdown || ''
+                        };
+                        config.selectedItems.push(selectedItemObject);
+                    }
                 }
                 item.classList.add('data-source-item--selected');
             } else {
-                this.currentConfig.selectedItems = this.currentConfig.selectedItems.filter(id => id !== sourceId);
+                // Remove by comparing ID (handle both object and string formats)
+                config.selectedItems = config.selectedItems.filter(selectedItem => {
+                    const selectedId = typeof selectedItem === 'object' ? selectedItem.id : selectedItem;
+                    return selectedId !== sourceId;
+                });
                 item.classList.remove('data-source-item--selected');
             }
 
-            console.log('[PopupDataSourceManager] Selected items:', this.currentConfig.selectedItems);
+            console.log('[PopupDataSourceManager] Selected items:', config.selectedItems);
         } catch (error) {
             console.error('[PopupDataSourceManager] Error handling data source selection:', error);
         }
@@ -515,11 +542,23 @@ class PopupDataSourceManager {
             const selectedType = Array.from(typeRadios).find(radio => radio.checked)?.value || 'markdown';
             config.type = selectedType;
 
-            // Get selected items
+            // Get selected items and create consistent object format
             const selectedItems = [];
             const checkboxes = document.querySelectorAll('#dataSourceList input[type="checkbox"]:checked');
             checkboxes.forEach(checkbox => {
-                selectedItems.push(checkbox.value);
+                const sourceId = checkbox.value;
+                // Find the full data source object
+                const dataSource = this.availableDataSources.find(source => source.id === sourceId);
+                if (dataSource) {
+                    const selectedItemObject = {
+                        id: dataSource.id,
+                        title: dataSource.title,
+                        url: dataSource.url,
+                        timestamp: dataSource.timestamp,
+                        content: dataSource[selectedType] || dataSource.markdown || ''
+                    };
+                    selectedItems.push(selectedItemObject);
+                }
             });
             config.selectedItems = selectedItems;
 
@@ -565,9 +604,10 @@ class PopupDataSourceManager {
             const openDataSourceModalBtn = document.getElementById('openDataSourceModalBtn');
 
             // Check if we have valid configured sources that actually exist in available sources
-            const validSelectedSources = this.currentConfig.selectedItems.filter(itemId => 
-                this.availableDataSources.some(source => source.id === itemId)
-            );
+            const validSelectedSources = this.currentConfig.selectedItems.filter(selectedItem => {
+                const selectedId = typeof selectedItem === 'object' ? selectedItem.id : selectedItem;
+                return this.availableDataSources.some(source => source.id === selectedId);
+            });
             
             const hasValidConfiguration = this.isConfigured && validSelectedSources.length > 0;
             
@@ -630,73 +670,78 @@ class PopupDataSourceManager {
     }
 
     /**
-     * Update Form Filler UI with current configuration
+     * Update Chat tab data source configuration (called from external sync)
+     */
+    updateChatConfiguration(config) {
+        this.currentConfig = { ...config };
+        this.isConfigured = true;
+        console.log('[PopupDataSourceManager] Chat configuration updated:', config);
+        this.updateChatUI();
+    }
+
+    /**
+     * Update Form Filler data source configuration (called from external sync)
+     */
+    updateFormFillerConfiguration(config) {
+        this.formFillerConfig = { ...config };
+        this.formFillerIsConfigured = true;
+        console.log('[PopupDataSourceManager] Form Filler configuration updated:', config);
+        this.updateFormFillerUI();
+        
+        // Trigger form filler button state update
+        this.notifyFormFillerDataSourceChange();
+    }
+
+    /**
+     * Update Chat tab UI to reflect current configuration
+     */
+    updateChatUI() {
+        try {
+            // Update chat data source status
+            const chatStatus = document.getElementById('chatDataSourceStatus');
+            if (chatStatus && this.isConfigured) {
+                const count = this.currentConfig.selectedItems.length;
+                chatStatus.textContent = `${count} data source${count !== 1 ? 's' : ''} selected`;
+                chatStatus.className = 'data-source-status data-source-status--configured';
+            }
+        } catch (error) {
+            console.error('[PopupDataSourceManager] Error updating chat UI:', error);
+        }
+    }
+
+    /**
+     * Update Form Filler UI to reflect current configuration
      */
     updateFormFillerUI() {
         try {
-            const formFillerDataSourceSummary = document.getElementById('formFillerDataSourceSummary');
-            const formFillerDataSourceSummaryText = document.getElementById('formFillerDataSourceSummaryText');
-            const openFormFillerDataSourceModalBtn = document.getElementById('openFormFillerDataSourceModalBtn');
-
-            // Check if we have valid configured sources for Form Filler
-            const validSelectedSources = this.formFillerConfig.selectedItems.filter(itemId => 
-                this.availableDataSources.some(source => source.id === itemId)
-            );
-            
-            const hasValidConfiguration = this.formFillerIsConfigured && validSelectedSources.length > 0;
-            
-            console.log('[PopupDataSourceManager] [DEBUG] Form Filler UI Update check:', {
-                isConfigured: this.formFillerIsConfigured,
-                configuredItems: this.formFillerConfig.selectedItems.length,
-                availableDataSources: this.availableDataSources.length,
-                validSelectedSources: validSelectedSources.length,
-                hasValidConfiguration
-            });
-
-            if (hasValidConfiguration) {
-                // Show summary and update text
-                if (formFillerDataSourceSummary) {
-                    formFillerDataSourceSummary.classList.remove('hidden');
-                }
-                
-                if (formFillerDataSourceSummaryText) {
-                    const count = validSelectedSources.length;
-                    const countText = `${count} source${count !== 1 ? 's' : ''}`;
-                    const typeText = this.getTypeDisplayName(this.formFillerConfig.type);
-                    formFillerDataSourceSummaryText.textContent = `Selected: ${countText}, ${typeText}`;
-                }
-                
-                // Update button text
-                if (openFormFillerDataSourceModalBtn) {
-                    const buttonText = openFormFillerDataSourceModalBtn.querySelector('.btn__text');
-                    if (buttonText) {
-                        buttonText.textContent = 'Reconfigure Sources';
-                    }
-                }
-            } else {
-                // Hide summary
-                if (formFillerDataSourceSummary) {
-                    formFillerDataSourceSummary.classList.add('hidden');
-                }
-                
-                // Reset button text
-                if (openFormFillerDataSourceModalBtn) {
-                    const buttonText = openFormFillerDataSourceModalBtn.querySelector('.btn__text');
-                    if (buttonText) {
-                        buttonText.textContent = 'Configure Sources';
-                    }
-                }
-                
-                // Reset invalid configuration if needed
-                if (this.formFillerIsConfigured && this.formFillerConfig.selectedItems.length > 0 && validSelectedSources.length === 0) {
-                    console.log('[PopupDataSourceManager] [DEBUG] Resetting invalid Form Filler configuration');
-                    this.formFillerConfig.selectedItems = [];
-                    this.formFillerIsConfigured = false;
-                    this.saveConfiguration();
-                }
+            // Update form filler data source status
+            const formFillerStatus = document.getElementById('formFillerDataSourceStatus');
+            if (formFillerStatus && this.formFillerIsConfigured) {
+                const count = this.formFillerConfig.selectedItems.length;
+                formFillerStatus.textContent = `${count} data source${count !== 1 ? 's' : ''} selected`;
+                formFillerStatus.className = 'data-source-status data-source-status--configured';
             }
         } catch (error) {
-            console.error('[PopupDataSourceManager] Error updating Form Filler UI:', error);
+            console.error('[PopupDataSourceManager] Error updating form filler UI:', error);
+        }
+    }
+
+    /**
+     * Notify Form Filler about data source changes
+     */
+    notifyFormFillerDataSourceChange() {
+        try {
+            // Dispatch custom event for form filler to update button states
+            const event = new CustomEvent('formFillerDataSourceChanged', {
+                detail: {
+                    hasDataSources: this.formFillerIsConfigured && this.formFillerConfig.selectedItems.length > 0,
+                    config: this.formFillerConfig
+                }
+            });
+            document.dispatchEvent(event);
+            console.log('[PopupDataSourceManager] Notified Form Filler about data source change');
+        } catch (error) {
+            console.error('[PopupDataSourceManager] Error notifying form filler:', error);
         }
     }
 
@@ -814,8 +859,12 @@ class PopupDataSourceManager {
                 return null;
             }
 
+            // Fix: Handle both object and string formats in selectedItems
             const selectedSources = this.availableDataSources.filter(source => 
-                this.formFillerConfig.selectedItems.includes(source.id)
+                this.formFillerConfig.selectedItems.some(selectedItem => {
+                    const selectedId = typeof selectedItem === 'object' ? selectedItem.id : selectedItem;
+                    return selectedId === source.id;
+                })
             );
 
             if (selectedSources.length === 0) {

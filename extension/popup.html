@@ -239,43 +239,57 @@
                         
                         <!-- Form Detection Results -->
                         <div id="formDetectionResults" class="form-detection-results hidden">
-                            <div class="form-detection-summary">
-                                <span class="summary-item">
-                                    <span class="summary-label">Forms Found:</span>
-                                    <span class="summary-value" id="formsFoundCount">0</span>
-                                </span>
-                                <span class="summary-item">
-                                    <span class="summary-label">Fields Found:</span>
-                                    <span class="summary-value" id="fieldsFoundCount">0</span>
-                                </span>
-                                <span class="summary-item hidden" id="iframeStatsContainer">
-                                    <span class="summary-label">Sources:</span>
-                                    <span class="summary-value" id="sourceStats">Main + 0 iframes</span>
-                                </span>
-                            </div>
-                            
-                            <div id="formsList" class="forms-list">
-                                <!-- Dynamic form list will be inserted here -->
-                            </div>
-                            
-                            <!-- Analyze Content Button - moved here -->
-                            <div class="action-buttons action-buttons--content-analysis">
-                                <button id="analyzeContentBtn" class="btn btn--primary" disabled>
-                                    <span class="btn__icon">🧠</span>
-                                    <span class="btn__text">Analyze Content</span>
+                            <div class="section__header section__header--collapsible section__header--results">
+                                <div class="section__header-content">
+                                    <div class="form-detection-summary">
+                                        <span class="summary-item">
+                                            <span class="summary-label">Forms Found:</span>
+                                            <span class="summary-value" id="formsFoundCount">0</span>
+                                        </span>
+                                        <span class="summary-item">
+                                            <span class="summary-label">Fields Found:</span>
+                                            <span class="summary-value" id="fieldsFoundCount">0</span>
+                                        </span>
+                                        <span class="summary-item hidden" id="iframeStatsContainer">
+                                            <span class="summary-label">Sources:</span>
+                                            <span class="summary-value" id="sourceStats">Main + 0 iframes</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <button class="section__collapse-btn" data-target="formDetection" title="Collapse/Expand">
+                                    <span class="collapse-icon">▼</span>
                                 </button>
+                            </div>
+                            
+                            <div class="section__content--collapsible" data-section="formDetection">
+                                <div id="formsList" class="forms-list">
+                                    <!-- Dynamic form list will be inserted here -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Content Analysis Results -->
+                <!-- Content Analysis Section -->
                 <div id="analysisResultsSection" class="section hidden">
-                    <div class="section__header">
-                        <h3 class="section__title">Content Analysis Results</h3>
-                        <p class="section__description">Stage 1: Form relevance analysis results</p>
+                    <div class="section__header section__header--collapsible">
+                        <div class="section__header-content">
+                            <h3 class="section__title">Content Analysis</h3>
+                            <p class="section__description">Stage 1: Form relevance analysis</p>
+                        </div>
+                        <button class="section__collapse-btn" data-target="analysisResults" title="Collapse/Expand">
+                            <span class="collapse-icon">▼</span>
+                        </button>
                     </div>
-                    <div class="section__content">
+                    <div class="section__content section__content--collapsible" data-section="analysisResults">
+                        <!-- Analyze Content Button - moved here -->
+                        <div class="action-buttons action-buttons--content-analysis">
+                            <button id="analyzeContentBtn" class="btn btn--primary" disabled>
+                                <span class="btn__icon">🧠</span>
+                                <span class="btn__text">Analyze Content</span>
+                            </button>
+                        </div>
+                        
                         <div id="analysisResults" class="analysis-results">
                             <!-- Dynamic analysis results will be inserted here -->
                         </div>
@@ -284,11 +298,16 @@
 
                 <!-- Field Mapping Section -->
                 <div id="fieldMappingSection" class="section hidden">
-                    <div class="section__header">
-                        <h3 class="section__title">Field Mapping</h3>
-                        <p class="section__description">Stage 2: Generate detailed field mappings for the selected form</p>
+                    <div class="section__header section__header--collapsible">
+                        <div class="section__header-content">
+                            <h3 class="section__title">Field Mapping</h3>
+                            <p class="section__description">Stage 2: Generate detailed field mappings for the selected form</p>
+                        </div>
+                        <button class="section__collapse-btn" data-target="fieldMapping" title="Collapse/Expand">
+                            <span class="collapse-icon">▼</span>
+                        </button>
                     </div>
-                    <div class="section__content">
+                    <div class="section__content section__content--collapsible" data-section="fieldMapping">
                         <div class="action-buttons action-buttons--mapping">
                             <button id="generateMappingBtn" class="btn btn--primary" disabled>
                                 <span class="btn__icon">🗺️</span>
@@ -304,11 +323,16 @@
 
                 <!-- Form Filling Actions -->
                 <div id="fillActionsSection" class="section hidden">
-                    <div class="section__header">
-                        <h3 class="section__title">Fill Forms</h3>
-                        <p class="section__description">Apply the mapped data to form fields</p>
+                    <div class="section__header section__header--collapsible">
+                        <div class="section__header-content">
+                            <h3 class="section__title">Fill Forms</h3>
+                            <p class="section__description">Apply the mapped data to form fields</p>
+                        </div>
+                        <button class="section__collapse-btn" data-target="fillActions" title="Collapse/Expand">
+                            <span class="collapse-icon">▼</span>
+                        </button>
                     </div>
-                    <div class="section__content">
+                    <div class="section__content section__content--collapsible" data-section="fillActions">
                         <div class="action-buttons action-buttons--fill-actions">
                             <button id="fillFormsBtn" class="btn btn--primary" disabled>
                                 <span class="btn__icon">✍️</span>
@@ -507,6 +531,7 @@
     <script src="src/modules/formDetectionService.js"></script>
     <script src="src/modules/formAnalysisService.js"></script>
     <script src="src/modules/formUIController.js"></script>
+    <script src="src/modules/collapsibleManager.js"></script>
     <script src="src/modules/formFillerHandler.js"></script>
     
     <!-- Popup manager modules -->
