@@ -51,7 +51,6 @@ class PopupManager {
                 'mainChatBtn',
                 'detectFormsBtn',
                 'analyzeContentBtn', 
-                'generateMappingBtn',
                 'fillFormsBtn'
             ];
             
@@ -62,6 +61,8 @@ class PopupManager {
                     console.log(`✅ Disabled model-dependent button: ${btnId}`);
                 }
             });
+            
+            // generateMappingBtn has custom logic and shouldn't be controlled here
             
             // Ensure system buttons are ALWAYS enabled from the start
             const systemButtons = [

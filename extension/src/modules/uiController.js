@@ -301,11 +301,10 @@ class UIController {
             this.elements.mainChatBtn.disabled = !enabled;
         }
         
-        // Form filler buttons need models
+        // Form filler buttons need models - but generateMappingBtn has custom logic
         const formFillerButtons = [
             'detectFormsBtn',
             'analyzeContentBtn', 
-            'generateMappingBtn',
             'fillFormsBtn'
         ];
         
@@ -315,6 +314,9 @@ class UIController {
                 btn.disabled = !enabled;
             }
         });
+        
+        // generateMappingBtn has its own custom logic in FormUIController.updateMappingButtonState()
+        // Don't control it here to avoid conflicts
         
         // Copy button doesn't need models, keep it enabled
         if (this.elements.copyBtn) {

@@ -9,6 +9,23 @@
  * Controller for form UI operations
  */
 class FormUIController {
+    constructor() {
+        // Initialize Generate Mapping button state
+        this.initializeGenerateMappingButton();
+    }
+
+    /**
+     * Initialize Generate Mapping button with correct initial state
+     */
+    initializeGenerateMappingButton() {
+        const mappingButton = document.getElementById("generateMappingBtn");
+        if (mappingButton) {
+            // Initially disabled until analysis is completed
+            mappingButton.disabled = true;
+            console.log('📊 Generate Mapping button initialized with custom logic (disabled initially)');
+        }
+    }
+
     /**
      * Get selected form filler model
      * @returns {string|null} Selected model name or null if service unavailable
@@ -177,8 +194,17 @@ class FormUIController {
         const mappingButton = document.getElementById("generateMappingBtn");
         
         if (mappingButton) {
-            // Need both analysis complete and content to generate mapping
-            mappingButton.disabled = !hasAnalyzed || !content;
+            // Check if we have data sources configured
+            let hasDataSources = false;
+            if (window.popupManager && window.popupManager.dataSourceManager) {
+                const dataSources = window.popupManager.dataSourceManager.getFormFillerDataSources();
+                hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
+            }
+            
+            const hasUserContent = content && content.trim().length > 0;
+            
+            // Enable if analysis is done AND (user has content OR data sources are configured)
+            mappingButton.disabled = !hasAnalyzed || (!hasUserContent && !hasDataSources);
         }
     }
     

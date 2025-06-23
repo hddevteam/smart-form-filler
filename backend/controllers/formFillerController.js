@@ -179,10 +179,14 @@ class FormFillerController {
                 dataSources = null // Selected data sources for context
             } = req.body;
 
-            if (!content || content.trim().length === 0) {
+            // Check if we have either user content or data sources
+            const hasUserContent = content && content.trim().length > 0;
+            const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
+            
+            if (!hasUserContent && !hasDataSources) {
                 return res.status(400).json({ 
-                    error: "No content provided",
-                    message: "Please provide content to analyze" 
+                    error: "No content or data sources provided",
+                    message: "Please provide content to analyze or configure data sources" 
                 });
             }
 
@@ -205,7 +209,7 @@ class FormFillerController {
 
             // Create enhanced field mapping prompt that includes user content, analysis results, and data sources
             const mappingPrompt = this.createEnhancedFieldMappingPrompt(
-                content, 
+                content || "", // Use empty string if no user content
                 targetForm, 
                 analysisResult, 
                 language,
@@ -507,21 +511,37 @@ Analysis requirements:
         
         console.log(`🌐 Using user-selected language: ${targetLanguage} for field mapping`);
 
+        // Check what data we have available
+        const hasUserContent = content && content.trim().length > 0;
+        const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
+        
         // Always use English for the prompt itself, but specify target language for output
         const languageInstruction = `Please respond in ${targetLanguage} language`;
         let promptParts = [];
 
-        // Start with instruction and language guidance
-        promptParts.push(`Analyze user content and generate appropriate values for each form field. ${languageInstruction}.`);
+        // Start with instruction and language guidance - adapt based on available data
+        if (hasUserContent && hasDataSources) {
+            promptParts.push(`Analyze user content and data sources to generate appropriate values for each form field. ${languageInstruction}.`);
+        } else if (hasDataSources && !hasUserContent) {
+            promptParts.push(`Generate appropriate form field values based on the provided data sources and form structure. ${languageInstruction}.`);
+        } else {
+            promptParts.push(`Analyze user content and generate appropriate values for each form field. ${languageInstruction}.`);
+        }
 
-        // Add user content
-        promptParts.push(`\nUser input content:\n"${content}"\n`);
+        // Add user content if available
+        if (hasUserContent) {
+            promptParts.push(`\nUser input content:\n"${content}"\n`);
+        }
 
         // Add data sources if available
-        if (dataSources && dataSources.sources && dataSources.sources.length > 0) {
-            promptParts.push(`\nAdditional context from selected data sources (${dataSources.type} format):`);
+        if (hasDataSources) {
+            promptParts.push(`\n${hasUserContent ? 'Additional' : 'Primary'} context from selected data sources (${dataSources.type} format):`);
             promptParts.push(`${dataSources.combinedText}\n`);
-            promptParts.push("Note: Use this additional context to enhance field mapping accuracy and provide more relevant information.\n");
+            if (hasUserContent) {
+                promptParts.push("Note: Use this additional context to enhance field mapping accuracy and provide more relevant information.\n");
+            } else {
+                promptParts.push("Note: Use this data source content as the primary source for generating appropriate field values.\n");
+            }
         }
 
         // Add form description - prioritize analysis result over original form description
@@ -566,21 +586,22 @@ Analysis requirements:
 
         promptParts.push(`Target form structure:\n${JSON.stringify(simplifiedForm, null, 2)}\n`);
 
-        // Add simplified instructions
-        const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
+        // Add simplified instructions based on available data
         promptParts.push(`Analysis instructions:
-1. User content may contain:
-   - Direct field values (e.g., "Name: John, Phone: 123456")
-   - Instructional guidance (e.g., "please help fill this form based on my info to make it persuasive")
-   - A combination of both
+1. ${hasUserContent ? 'User content may contain:' : 'No user content provided - generate values based on form structure and data sources:'}
+   ${hasUserContent ? '- Direct field values (e.g., "Name: John, Phone: 123456")' : ''}
+   ${hasUserContent ? '- Instructional guidance (e.g., "please help fill this form based on my info to make it persuasive")' : ''}
+   ${hasUserContent ? '- A combination of both' : ''}
 
-2. ${hasDataSources ? 'Additional data sources are provided for context:' : 'Processing strategy:'}
-   ${hasDataSources ? '- Use the additional context from data sources to enhance field mapping accuracy' : ''}
-   ${hasDataSources ? '- Combine user input with relevant information from data sources' : ''}
-   ${hasDataSources ? '- Prioritize user input but supplement with data source information when appropriate' : ''}
-   - For direct information: extract exact field values
-   - For instructional content: generate appropriate values based on field descriptions${hasDataSources ? ' and available data sources' : ''}
-   - Consider user intent and form context
+2. ${hasDataSources ? (hasUserContent ? 'Additional data sources are provided for context:' : 'Data sources are your primary information source:') : 'Processing strategy:'}
+   ${hasDataSources ? '- Use the ' + (hasUserContent ? 'additional' : 'available') + ' context from data sources to ' + (hasUserContent ? 'enhance field mapping accuracy' : 'generate appropriate field values') : ''}
+   ${hasDataSources && hasUserContent ? '- Combine user input with relevant information from data sources' : ''}
+   ${hasDataSources && hasUserContent ? '- Prioritize user input but supplement with data source information when appropriate' : ''}
+   ${hasUserContent ? '- For direct information: extract exact field values' : ''}
+   ${hasUserContent ? '- For instructional content: generate appropriate values based on field descriptions' + (hasDataSources ? ' and available data sources' : '') : ''}
+   ${!hasUserContent && hasDataSources ? '- Extract relevant information from data sources that matches form field requirements' : ''}
+   ${!hasUserContent && hasDataSources ? '- Generate contextually appropriate values based on form purpose and available data' : ''}
+   - Consider ${hasUserContent ? 'user intent and ' : ''}form context and field types
 
 3. **CRITICAL LANGUAGE REQUIREMENT**: ALL field values MUST be generated in ${targetLanguage}. This is mandatory.
 

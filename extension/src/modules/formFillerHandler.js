@@ -101,6 +101,12 @@ class FormFillerHandler {
             console.warn("⚠️ 'Content Input' field not found in DOM");
         }
         
+        // Listen for Form Filler data source configuration changes
+        document.addEventListener('formFillerDataSourcesChanged', (event) => {
+            console.log('[FormFillerHandler] Data source configuration changed:', event.detail);
+            this.onDataSourceConfigurationChanged();
+        });
+        
         console.log("✅ Form Filler event listeners initialized!");
     }
 
@@ -233,10 +239,28 @@ class FormFillerHandler {
             return;
         }
 
-        const content = document.getElementById("fillContentInput")?.value?.trim();
-        if (!content) {
-            this.uiController.showError("Please enter content to analyze");
+        const content = document.getElementById("fillContentInput")?.value?.trim() || "";
+        
+        // Check if we have either user content or configured data sources
+        let dataSources = null;
+        if (window.popupManager && window.popupManager.dataSourceManager) {
+            dataSources = window.popupManager.dataSourceManager.getFormFillerDataSources();
+        }
+        
+        const hasUserContent = content.length > 0;
+        const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
+        
+        if (!hasUserContent && !hasDataSources) {
+            this.uiController.showError("Please enter content to analyze or configure data sources first");
             return;
+        }
+        
+        if (!hasUserContent && hasDataSources) {
+            console.log("📊 Generating mapping using configured data sources (no user input)");
+        } else if (hasUserContent && hasDataSources) {
+            console.log("📊 Generating mapping using both user input and configured data sources");
+        } else {
+            console.log("📝 Generating mapping using user input only");
         }
 
         try {
@@ -258,17 +282,13 @@ class FormFillerHandler {
             
             const selectedLanguage = this.uiController.getSelectedLanguage();
             
-            // Get selected Form Filler data sources
-            let dataSources = null;
-            if (window.popupManager && window.popupManager.dataSourceManager) {
-                dataSources = window.popupManager.dataSourceManager.getFormFillerDataSources();
-                if (dataSources) {
-                    console.log("📊 Including Form Filler data sources in mapping generation:", {
-                        type: dataSources.type,
-                        sourceCount: dataSources.sources.length,
-                        totalContentLength: dataSources.combinedText.length
-                    });
-                }
+            // Get selected Form Filler data sources (already retrieved above)
+            if (dataSources) {
+                console.log("📊 Including Form Filler data sources in mapping generation:", {
+                    type: dataSources.type,
+                    sourceCount: dataSources.sources.length,
+                    totalContentLength: dataSources.combinedText.length
+                });
             }
             
             // Perform field mapping analysis (Stage 2)
@@ -328,6 +348,17 @@ class FormFillerHandler {
         } finally {
             this.uiController.setFillLoading(false);
         }
+    }
+
+    /**
+     * Handle Form Filler data source configuration changes
+     */
+    onDataSourceConfigurationChanged() {
+        // Update mapping button state when data sources change
+        const content = document.getElementById("fillContentInput")?.value?.trim() || "";
+        this.uiController.updateMappingButtonState(this.selectedFormId !== null, content);
+        
+        console.log('📊 Updated mapping button state due to data source configuration change');
     }
 
     /**

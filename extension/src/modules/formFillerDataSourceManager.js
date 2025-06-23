@@ -66,6 +66,30 @@ class FormFillerDataSourceManager {
             selectedCount: this.currentConfig.selectedItems.length,
             isConfigured: this.isConfigured
         });
+        
+        // Notify Form Filler Handler to update button states
+        this.notifyFormFillerHandler();
+    }
+
+    /**
+     * Notify Form Filler Handler about data source configuration changes
+     */
+    notifyFormFillerHandler() {
+        try {
+            // Dispatch custom event to notify that Form Filler data sources changed
+            const event = new CustomEvent('formFillerDataSourcesChanged', {
+                detail: {
+                    isConfigured: this.isConfigured,
+                    selectedCount: this.currentConfig.selectedItems.length,
+                    type: this.currentConfig.type
+                }
+            });
+            document.dispatchEvent(event);
+            
+            console.log('[FormFillerDataSourceManager] Notified Form Filler Handler about configuration change');
+        } catch (error) {
+            console.error('[FormFillerDataSourceManager] Error notifying Form Filler Handler:', error);
+        }
     }
 
     /**
