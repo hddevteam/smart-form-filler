@@ -172,6 +172,14 @@ class PopupManager {
             this.formAnalysisService = new FormAnalysisService();
             this.chatHandler = new ChatHandler(this.elements, this.apiClient);
             
+            // Initialize Form Filler Mode Components
+            console.log("🔧 Initializing Form Filler mode components...");
+            // Note: dataSourceManager will be passed later after it's initialized
+            this.simpleMode = new SimpleMode(this.formFillerHandler, null);
+            this.advancedMode = new AdvancedMode(this.formFillerHandler, null);
+            this.modeToggle = new ModeToggle(this.simpleMode, this.advancedMode, this.formFillerHandler);
+            console.log("✅ Form Filler mode components initialized");
+            
             // Initialize managers after core services are ready
             this.settingsManager = new PopupSettingsManager(this);
             this.modelManager = new PopupModelManager(this);
@@ -215,6 +223,47 @@ class PopupManager {
                 hasModal: !!this.dataSourceManager.elements?.dataSourceModal,
                 modalId: this.dataSourceManager.elements?.dataSourceModal?.id
             });
+
+            // Update mode components with dataSourceManager
+            console.log("🔧 Updating mode components with dataSourceManager...");
+            if (this.simpleMode) {
+                this.simpleMode.dataSourceManager = this.dataSourceManager;
+            }
+            if (this.advancedMode) {
+                this.advancedMode.dataSourceManager = this.dataSourceManager;
+            }
+            
+            // Initialize data source buttons for all modes
+            console.log("🔧 Initializing data source buttons...");
+            this.chatDataSourceButton = new DataSourceButton(
+                'chatDataSourceBtn', 
+                'chatDataSourceText', 
+                'chatDataSourceIcon', 
+                'chat', 
+                this.dataSourceManager
+            );
+            
+            this.simpleModeDataSourceButton = new DataSourceButton(
+                'simpleModeDataSourceBtn', 
+                'simpleModeDataSourceText', 
+                'simpleModeDataSourceIcon', 
+                'formFiller', 
+                this.dataSourceManager
+            );
+            
+            this.advancedDataSourceButton = new DataSourceButton(
+                'advancedDataSourceBtn', 
+                'advancedDataSourceText', 
+                'advancedDataSourceIcon', 
+                'formFiller', 
+                this.dataSourceManager
+            );
+            console.log("✅ Data source buttons initialized");
+            
+            console.log("✅ Mode components updated with dataSourceManager");
+            
+            // Trigger initial data source update
+            document.dispatchEvent(new CustomEvent('dataSourcesChanged'));
 
             this.isInitialized = true;
             console.log("✅ PopupManager initialized successfully");

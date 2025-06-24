@@ -37,6 +37,11 @@ class PopupDataSourceManagerRefactored {
             
             // Update UI with current configurations
             this.updateAllUI();
+            
+            // Notify other components that data source manager is ready
+            document.dispatchEvent(new CustomEvent('dataSourceManagerReady'));
+            document.dispatchEvent(new CustomEvent('dataSourcesUpdated'));
+            document.dispatchEvent(new CustomEvent('formFillerConfigChanged'));
         } catch (error) {
             console.error('[PopupDataSourceManagerRefactored] Error during initialization:', error);
         }
@@ -55,19 +60,27 @@ class PopupDataSourceManagerRefactored {
         // Listen for configuration changes
         this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED, (data) => {
             this.uiController.updateChatUI(data.config);
+            // Dispatch DOM event for external listeners
+            document.dispatchEvent(new CustomEvent('chatConfigChanged', { detail: data }));
         });
         
         this.eventEmitter.on(DataSourceEventEmitter.EVENTS.FORM_FILLER_CONFIG_CHANGED, (data) => {
             this.uiController.updateFormFillerUI(data.config, this.syncManager.getAvailableDataSources());
+            // Dispatch DOM event for external listeners
+            document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: data }));
         });
         
-        this.eventEmitter.on(DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED, () => {
+        this.eventEmitter.on(DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED, (data) => {
             this.updateAllUI();
+            // Dispatch DOM event for external listeners
+            document.dispatchEvent(new CustomEvent('dataSourcesUpdated', { detail: data }));
         });
         
         this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CONFIGURATION_APPLIED, (data) => {
             // Notify other modules about the change
             this.notifyConfigurationChanged();
+            // Dispatch DOM event for external listeners
+            document.dispatchEvent(new CustomEvent('configurationApplied', { detail: data }));
         });
         
         // Listen for extraction history changes (custom event from resultsHandler)
@@ -166,10 +179,10 @@ class PopupDataSourceManagerRefactored {
     }
 
     /**
-     * Open modal for chat configuration
+     * Open modal for configuration (supports context parameter)
      */
-    openModal() {
-        this.uiController.openModalForContext('chat');
+    openModal(context = 'chat') {
+        this.uiController.openModalForContext(context);
     }
 
     /**
@@ -233,6 +246,66 @@ class PopupDataSourceManagerRefactored {
 
     getFormFillerDataSources() {
         return this.syncManager.getFormFillerDataSources();
+    }
+
+    /**
+     * Get selected data sources for Form Filler
+     */
+    getFormFillerSelectedSources() {
+        try {
+            const configs = this.syncManager.getConfigurations();
+            const formFillerConfig = configs.formFiller;
+            
+            if (!formFillerConfig || !formFillerConfig.isValid()) {
+                return [];
+            }
+
+            const availableDataSources = this.syncManager.getAvailableDataSources();
+            
+            // Filter by selected items
+            const selectedSources = [];
+            formFillerConfig.selectedItems.forEach(item => {
+                const source = availableDataSources.find(ds => ds.id === item.id);
+                if (source) {
+                    selectedSources.push(source);
+                }
+            });
+            
+            return selectedSources;
+        } catch (error) {
+            console.error('[PopupDataSourceManagerRefactored] Error getting form filler selected sources:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get selected data sources for Chat
+     */
+    getChatSelectedSources() {
+        try {
+            const configs = this.syncManager.getConfigurations();
+            const chatConfig = configs.chat;
+            
+            if (!chatConfig || !chatConfig.isValid()) {
+                return [];
+            }
+
+            const availableDataSources = this.syncManager.getAvailableDataSources();
+            
+            // Filter by selected items
+            const selectedSources = [];
+            chatConfig.selectedItems.forEach(item => {
+                const source = availableDataSources.find(ds => ds.id === item.id);
+                if (source) {
+                    selectedSources.push(source);
+                }
+            });
+            
+            return selectedSources;
+        } catch (error) {
+            console.error('[PopupDataSourceManagerRefactored] Error getting chat selected sources:', error);
+            return [];
+        }
     }
 
     /**

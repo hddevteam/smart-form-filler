@@ -518,6 +518,64 @@ class FormFillerHandler {
     }
 
     /**
+     * Clear all results and reset the form filler to initial state
+     */
+    clearAllResults() {
+        console.log("🧹 Clearing all form filler results...");
+        
+        // Reset state variables
+        this.currentForms = [];
+        this.analyzedData = null;
+        this.currentMappings = [];
+        this.selectedFormId = null;
+        this.lastAnalyzedContent = "";
+        this.currentAnalysisResult = null;
+        this.currentFormDescription = "";
+        
+        // Reset UI through UIController
+        if (this.uiController) {
+            this.uiController.resetFormDetectionState();
+            this.uiController.resetAnalysisState();
+            this.uiController.resetMappingState();
+            this.uiController.resetFillState();
+            this.uiController.updateFormDetectionButtonState(true);
+            this.uiController.updateFillButtonStates(false);
+        }
+        
+        // Hide all result sections
+        const sectionsToHide = [
+            'formDetectionResults',
+            'analysisResultsSection',
+            'fieldMappingSection', 
+            'fillActionsSection'
+        ];
+        
+        sectionsToHide.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('hidden');
+            }
+        });
+        
+        // Reset the generate mapping button
+        const generateBtn = document.getElementById("generateMappingBtn");
+        if (generateBtn) {
+            generateBtn.disabled = true;
+        }
+        
+        // Reset the analyze content button
+        const analyzeBtn = document.getElementById("analyzeContentBtn");
+        if (analyzeBtn) {
+            analyzeBtn.disabled = true;
+        }
+        
+        console.log("✅ All form filler results cleared");
+        
+        // Dispatch event for other components
+        document.dispatchEvent(new CustomEvent('formFillerCleared'));
+    }
+
+    /**
      * Handle Form Filler data source configuration changes
      */
     onDataSourceConfigurationChanged() {
