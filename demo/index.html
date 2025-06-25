@@ -13,8 +13,8 @@
             <p class="subtitle">Experience AI-powered intelligent form filling in action</p>
             <div class="demo-nav">
                 <button class="nav-btn active" data-step="intro">Introduction</button>
-                <button class="nav-btn" data-step="extraction">Data Extraction</button>
-                <button class="nav-btn" data-step="forms">Smart Forms</button>
+                <button class="nav-btn" data-step="workflow">Demo Workflow</button>
+                <button class="nav-btn" data-step="prompts">Prompt Templates</button>
                 <button class="nav-btn" data-step="chat">AI Chat</button>
             </div>
         </header>
@@ -59,132 +59,159 @@
                             <li>Try the extension on real websites!</li>
                         </ol>
                         
-                        <div class="demo-notice">
-                            <h4>📢 Important for Local File Access</h4>
-                            <p>If you opened this demo via file:// URL, the extension needs special permissions:</p>
-                            <ol>
-                                <li>Go to <code>chrome://extensions/</code> (or <code>edge://extensions/</code>)</li>
-                                <li>Find "Smart Form Filler" extension</li>
-                                <li>Click "Details"</li>
-                                <li>Enable "Allow access to file URLs"</li>
-                            </ol>
-                            <p><strong>Recommended:</strong> Use <code>npm run demo</code> to run the demo server at http://localhost:3002</p>
+                        <div class="demo-links" style="margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                            <h4>🚀 Try the Complete Demo Workflow</h4>
+                            <p>Experience the full data extraction and form filling process:</p>
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 15px;">
+                                <a href="data-source.html" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; text-decoration: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; transition: transform 0.3s ease;">
+                                    📊 Step 1: Data Source Page
+                                </a>
+                                <span style="display: flex; align-items: center; color: #7f8c8d; font-size: 1.2em;">→</span>
+                                <a href="employee-form.html" style="background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; text-decoration: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; transition: transform 0.3s ease;">
+                                    📝 Step 2: Smart Form Filling
+                                </a>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 0.9em; color: #6c757d;">
+                                <strong>Workflow:</strong> Extract employee data from the source page, then use the Smart Form Filler extension to intelligently fill the employee update form.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Data Extraction Step -->
-        <section id="extraction" class="demo-step">
+        <!-- Demo Workflow Step -->
+        <section id="workflow" class="demo-step">
             <div class="step-content">
                 <div class="demo-layout">
                     <div class="demo-panel">
-                        <h2>📊 Data Extraction Demo</h2>
-                        <p>See how the extension extracts structured data from web content.</p>
+                        <h2>🎯 Complete Demo Workflow</h2>
+                        <p>Experience the full data extraction and form filling process using our dedicated demo pages.</p>
                         
-                        <div class="sample-content">
-                            <h3>Sample Profile Information</h3>
-                            <div class="profile-card">
-                                <div class="profile-header">
-                                    <div class="profile-avatar">
-                                        <img src="https://via.placeholder.com/90x90/4f46e5/ffffff?text=JS" alt="JS" onerror="this.style.display='none'; this.parentNode.innerHTML='JS';">
-                                    </div>
-                                    <div class="profile-info">
-                                        <h4>John Smith</h4>
-                                        <p class="title">Senior Software Engineer</p>
-                                        <p class="company">TechCorp Solutions</p>
-                                    </div>
+                        <div class="workflow-overview">
+                            <div class="workflow-step">
+                                <div class="workflow-number">1</div>
+                                <div class="workflow-content">
+                                    <h4>📊 Data Extraction</h4>
+                                    <p>Extract employee profile data from a realistic company database page</p>
+                                    <a href="data-source.html" class="demo-btn primary" target="_blank">
+                                        🔗 Open Data Source Page
+                                    </a>
                                 </div>
-                                <div class="profile-details">
-                                    <div class="detail-item">
-                                        <span class="label">Email:</span>
-                                        <span class="value">john.smith@techcorp.com</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Phone:</span>
-                                        <span class="value">+1 (555) 123-4567</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Location:</span>
-                                        <span class="value">San Francisco, CA</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Department:</span>
-                                        <span class="value">Engineering</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Employee ID:</span>
-                                        <span class="value">EMP-2024-001</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Start Date:</span>
-                                        <span class="value">January 15, 2020</span>
+                            </div>
+                            
+                            <div class="workflow-arrow">↓</div>
+                            
+                            <div class="workflow-step">
+                                <div class="workflow-number">2</div>
+                                <div class="workflow-content">
+                                    <h4>📝 Smart Form Filling</h4>
+                                    <p>Use extracted data to intelligently fill employee update forms</p>
+                                    <a href="employee-form.html" class="demo-btn primary" target="_blank">
+                                        🔗 Open Form Page
+                                    </a>
+                                    
+                                    <div class="form-filling-prompts-inline">
+                                        <h5>📝 Quick Form Filling Prompts</h5>
+                                        <p><strong>Important:</strong> Copy these prompts for use with the employee form.</p>
+                                        <div class="quick-prompt-examples-inline">
+                                            <div class="quick-prompt-item-inline">
+                                                <strong>🔄 Complete Update:</strong>
+                                                <div class="quick-prompt-content-inline">
+                                                    <code>Fill this employee information update form using the previously extracted employee data. Update all personal information, contact details, employment information, and emergency contact. For any fields not available in the extracted data, use reasonable professional defaults appropriate for a senior software engineer.</code>
+                                                    <button class="copy-btn-inline" onclick="copyPrompt(this)" data-prompt="Fill this employee information update form using the previously extracted employee data. Update all personal information, contact details, employment information, and emergency contact. For any fields not available in the extracted data, use reasonable professional defaults appropriate for a senior software engineer.">📋 Copy</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="quick-prompt-item-inline">
+                                                <strong>🏠 Address Change:</strong>
+                                                <div class="quick-prompt-content-inline">
+                                                    <code>Fill this form as if Alex Johnson is updating her address after moving to a new apartment in San Francisco. Use the extracted employee data for personal and employment information, but change the address to "2890 Bush Street, Apt 4A, San Francisco, CA 94115". Update reason should be "Address Change - Recent Move".</code>
+                                                    <button class="copy-btn-inline" onclick="copyPrompt(this)" data-prompt="Fill this form as if Alex Johnson is updating her address after moving to a new apartment in San Francisco. Use the extracted employee data for personal and employment information, but change the address to '2890 Bush Street, Apt 4A, San Francisco, CA 94115'. Update reason should be 'Address Change - Recent Move'.">📋 Copy</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <button class="demo-btn" id="extractDataBtn">🔍 Extract Data</button>
+                        <div class="demo-features">
+                            <h3>🔧 What You'll Experience</h3>
+                            <div class="features-grid">
+                                <div class="feature-item">
+                                    <div class="feature-icon">👤</div>
+                                    <h4>Rich Employee Data</h4>
+                                    <p>Complete employee profile with personal info, contact details, employment data, and projects</p>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">🤖</div>
+                                    <h4>AI-Powered Extraction</h4>
+                                    <p>Extract structured data from complex web pages using natural language prompts</p>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">📋</div>
+                                    <h4>Intelligent Form Filling</h4>
+                                    <p>Fill comprehensive forms using extracted data with scenario-based customization</p>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">🎯</div>
+                                    <h4>Multiple Scenarios</h4>
+                                    <p>Test different use cases: address updates, benefits enrollment, emergency contacts</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="instructions-panel">
-                        <h3>💡 How to Use Data Extraction</h3>
+                        <h3>💡 Step-by-Step Instructions</h3>
                         <div class="instruction-steps">
                             <div class="step">
                                 <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Start with Data Extraction</h4>
+                                    <p>Click "Open Data Source Page" and use the extension to extract employee data</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
                                 <div class="step-content">
                                     <h4>Open Extension</h4>
                                     <p>Click the Smart Form Filler icon in your browser toolbar</p>
                                 </div>
                             </div>
                             <div class="step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <h4>Select Purpose</h4>
-                                    <p>Choose analysis purpose: "Contact Information" or "Profile Data"</p>
-                                </div>
-                            </div>
-                            <div class="step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
                                     <h4>Extract Data</h4>
-                                    <p>Click "Extract Data" to analyze the current page</p>
+                                    <p>Use prompts like: "Extract all employee information including personal and employment details"</p>
                                 </div>
                             </div>
                             <div class="step">
                                 <div class="step-number">4</div>
                                 <div class="step-content">
-                                    <h4>Review Results</h4>
-                                    <p>View extracted data in multiple formats (Markdown, HTML, Metadata)</p>
+                                    <h4>Navigate to Form</h4>
+                                    <p>Click "Open Form Page" to access the employee update form</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h4>Fill Form Intelligently</h4>
+                                    <p>Copy one of the provided prompt templates and use the extension to fill the form</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="prompt-guide">
-                            <h4>🎯 Extraction Prompts</h4>
-                            <div class="prompt-examples">
-                                <div class="prompt-item">
-                                    <strong>Contact Information:</strong>
-                                    <div class="prompt-content">
-                                        <code>"Extract contact details including name, email, phone, and address"</code>
-                                        <button class="copy-btn" data-prompt="Extract contact details including name, email, phone, and address">📋</button>
-                                    </div>
-                                </div>
-                                <div class="prompt-item">
-                                    <strong>Product Details:</strong>
-                                    <div class="prompt-content">
-                                        <code>"Extract product information including name, price, specifications, and availability"</code>
-                                        <button class="copy-btn" data-prompt="Extract product information including name, price, specifications, and availability">📋</button>
-                                    </div>
-                                </div>
-                                <div class="prompt-item">
-                                    <strong>Event Information:</strong>
-                                    <div class="prompt-content">
-                                        <code>"Extract event details including date, time, location, and description"</code>
-                                        <button class="copy-btn" data-prompt="Extract event details including date, time, location, and description">📋</button>
-                                    </div>
-                                </div>
+                        <div class="quick-actions">
+                            <h4>🚀 Quick Start</h4>
+                            <div class="action-buttons">
+                                <a href="data-source.html" class="action-btn" target="_blank">
+                                    📊 Data Source
+                                </a>
+                                <a href="employee-form.html" class="action-btn" target="_blank">
+                                    📝 Employee Form
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -192,211 +219,119 @@
             </div>
         </section>
 
-        <!-- Smart Forms Step -->
-        <section id="forms" class="demo-step">
+        <!-- Prompt Templates Step -->
+        <section id="prompts" class="demo-step">
             <div class="step-content">
                 <div class="demo-layout">
                     <div class="demo-panel">
-                        <h2>✍️ Smart Form Filling Demo</h2>
-                        <p>Experience intelligent form filling using extracted data.</p>
+                        <h2>🎨 Prompt Templates & Scenarios</h2>
+                        <p>Ready-to-use prompt templates for different form filling scenarios. Copy and use with the Smart Form Filler extension.</p>
                         
-                        <form class="demo-form" id="feedbackForm">
-                            <h3>🍽️ Restaurant Feedback Form</h3>
-                            <p class="form-description">We value your feedback! Please share your dining experience with us.</p>
-                            
-                            <div class="form-group">
-                                <label for="customerName">Customer Name *</label>
-                                <input type="text" id="customerName" name="customerName" placeholder="Your full name">
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="customerEmail">Email Address *</label>
-                                    <input type="email" id="customerEmail" name="customerEmail" placeholder="your.email@example.com">
-                                </div>
-                                <div class="form-group">
-                                    <label for="customerPhone">Phone Number</label>
-                                    <input type="tel" id="customerPhone" name="customerPhone" placeholder="+1 (555) 123-4567">
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="visitDate">Visit Date</label>
-                                    <input type="date" id="visitDate" name="visitDate">
-                                </div>
-                                <div class="form-group">
-                                    <label for="partySize">Party Size</label>
-                                    <select id="partySize" name="partySize">
-                                        <option value="">Select size</option>
-                                        <option value="1">1 person</option>
-                                        <option value="2">2 people</option>
-                                        <option value="3-4">3-4 people</option>
-                                        <option value="5-8">5-8 people</option>
-                                        <option value="9+">9+ people</option>
-                                    </select>
+                        <div class="prompt-categories">
+                            <div class="prompt-category">
+                                <h3>📊 Data Extraction Prompts</h3>
+                                <div class="prompt-examples">
+                                    <div class="prompt-item">
+                                        <h4>Complete Employee Data</h4>
+                                        <div class="prompt-content">
+                                            <code>Extract all employee information including personal details, contact information, employment data, emergency contacts, benefits information, and technical skills from this page.</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Extract all employee information including personal details, contact information, employment data, emergency contacts, benefits information, and technical skills from this page.">📋 Copy</button>
+                                        </div>
+                                    </div>
+                                    <div class="prompt-item">
+                                        <h4>Contact Information Focus</h4>
+                                        <div class="prompt-content">
+                                            <code>Extract contact details including name, email addresses, phone numbers, home address, and emergency contact information from this employee profile.</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Extract contact details including name, email addresses, phone numbers, home address, and emergency contact information from this employee profile.">📋 Copy</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="overallRating">Overall Experience *</label>
-                                <select id="overallRating" name="overallRating">
-                                    <option value="">Rate your experience</option>
-                                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                                    <option value="4">⭐⭐⭐⭐ Very Good</option>
-                                    <option value="3">⭐⭐⭐ Good</option>
-                                    <option value="2">⭐⭐ Fair</option>
-                                    <option value="1">⭐ Poor</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="foodQuality">Food Quality</label>
-                                    <select id="foodQuality" name="foodQuality">
-                                        <option value="">Rate food quality</option>
-                                        <option value="excellent">Excellent</option>
-                                        <option value="very-good">Very Good</option>
-                                        <option value="good">Good</option>
-                                        <option value="fair">Fair</option>
-                                        <option value="poor">Poor</option>
-                                    </select>
+
+                            <div class="prompt-category">
+                                <h3>📝 Form Filling Scenarios</h3>
+                                <div class="category-notice">
+                                    <p><strong>⚠️ Important:</strong> These prompts are specifically designed for use with the <a href="employee-form.html" target="_blank">Employee Information Update Form</a>. They are intentionally not displayed on the form page itself to prevent AI interference during form filling.</p>
                                 </div>
-                                <div class="form-group">
-                                    <label for="serviceQuality">Service Quality</label>
-                                    <select id="serviceQuality" name="serviceQuality">
-                                        <option value="">Rate service quality</option>
-                                        <option value="excellent">Excellent</option>
-                                        <option value="very-good">Very Good</option>
-                                        <option value="good">Good</option>
-                                        <option value="fair">Fair</option>
-                                        <option value="poor">Poor</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="favoriteItem">Favorite Menu Item</label>
-                                <input type="text" id="favoriteItem" name="favoriteItem" placeholder="What dish did you enjoy most?">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="feedbackComments">Detailed Comments</label>
-                                <textarea id="feedbackComments" name="feedbackComments" rows="4" placeholder="Please share your detailed feedback about your dining experience..."></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="recommendToFriends">Would you recommend us to friends?</label>
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="recommendToFriends" value="definitely">
-                                        <span>Definitely</span>
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="recommendToFriends" value="probably">
-                                        <span>Probably</span>
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="recommendToFriends" value="maybe">
-                                        <span>Maybe</span>
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="recommendToFriends" value="probably-not">
-                                        <span>Probably Not</span>
-                                    </label>
+                                <div class="prompt-examples">
+                                    <div class="prompt-item highlight">
+                                        <h4>🔄 Complete Information Update</h4>
+                                        <div class="prompt-content">
+                                            <code>Fill this employee information update form using the previously extracted employee data. Update all personal information, contact details, employment information, and emergency contact. For any fields not available in the extracted data, use reasonable professional defaults appropriate for a senior software engineer.</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Fill this employee information update form using the previously extracted employee data. Update all personal information, contact details, employment information, and emergency contact. For any fields not available in the extracted data, use reasonable professional defaults appropriate for a senior software engineer.">📋 Copy</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="prompt-item">
+                                        <h4>🏠 Address Change Scenario</h4>
+                                        <div class="prompt-content">
+                                            <code>Fill this form as if Alex Johnson is updating her address after moving to a new apartment in San Francisco. Use the extracted employee data for personal and employment information, but change the address to "2890 Bush Street, Apt 4A, San Francisco, CA 94115". Update reason should be "Address Change - Recent Move".</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Fill this form as if Alex Johnson is updating her address after moving to a new apartment in San Francisco. Use the extracted employee data for personal and employment information, but change the address to '2890 Bush Street, Apt 4A, San Francisco, CA 94115'. Update reason should be 'Address Change - Recent Move'.">📋 Copy</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="prompt-item">
+                                        <h4>💼 Benefits Enrollment Update</h4>
+                                        <div class="prompt-content">
+                                            <code>Fill this form for Alex Johnson who wants to update her benefits enrollment. Use extracted data for personal information but focus on updating health insurance to "Family Plan" due to having a new child, increase life insurance to "3x Annual Salary", and add dependent information for spouse and child.</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Fill this form for Alex Johnson who wants to update her benefits enrollment. Use extracted data for personal information but focus on updating health insurance to 'Family Plan' due to having a new child, increase life insurance to '3x Annual Salary', and add dependent information for spouse and child.">📋 Copy</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="prompt-item">
+                                        <h4>📞 Emergency Contact Update</h4>
+                                        <div class="prompt-content">
+                                            <code>Fill this employee update form using the extracted data, but Alex needs to add a secondary emergency contact. Keep Michael Johnson as primary emergency contact (husband), and add "Sarah Johnson (Sister), Phone: +1 (510) 555-3421, Relationship: Sister" as secondary emergency contact.</code>
+                                            <button class="copy-btn" onclick="copyPrompt(this)" data-prompt="Fill this employee update form using the extracted data, but Alex needs to add a secondary emergency contact. Keep Michael Johnson as primary emergency contact (husband), and add 'Sarah Johnson (Sister), Phone: +1 (510) 555-3421, Relationship: Sister' as secondary emergency contact.">📋 Copy</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="demo-btn secondary" id="clearFormBtn">Clear Form</button>
-                                <button type="submit" class="demo-btn primary">Submit Feedback</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
 
                     <div class="instructions-panel">
-                        <h3>💡 How to Use Smart Form Filling</h3>
+                        <h3>💡 How to Use Prompt Templates</h3>
                         <div class="instruction-steps">
                             <div class="step">
                                 <div class="step-number">1</div>
                                 <div class="step-content">
-                                    <h4>Extract Data First</h4>
-                                    <p>Use data extraction on a page with relevant information</p>
+                                    <h4>Choose Your Scenario</h4>
+                                    <p>Select a prompt template that matches your testing scenario</p>
                                 </div>
                             </div>
                             <div class="step">
                                 <div class="step-number">2</div>
                                 <div class="step-content">
-                                    <h4>Navigate to Form</h4>
-                                    <p>Go to any webpage with a form you want to fill</p>
+                                    <h4>Copy the Prompt</h4>
+                                    <p>Click the copy button next to the prompt you want to use</p>
                                 </div>
                             </div>
                             <div class="step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
-                                    <h4>Open Form Filler</h4>
-                                    <p>Switch to the "Form Filler" tab in the extension</p>
+                                    <h4>Use in Extension</h4>
+                                    <p>Paste the prompt in the Smart Form Filler extension</p>
                                 </div>
                             </div>
                             <div class="step">
                                 <div class="step-number">4</div>
                                 <div class="step-content">
-                                    <h4>Analyze & Fill</h4>
-                                    <p>Click "Analyze Form" then "Fill Form" to complete automatically</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="prompt-guide">
-                            <h4>🎯 Realistic Form Filling Scenarios</h4>
-                            <p class="prompt-intro">Try these specific scenarios to test the extension's capabilities:</p>
-                            <div class="prompt-examples">
-                                <div class="prompt-item highlight">
-                                    <strong>🍽️ Restaurant Review Scenario:</strong>
-                                    <div class="scenario-details">
-                                        <p><strong>Context:</strong> "As John Smith (john.smith@techcorp.com) who just had dinner at Mario's Italian Restaurant"</p>
-                                        <div class="prompt-content">
-                                            <code>"Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff."</code>
-                                            <button class="copy-btn" data-prompt="Fill this restaurant feedback form as a satisfied customer who enjoyed the seafood pasta and excellent service. Give a 5-star rating and positive detailed comments about the authentic Italian atmosphere and friendly staff.">📋</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="prompt-item">
-                                    <strong>👨‍👩‍👧‍👦 Family Dinner:</strong>
-                                    <div class="scenario-details">
-                                        <p><strong>Context:</strong> "As a parent with children"</p>
-                                        <div class="prompt-content">
-                                            <code>"Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback."</code>
-                                            <button class="copy-btn" data-prompt="Fill as a family visitor. Mention kid-friendly menu, accommodating staff for children, high chairs available, and how children enjoyed their meals. Family-focused feedback.">📋</button>
-                                        </div>
-                                    </div>
+                                    <h4>Review Results</h4>
+                                    <p>Check the filled form data for accuracy and completeness</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="tips-section">
-                            <h4>💡 Extension Usage Tips</h4>
+                            <h4>💡 Prompt Writing Tips</h4>
                             <ul>
-                                <li><strong>Extract Profile Data:</strong> Use the extension on LinkedIn, company pages, or resume sites first</li>
-                                <li><strong>Context Matters:</strong> Provide specific scenarios and personas for realistic results</li>
-                                <li><strong>Review Before Submit:</strong> Always check the filled data for accuracy</li>
-                                <li><strong>Customize Tone:</strong> Specify if you want professional, casual, enthusiastic, or critical feedback</li>
-                                <li><strong>Real-world Testing:</strong> Try the extension on actual restaurant, hotel, or service feedback forms</li>
+                                <li><strong>Be Specific:</strong> Include exact field names and desired values</li>
+                                <li><strong>Provide Context:</strong> Explain the scenario and reason for the update</li>
+                                <li><strong>Set Expectations:</strong> Specify how to handle missing information</li>
+                                <li><strong>Use Personas:</strong> Create realistic user scenarios for testing</li>
+                                <li><strong>Test Variations:</strong> Try different prompts to see how the AI responds</li>
                             </ul>
-                        </div>
-
-                        <div class="cta-section">
-                            <h4>🚀 Ready to Try the Real Extension?</h4>
-                            <p>Install the Smart Form Filler extension and experience intelligent form filling on any website!</p>
-                            <div class="cta-steps">
-                                <span class="cta-step">1. Install Extension</span>
-                                <span class="cta-arrow">→</span>
-                                <span class="cta-step">2. Visit Any Site</span>
-                                <span class="cta-arrow">→</span>
-                                <span class="cta-step">3. Extract Data</span>
-                                <span class="cta-arrow">→</span>
-                                <span class="cta-step">4. Fill Forms</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -527,6 +462,368 @@
 
     <!-- 加载模块化脚本 -->
     <script type="module" src="modules/uiUtils.js"></script>
+    <script>
+        // Copy prompt to clipboard functionality
+        function copyPrompt(button) {
+            const prompt = button.getAttribute('data-prompt');
+            navigator.clipboard.writeText(prompt).then(function() {
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                setTimeout(function() {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = prompt;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalText = button.textContent;
+                    button.textContent = '✅ Copied!';
+                    setTimeout(function() {
+                        button.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Fallback: Could not copy text: ', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+    </script>
+    <style>
+        /* Additional styles for new demo sections */
+        .workflow-overview {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .workflow-step {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        
+        .workflow-step:hover {
+            border-color: #3498db;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.1);
+        }
+        
+        .workflow-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+        
+        .workflow-content {
+            flex: 1;
+        }
+        
+        .workflow-content h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+            color: #2c3e50;
+        }
+        
+        .workflow-content p {
+            margin: 0 0 15px 0;
+            color: #7f8c8d;
+        }
+        
+        .workflow-arrow {
+            text-align: center;
+            font-size: 2em;
+            color: #3498db;
+            font-weight: bold;
+            padding: 10px 0;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            border-color: #3498db;
+            transform: translateY(-3px);
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .prompt-categories {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .prompt-category {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .prompt-category h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .category-notice {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .category-notice p {
+            margin: 0;
+            color: #155724;
+            font-size: 0.95em;
+        }
+        
+        .category-notice a {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        
+        .prompt-item.highlight {
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            border-left-color: #28a745;
+            border-left-width: 5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .form-filling-prompts {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .form-filling-prompts h4 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .form-filling-prompts p {
+            color: #856404;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .quick-prompt-examples {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .quick-prompt-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .quick-prompt-item strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .quick-prompt-content {
+            position: relative;
+        }
+        
+        .quick-prompt-content code {
+            display: block;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #495057;
+        }
+        
+        .quick-prompt-content .copy-btn {
+            position: static;
+            background: #856404;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.3s ease;
+        }
+        
+        .quick-prompt-content .copy-btn:hover {
+            background: #6c5503;
+        }
+        
+        /* Inline form filling prompts styles */
+        .form-filling-prompts-inline {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .form-filling-prompts-inline h5 {
+            color: #155724;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .form-filling-prompts-inline p {
+            color: #155724;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .quick-prompt-examples-inline {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .quick-prompt-item-inline {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .quick-prompt-item-inline strong {
+            color: #155724;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .quick-prompt-content-inline {
+            position: relative;
+        }
+        
+        .quick-prompt-content-inline code {
+            display: block;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 0.8em;
+            line-height: 1.3;
+            color: #495057;
+        }
+        
+        .copy-btn-inline {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: background-color 0.3s ease;
+        }
+        
+        .copy-btn-inline:hover {
+            background: #218838;
+        }
+        
+        /* Responsive design for workflow */
+        @media (max-width: 768px) {
+            .workflow-step {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .workflow-content {
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .workflow-overview {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .workflow-arrow {
+                transform: rotate(90deg);
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
     <script src="script.js"></script>
 </body>
 </html>
