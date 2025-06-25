@@ -2832,6 +2832,8 @@ body {
 
 .connection-status:not(.hidden) {
    
+
+
     opacity: 1;
     transform: translateY(0);
 }
@@ -2887,7 +2889,6 @@ body {
 }
 
 .btn:focus-visible {
-   
 
 
 
@@ -3481,6 +3482,14 @@ body {
     font-size: 12px;
 }
 
+.simple-mode__field-preview--detailed {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 12px;
+    font-size: 13px;
+}
+
 .simple-mode__field-preview--more {
     font-style: italic;
     color: #6b7280;
@@ -3494,6 +3503,14 @@ body {
     min-width: 80px;
 }
 
+.simple-mode__field-preview--detailed .simple-mode__field-label {
+    color: #374151;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 2px;
+    min-width: auto;
+}
+
 .simple-mode__field-arrow {
     color: #6b7280;
 }
@@ -3504,6 +3521,20 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.simple-mode__field-preview--detailed .simple-mode__field-value {
+    color: #059669;
+    background: #f0fdf4;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #bbf7d0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: visible;
+    text-overflow: unset;
+    font-family: inherit;
+    line-height: 1.4;
 }
 
 .simple-mode__no-results {
@@ -3670,136 +3701,119 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Advanced Mode section content collapsed state */
 .advanced-mode__section-content--collapsed {
     max-height: 0;
     padding: 0;
     margin: 0;
     opacity: 0;
+    overflow: hidden;
 }
 
-.advanced-mode__step-status {
-    font-size: 12px;
-    color: #6b7280;
-    margin-left: 8px;
+/* Action buttons are now positioned outside collapsible content, so no special handling needed */
+
+/* Action buttons are now positioned outside collapsible content, so no special handling needed */
+
+/* Results containers styling */
+.form-detection-results,
+.analysis-results-container,
+.mapping-results-container {
+    margin-top: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f9fafb;
 }
 
-/* Form Filler Content Container */
-.form-filler__content {
+/* Results content collapsible */
+.section__content--collapsible {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.section__content--collapsible.collapsed {
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
+}
+
+/* Results section headers */
+.section__header--results {
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.section__header--results:hover {
+    background: var(--color-background-hover);
+}
+
+.section__header--results .section__header-content {
+    flex: 1;
+}
+
+.section__header--results .section__subtitle {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* Results content collapsible styling */
+.section__content--collapsible {
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    background: var(--color-background);
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.section__content--collapsible.collapsed {
+    display: none;
+}
+
+/* Ensure results containers have proper spacing */
+.form-detection-results,
+.analysis-results-container,
+.mapping-results-container {
+    margin-top: 0.5rem;
+}
+
+/* Action buttons positioned at the top of each section - always visible */
+.advanced-mode__section > .action-buttons {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 1rem 0.75rem 1rem; /* No top margin, bottom margin before header */
+    padding: 0.75rem;
+    background: var(--color-background);
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
     position: relative;
-    min-height: 200px;
+    z-index: 10; /* Ensure always on top */
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-    .simple-mode__actions {
-        flex-direction: column;
-    }
-    
-    .simple-mode__btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .simple-mode__results-stats {
-        flex-direction: column;
-    }
-    
-    .mode-toggle-container {
-        flex-direction: column;
-        gap: 2px;
-    }
-    
-    .simple-mode__field-preview {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-    }
-    
-    .simple-mode__field-label {
-        min-width: auto;
-    }
-    
-    .simple-mode__error-actions {
-        flex-direction: column;
-        width: 100%;
-    }
+/* First action button section gets top margin */
+.advanced-mode__section:first-of-type > .action-buttons {
+    margin-top: 0.75rem;
 }
 
-@media (max-width: 360px) {
-    .form-filler__mode-header {
-        padding: 8px 12px;
-        margin-bottom: 16px;
-    }
-    
-    .simple-mode__section {
-        padding: 16px;
-    }
-    
-    .simple-mode__input-group {
-        margin-bottom: 12px;
-    }
+/* Specific styling for different action button types */
+.action-buttons--form-detection {
+    border-left: 3px solid var(--color-secondary);
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .simple-mode__btn--primary {
-        background: #000;
-        border: 2px solid #000;
-    }
-    
-    .simple-mode__btn--secondary {
-        border: 2px solid #666;
-    }
-    
-    .simple-mode__progress-fill {
-        background: #000;
-    }
+.action-buttons--content-analysis {
+    border-left: 3px solid var(--color-primary);
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .simple-mode__progress-icon,
-    .simple-mode__progress-fill,
-    .simple-mode__btn,
-    .mode-toggle,
-    .advanced-mode__section,
-    .simple-mode__temp-message {
-        animation: none;
-        transition: none;
-    }
-}
-
-/* Dark mode support (if needed in future) */
-@media (prefers-color-scheme: dark) {
-    .form-filler__mode-header {
-        background: #1f2937;
-        border-color: #374151;
-    }
-    
-    .mode-toggle-container {
-        background: #111827;
-    }
-    
-    .mode-toggle {
-        color: #d1d5db;
-    }
-    
-    .mode-toggle:hover {
-        background: #374151;
-        color: #f9fafb;
-    }
-    
-    .simple-mode__section {
-        background: #1f2937;
-        border-color: #374151;
-    }
-    
-    .simple-mode__select,
-    .simple-mode__textarea {
-        background: #111827;
-        border-color: #374151;
-        color: #f9fafb;
-    }
+.action-buttons--mapping {
+    border-left: 3px solid var(--color-accent);
 }
 
 /* End of Form Filler Mode Styles */
@@ -3888,4 +3902,53 @@ body {
 @keyframes simpleModeSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Collapse icons transition effects */
+.advanced-mode__collapse-icon,
+.collapse-icon {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+/* Collapsed state icons */
+.advanced-mode__section-content--collapsed .advanced-mode__collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.section__content--collapsible.collapsed + .section__header--collapsible .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* Ensure visibility of action buttons even when section is collapsed */
+.advanced-mode__section.collapsed .action-buttons,
+.advanced-mode__section-content--collapsed ~ .action-buttons {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hover effects for interactive elements */
+.section__header--collapsible:hover {
+    background: var(--color-background-hover, #f8f9fa);
+}
+
+.advanced-mode__section-header--collapsible:hover {
+    background: var(--color-background-hover, #f8f9fa);
+}
+
+/* Better spacing for section content */
+.advanced-mode__section-content {
+    padding: 0;
+}
+
+.advanced-mode__section-content.advanced-mode__section-content--collapsed {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Action button container spacing adjustments */
+.advanced-mode__section > .action-buttons {
+    margin: 0.75rem 1rem 0.5rem 1rem;
 }

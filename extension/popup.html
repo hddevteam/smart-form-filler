@@ -343,7 +343,15 @@
                         </div>
 
                         <!-- Form Detection Section -->
-                        <div id="advancedFormDetection" class="section advanced-mode__section" data-step="formDetection" data-section="formDetection">
+                        <div id="advancedFormDetection" class="section advanced-mode__section" data-step="formDetection" data-section-container="formDetection">
+                            <!-- Action button always visible - above section header -->
+                            <div class="action-buttons action-buttons--form-detection">
+                                <button id="detectFormsBtn" class="btn btn--secondary">
+                                    <span class="btn__icon">🔍</span>
+                                    <span class="btn__text">Detect Forms</span>
+                                </button>
+                            </div>
+                            
                             <div class="section__header advanced-mode__section-header--collapsible" data-target="formDetection">
                                 <div class="section__header-content">
                                     <h3 class="section__title">Form Detection</h3>
@@ -353,17 +361,11 @@
                                     <span class="advanced-mode__collapse-icon">▼</span>
                                 </button>
                             </div>
+                            
                             <div class="section__content advanced-mode__section-content" data-section="formDetection">
-                                <div class="action-buttons action-buttons--form-detection">
-                                    <button id="detectFormsBtn" class="btn btn--secondary">
-                                        <span class="btn__icon">🔍</span>
-                                        <span class="btn__text">Detect Forms</span>
-                                    </button>
-                                </div>
-                                
-                                <!-- Form Detection Results -->
+                                <!-- Form Detection Results with independent collapse -->
                                 <div id="formDetectionResults" class="form-detection-results hidden">
-                                    <div class="section__header section__header--collapsible section__header--results">
+                                    <div class="section__header section__header--collapsible section__header--results" data-target="formDetectionResultsContent">
                                         <div class="section__header-content">
                                             <div class="form-detection-summary">
                                                 <span class="summary-item">
@@ -380,12 +382,12 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <button class="section__collapse-btn" data-target="formDetection" title="Collapse/Expand">
+                                        <button class="section__collapse-btn" data-target="formDetectionResultsContent" title="Collapse/Expand Results">
                                             <span class="collapse-icon">▼</span>
                                         </button>
                                     </div>
                                     
-                                    <div class="section__content--collapsible" data-section="formDetection">
+                                    <div class="section__content--collapsible" data-section="formDetectionResultsContent">
                                         <div id="formsList" class="forms-list">
                                             <!-- Dynamic form list will be inserted here -->
                                         </div>
@@ -395,7 +397,15 @@
                         </div>
 
                         <!-- Content Analysis Section -->
-                        <div id="advancedContentAnalysis" class="section advanced-mode__section hidden" data-step="contentAnalysis" data-section="analysisResults">
+                        <div id="advancedContentAnalysis" class="section advanced-mode__section hidden" data-step="contentAnalysis" data-section-container="analysisResults">
+                            <!-- Action button always visible - above section header -->
+                            <div class="action-buttons action-buttons--content-analysis">
+                                <button id="analyzeContentBtn" class="btn btn--primary" disabled>
+                                    <span class="btn__icon">🧠</span>
+                                    <span class="btn__text">Analyze Content</span>
+                                </button>
+                            </div>
+                            
                             <div class="section__header advanced-mode__section-header--collapsible" data-target="analysisResults">
                                 <div class="section__header-content">
                                     <h3 class="section__title">Content Analysis</h3>
@@ -405,23 +415,30 @@
                                     <span class="advanced-mode__collapse-icon">▼</span>
                                 </button>
                             </div>
+                            
                             <div class="section__content advanced-mode__section-content" data-section="analysisResults">
-                                <!-- Analyze Content Button - moved here -->
-                                <div class="action-buttons action-buttons--content-analysis">
-                                    <button id="analyzeContentBtn" class="btn btn--primary" disabled>
-                                        <span class="btn__icon">🧠</span>
-                                        <span class="btn__text">Analyze Content</span>
-                                    </button>
-                                </div>
-                                
-                                <div id="analysisResults" class="analysis-results">
-                                    <!-- Dynamic analysis results will be inserted here -->
+                                <!-- Analysis Results with independent collapse -->
+                                <div id="analysisResultsContainer" class="analysis-results-container hidden">
+                                    <div class="section__header section__header--collapsible section__header--results" data-target="analysisResultsContent">
+                                        <div class="section__header-content">
+                                            <h4 class="section__subtitle">Analysis Results</h4>
+                                        </div>
+                                        <button class="section__collapse-btn" data-target="analysisResultsContent" title="Collapse/Expand Results">
+                                            <span class="collapse-icon">▼</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="section__content--collapsible" data-section="analysisResultsContent">
+                                        <div id="analysisResults" class="analysis-results">
+                                            <!-- Dynamic analysis results will be inserted here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Field Mapping Section -->
-                        <div id="advancedFieldMapping" class="section advanced-mode__section hidden" data-step="fieldMapping" data-section="fieldMapping">
+                        <div id="advancedFieldMapping" class="section advanced-mode__section hidden" data-step="fieldMapping" data-section-container="fieldMapping">
                             <div class="section__header advanced-mode__section-header--collapsible" data-target="fieldMapping">
                                 <div class="section__header-content">
                                     <h3 class="section__title">Field Mapping</h3>
@@ -431,16 +448,32 @@
                                     <span class="advanced-mode__collapse-icon">▼</span>
                                 </button>
                             </div>
+                            
+                            <!-- Action button always visible - outside collapsible content -->
+                            <div class="action-buttons action-buttons--mapping">
+                                <button id="generateMappingBtn" class="btn btn--primary" disabled>
+                                    <span class="btn__icon">🗺️</span>
+                                    <span class="btn__text">Generate Mapping</span>
+                                </button>
+                            </div>
+                            
                             <div class="section__content advanced-mode__section-content" data-section="fieldMapping">
-                                <div class="action-buttons action-buttons--mapping">
-                                    <button id="generateMappingBtn" class="btn btn--primary" disabled>
-                                        <span class="btn__icon">🗺️</span>
-                                        <span class="btn__text">Generate Mapping</span>
-                                    </button>
-                                </div>
-                                
-                                <div id="mappingResults" class="mapping-results hidden">
-                                    <!-- Dynamic mapping results will be inserted here -->
+                                <!-- Mapping Results with independent collapse -->
+                                <div id="mappingResultsContainer" class="mapping-results-container hidden">
+                                    <div class="section__header section__header--collapsible section__header--results" data-target="mappingResultsContent">
+                                        <div class="section__header-content">
+                                            <h4 class="section__subtitle">Mapping Results</h4>
+                                        </div>
+                                        <button class="section__collapse-btn" data-target="mappingResultsContent" title="Collapse/Expand Results">
+                                            <span class="collapse-icon">▼</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="section__content--collapsible" data-section="mappingResultsContent">
+                                        <div id="mappingResults" class="mapping-results">
+                                            <!-- Dynamic mapping results will be inserted here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

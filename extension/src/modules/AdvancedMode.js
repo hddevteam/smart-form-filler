@@ -34,11 +34,27 @@ class AdvancedMode {
         // Bind collapsible section headers
         this.collapsibleHeaders.forEach(header => {
             header.addEventListener('click', (e) => {
+                // Prevent event bubbling to avoid conflicts
+                e.stopPropagation();
+                
                 const target = header.getAttribute('data-target');
                 if (target) {
+                    console.log(`[AdvancedMode] Toggling section: ${target}`);
                     this.toggleSection(target);
                 }
             });
+        });
+
+        // Bind results section collapse buttons
+        document.addEventListener('click', (e) => {
+            const collapseBtn = e.target.closest('.section__collapse-btn');
+            if (collapseBtn && collapseBtn.closest('.advanced-mode__section')) {
+                e.stopPropagation();
+                const target = collapseBtn.getAttribute('data-target');
+                if (target && target.includes('ResultsContent')) {
+                    this.toggleResultsSection(target);
+                }
+            }
         });
 
         // Listen for form filler events to update visibility
@@ -63,10 +79,41 @@ class AdvancedMode {
             this.collapsedSections.delete(sectionId);
             if (icon) icon.textContent = '▼';
         } else {
-            // Collapse
+            // Collapse - but ensure action buttons remain visible
             section.classList.add('advanced-mode__section-content--collapsed');
             this.collapsedSections.add(sectionId);
             if (icon) icon.textContent = '▶';
+        }
+        
+        // Action buttons are now outside the collapsible content area, so they should always be visible
+        // No additional handling needed since they're positioned before the header
+    }
+
+    toggleResultsSection(sectionId) {
+        console.log(`[AdvancedMode] toggleResultsSection called with: ${sectionId}`);
+        
+        const section = this.container.querySelector(`[data-section="${sectionId}"]`);
+        const button = this.container.querySelector(`[data-target="${sectionId}"]`);
+        const icon = button?.querySelector('.collapse-icon');
+
+        if (!section || !button) {
+            console.warn(`[AdvancedMode] toggleResultsSection: Could not find section or button for ${sectionId}`);
+            return;
+        }
+
+        const isCollapsed = section.classList.contains('collapsed');
+        console.log(`[AdvancedMode] Results section ${sectionId} is currently ${isCollapsed ? 'collapsed' : 'expanded'}`);
+
+        if (isCollapsed) {
+            // Expand
+            section.classList.remove('collapsed');
+            if (icon) icon.textContent = '▼';
+            console.log(`[AdvancedMode] Expanded results section ${sectionId}`);
+        } else {
+            // Collapse
+            section.classList.add('collapsed');
+            if (icon) icon.textContent = '▶';
+            console.log(`[AdvancedMode] Collapsed results section ${sectionId}`);
         }
     }
 
@@ -252,6 +299,29 @@ class AdvancedMode {
             }
         });
 
+        // Hide results containers
+        const resultsContainers = [
+            'formDetectionResults',
+            'analysisResultsContainer', 
+            'mappingResultsContainer'
+        ];
+        resultsContainers.forEach(id => {
+            const container = document.getElementById(id);
+            if (container) {
+                container.classList.add('hidden');
+            }
+        });
+
+        // Reset results content collapse state
+        this.container.querySelectorAll('.section__content--collapsible').forEach(content => {
+            content.classList.remove('collapsed');
+        });
+        
+        // Reset all collapse icons for results
+        this.container.querySelectorAll('.collapse-icon').forEach(icon => {
+            icon.textContent = '▼';
+        });
+
         // Expand all visible sections by default
         this.collapsedSections.clear();
         this.container.querySelectorAll('.advanced-mode__collapse-icon').forEach(icon => {
@@ -260,6 +330,8 @@ class AdvancedMode {
         this.container.querySelectorAll('.advanced-mode__section-content--collapsed').forEach(content => {
             content.classList.remove('advanced-mode__section-content--collapsed');
         });
+        
+        // Action buttons should always be visible since they're positioned outside collapsible areas
     }
 
     // Get current workflow progress

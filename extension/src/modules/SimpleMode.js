@@ -99,18 +99,22 @@ class SimpleMode {
         // Listen for data source changes from other components
         document.addEventListener('dataSourcesUpdated', () => {
             // DataSourceButton component handles updates
+            this.updateSubmitButtonState();
         });
         
         document.addEventListener('formFillerConfigChanged', () => {
             // DataSourceButton component handles updates
+            this.updateSubmitButtonState();
         });
         
         document.addEventListener('configurationApplied', () => {
             // DataSourceButton component handles updates
+            this.updateSubmitButtonState();
         });
         
         document.addEventListener('dataSourceManagerReady', () => {
             // DataSourceButton component handles updates
+            this.updateSubmitButtonState();
         });
     }
 
@@ -124,14 +128,27 @@ class SimpleMode {
     updateSubmitButtonState() {
         if (this.submitBtn && this.contentInput) {
             const hasContent = this.contentInput.value.trim().length > 0;
-            this.submitBtn.disabled = !hasContent || this.currentStep === 'processing';
+            const hasDataSources = this.hasSelectedDataSources();
+            
+            // Allow submit if either has content OR has data sources
+            const canSubmit = hasContent || hasDataSources;
+            this.submitBtn.disabled = !canSubmit || this.currentStep === 'processing';
         }
+    }
+
+    hasSelectedDataSources() {
+        // Check if there are selected data sources
+        const selectedSources = this.getSelectedDataSources();
+        return selectedSources && selectedSources.length > 0;
     }
 
     async handleSubmit() {
         const content = this.contentInput?.value?.trim();
-        if (!content) {
-            this.showError('Please enter content to analyze');
+        const hasDataSources = this.hasSelectedDataSources();
+        
+        // Allow submit if either has content OR has data sources
+        if (!content && !hasDataSources) {
+            this.showError('Please enter content to analyze or select data sources');
             return;
         }
 
@@ -148,6 +165,17 @@ class SimpleMode {
         this.currentStepIndex = 0;
         
         try {
+            // If no content provided, try to get content from data sources
+            let effectiveContent = content;
+            if (!effectiveContent) {
+                const selectedSources = this.getSelectedDataSources();
+                if (selectedSources && selectedSources.length > 0) {
+                    // Use the first selected data source content
+                    effectiveContent = this.getContentFromDataSources(selectedSources);
+                    console.log('[SimpleMode] Using content from data sources:', effectiveContent ? effectiveContent.substring(0, 100) + '...' : 'No content available');
+                }
+            }
+            
             // Step 1: Detect Forms
             this.updateProgress(0, 'detecting');
             await this.formFillerHandler.detectForms();
@@ -156,9 +184,24 @@ class SimpleMode {
                 throw new Error('No forms found on the current page');
             }
 
-            // Step 2: Analyze Content
+            // Step 2: Analyze Content - temporarily set content input for the API
             this.updateProgress(1, 'analyzing');
-            await this.formFillerHandler.analyzeContentWithFormStructure();
+            const contentInput = document.getElementById('fillContentInput');
+            const originalValue = contentInput ? contentInput.value : '';
+            
+            if (contentInput && effectiveContent && !content) {
+                // Temporarily set the data source content for analysis
+                contentInput.value = effectiveContent;
+            }
+            
+            try {
+                await this.formFillerHandler.analyzeContentWithFormStructure();
+            } finally {
+                // Restore original value
+                if (contentInput && !content) {
+                    contentInput.value = originalValue;
+                }
+            }
             
             if (!this.formFillerHandler.currentAnalysisResult) {
                 throw new Error('Content analysis failed');
@@ -168,12 +211,14 @@ class SimpleMode {
             this.updateProgress(2, 'generating');
             await this.formFillerHandler.generateMapping();
             
-            if (!this.formFillerHandler.currentMappings || this.formFillerHandler.currentMappings.length === 0) {
-                throw new Error('Failed to generate field mappings');
-            }
-
-            // Success
+            // Always show results, even if mapping failed or returned empty results
+            // This allows users to see what forms were detected, even if mapping failed
             this.showResults();
+            
+            // Check if mapping was successful for informational purposes
+            if (!this.formFillerHandler.currentMappings || this.formFillerHandler.currentMappings.length === 0) {
+                console.warn('[SimpleMode] Warning: No field mappings were generated, but continuing to show detected forms');
+            }
             
         } catch (error) {
             this.showError(`Step failed: ${error.message}`, error);
@@ -216,13 +261,21 @@ class SimpleMode {
             this.updateResultsDisplay();
         }
         
-        // Show the fill section
+        // Check if we have any valid field mappings
+        const hasValidMappings = this.formFillerHandler.currentMappings && 
+                                this.formFillerHandler.currentMappings.length > 0;
+        
+        // Show the fill section only if we have mappings
         if (this.fillSection) {
-            this.fillSection.classList.remove('hidden');
+            if (hasValidMappings) {
+                this.fillSection.classList.remove('hidden');
+            } else {
+                this.fillSection.classList.add('hidden');
+            }
         }
         
         if (this.fillFormsBtn) {
-            this.fillFormsBtn.disabled = false;
+            this.fillFormsBtn.disabled = !hasValidMappings;
         }
         
         this.updateSubmitButtonState();
@@ -256,15 +309,35 @@ class SimpleMode {
     updateResultsDisplay() {
         if (!this.resultsContainer) return;
 
-        const mappings = this.formFillerHandler.currentMappings || [];
-        const totalFields = mappings.reduce((sum, mapping) => sum + (mapping.fields?.length || 0), 0);
+        // Get field-level mappings from formFillerHandler
+        const fieldMappings = this.formFillerHandler.currentMappings || [];
+        const detectedForms = this.formFillerHandler.currentForms || [];
+        
+        // Add debug logging to understand the data structure
+        console.log('[SimpleMode] Debug - Field mappings:', fieldMappings);
+        console.log('[SimpleMode] Debug - Detected forms:', detectedForms);
+        
+        // Convert field-level mappings to form-level structure for Simple mode display
+        const formMappings = this.convertToFormMappings(fieldMappings, detectedForms);
+        const totalFields = fieldMappings.length;
+        
+        // If no successful mappings but we have detected forms, show all forms with 0 fields
+        const displayMappings = formMappings.length > 0 ? formMappings : 
+            detectedForms.map(form => ({
+                formTitle: form.name || form.id || 'Untitled Form',
+                formId: form.id,
+                fields: []
+            }));
+        
+        console.log('[SimpleMode] Debug - Converted form mappings:', formMappings);
+        console.log('[SimpleMode] Debug - Display mappings:', displayMappings);
         
         const resultsHTML = `
             <div class="simple-mode__results-summary">
                 <div class="simple-mode__results-stats">
                     <span class="simple-mode__stat">
                         <span class="simple-mode__stat-icon">📝</span>
-                        <span class="simple-mode__stat-text">${mappings.length} forms ready</span>
+                        <span class="simple-mode__stat-text">${displayMappings.length} forms ready</span>
                     </span>
                     <span class="simple-mode__stat">
                         <span class="simple-mode__stat-icon">🎯</span>
@@ -272,7 +345,7 @@ class SimpleMode {
                     </span>
                 </div>
                 <div class="simple-mode__results-preview">
-                    ${this.generateResultsPreview(mappings)}
+                    ${this.generateResultsPreview(displayMappings)}
                 </div>
             </div>
         `;
@@ -280,31 +353,124 @@ class SimpleMode {
         this.resultsContainer.innerHTML = resultsHTML;
     }
 
-    generateResultsPreview(mappings) {
-        if (!mappings || mappings.length === 0) {
+    convertToFormMappings(fieldMappings, detectedForms) {
+        console.log('[SimpleMode] Converting field mappings to form mappings...');
+        console.log('[SimpleMode] Field mappings count:', fieldMappings.length);
+        console.log('[SimpleMode] Detected forms count:', detectedForms.length);
+        
+        // If no field mappings, return all detected forms with 0 fields
+        if (!fieldMappings || fieldMappings.length === 0) {
+            console.log('[SimpleMode] No field mappings found, returning empty forms');
+            return detectedForms.map(form => ({
+                formTitle: form.name || form.id || 'Untitled Form',
+                formId: form.id,
+                fields: []
+            }));
+        }
+        
+        // Group field mappings by form
+        const formMap = new Map();
+        
+        // First, create entries for all detected forms
+        detectedForms.forEach(form => {
+            if (!formMap.has(form.id)) {
+                formMap.set(form.id, {
+                    formTitle: form.name || form.id || 'Untitled Form',
+                    formId: form.id,
+                    fields: []
+                });
+            }
+        });
+        
+        // Then add field mappings to their respective forms
+        let unmatchedFields = 0;
+        fieldMappings.forEach((mapping, index) => {
+            console.log(`[SimpleMode] Processing field mapping ${index}:`, mapping);
+            
+            // Find which form this field belongs to by matching field information
+            let targetFormId = null;
+            
+            // Try to find the form that contains this field
+            for (const form of detectedForms) {
+                const hasField = form.fields.some(field => {
+                    const match = field.id === mapping.fieldId || 
+                                 field.name === mapping.fieldName ||
+                                 field.name === mapping.fieldId ||
+                                 (field.xpath && field.xpath === mapping.xpath);
+                    
+                    if (match) {
+                        console.log(`[SimpleMode] Found matching field in form ${form.id}:`, field);
+                    }
+                    return match;
+                });
+                
+                if (hasField) {
+                    targetFormId = form.id;
+                    break;
+                }
+            }
+            
+            // If we found a matching form, add the field mapping
+            if (targetFormId && formMap.has(targetFormId)) {
+                const formData = formMap.get(targetFormId);
+                formData.fields.push({
+                    label: mapping.fieldLabel || mapping.fieldName || mapping.fieldId,
+                    name: mapping.fieldName || mapping.fieldId,
+                    suggestedValue: mapping.suggestedValue || mapping.value || 'N/A'
+                });
+                console.log(`[SimpleMode] Added field to form ${targetFormId}`);
+            } else {
+                // If no matching form found, create a generic form entry
+                unmatchedFields++;
+                const genericFormId = 'mapped-form';
+                if (!formMap.has(genericFormId)) {
+                    formMap.set(genericFormId, {
+                        formTitle: 'Mapped Fields',
+                        formId: genericFormId,
+                        fields: []
+                    });
+                }
+                
+                const genericForm = formMap.get(genericFormId);
+                genericForm.fields.push({
+                    label: mapping.fieldLabel || mapping.fieldName || mapping.fieldId,
+                    name: mapping.fieldName || mapping.fieldId,
+                    suggestedValue: mapping.suggestedValue || mapping.value || 'N/A'
+                });
+                console.log(`[SimpleMode] Added unmatched field to generic form:`, mapping.fieldId);
+            }
+        });
+        
+        if (unmatchedFields > 0) {
+            console.log(`[SimpleMode] Warning: ${unmatchedFields} fields could not be matched to detected forms`);
+        }
+        
+        // Convert map to array
+        const result = Array.from(formMap.values());
+        console.log('[SimpleMode] Final form mappings:', result);
+        
+        return result;
+    }
+
+    generateResultsPreview(formMappings) {
+        if (!formMappings || formMappings.length === 0) {
             return '<p class="simple-mode__no-results">No mappings generated</p>';
         }
 
-        return mappings.map(mapping => `
+        return formMappings.map(formMapping => `
             <div class="simple-mode__form-preview">
                 <div class="simple-mode__form-title">
                     <span class="simple-mode__form-icon">📋</span>
-                    <span class="simple-mode__form-name">${mapping.formTitle || 'Untitled Form'}</span>
-                    <span class="simple-mode__field-count">${mapping.fields?.length || 0} fields</span>
+                    <span class="simple-mode__form-name">${formMapping.formTitle || 'Untitled Form'}</span>
+                    <span class="simple-mode__field-count">${formMapping.fields?.length || 0} fields</span>
                 </div>
                 <div class="simple-mode__fields-preview">
-                    ${(mapping.fields || []).slice(0, 3).map(field => `
-                        <div class="simple-mode__field-preview">
-                            <span class="simple-mode__field-label">${field.label || field.name}</span>
-                            <span class="simple-mode__field-arrow">→</span>
-                            <span class="simple-mode__field-value">${this.truncateText(field.suggestedValue || 'N/A', 30)}</span>
+                    ${(formMapping.fields || []).map(field => `
+                        <div class="simple-mode__field-preview simple-mode__field-preview--detailed">
+                            <div class="simple-mode__field-label">${field.label || field.name}</div>
+                            <div class="simple-mode__field-value">${field.suggestedValue || 'N/A'}</div>
                         </div>
                     `).join('')}
-                    ${mapping.fields?.length > 3 ? `
-                        <div class="simple-mode__field-preview simple-mode__field-preview--more">
-                            ... and ${mapping.fields.length - 3} more fields
-                        </div>
-                    ` : ''}
                 </div>
             </div>
         `).join('');
@@ -425,6 +591,27 @@ class SimpleMode {
         }
         console.log('[SimpleMode] getSelectedDataSources: No data source manager or method available');
         return [];
+    }
+
+    getContentFromDataSources(selectedSources) {
+        // Extract content from selected data sources
+        if (!selectedSources || selectedSources.length === 0) {
+            return '';
+        }
+        
+        // Combine content from all selected sources
+        const contents = selectedSources
+            .filter(source => source.content)
+            .map(source => {
+                let content = source.content;
+                // Add source title if available
+                if (source.title) {
+                    content = `[${source.title}]\n${content}`;
+                }
+                return content;
+            });
+            
+        return contents.join('\n\n---\n\n');
     }
 
     openDataSourceModal() {

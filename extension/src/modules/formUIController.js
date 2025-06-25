@@ -460,9 +460,9 @@ class FormUIController {
      */
     _displayContentAnalysisResults(relevanceData, currentForms) {
         const analysisResultsEl = document.getElementById("analysisResults");
-        const analysisResultsSection = document.getElementById("analysisResultsSection");
+        const analysisResultsContainer = document.getElementById("analysisResultsContainer");
         
-        if (!analysisResultsEl || !analysisResultsSection) {
+        if (!analysisResultsEl || !analysisResultsContainer) {
             console.warn("⚠️ Cannot display analysis results: missing elements");
             return;
         }
@@ -543,8 +543,8 @@ class FormUIController {
         // Update the analysis results container
         analysisResultsEl.innerHTML = analysisHtml;
         
-        // Show analysis results section
-        analysisResultsSection.classList.remove("hidden");
+        // Show analysis results container
+        analysisResultsContainer.classList.remove("hidden");
     }
     
     /**
@@ -554,6 +554,8 @@ class FormUIController {
      */
     displayMappingResults(mappings, confidence) {
         const mappingResultsEl = document.getElementById("mappingResults");
+        const mappingResultsContainer = document.getElementById("mappingResultsContainer");
+        
         if (!mappingResultsEl) return;
         
         // Create a confidence indicator
@@ -622,8 +624,11 @@ class FormUIController {
             </div>
         `;
         
-        // Show mapping results
+        // Show mapping results container
         mappingResultsEl.classList.remove("hidden");
+        if (mappingResultsContainer) {
+            mappingResultsContainer.classList.remove("hidden");
+        }
         
         // Show fill actions section
         const fillActionsSection = document.getElementById("fillActionsSection");
