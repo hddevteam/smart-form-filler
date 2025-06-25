@@ -8,6 +8,12 @@ A standalone browser extension for intelligent data extraction and form filling 
 
 [![Smart Form Filler Demo](https://img.shields.io/badge/📺_Watch_Demo-MP4_Video-blue?style=for-the-badge)](../../releases/latest/download/smart-form-filler-demo.mp4)
 
+## 📸 Screenshots
+
+![Smart Form Filler in Action](screenshots/screenshot_formfiller.png)
+
+*Smart Form Filler analyzing and auto-filling a complex web form*
+
 > **💡 Tip**: The demo showcases all major features including AI-powered form filling, data extraction
 
 ## 🚀 Features
