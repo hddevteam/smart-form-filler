@@ -514,13 +514,30 @@ class SimpleMode {
         this.currentStepIndex = -1;
         this.lastError = null;
         
+        // Hide all states first to remove any borders/containers
+        this.hideAllStates();
+        
+        // Clear results content explicitly
+        if (this.resultsContainer) {
+            this.resultsContainer.innerHTML = '';
+            this.resultsContainer.classList.add('hidden'); // Ensure it's hidden
+        }
+        
+        // Ensure Fill Forms button is disabled and hidden
+        if (this.fillFormsBtn) {
+            this.fillFormsBtn.disabled = true;
+        }
+        
+        // Ensure Fill section is hidden
+        if (this.fillSection) {
+            this.fillSection.classList.add('hidden');
+        }
+        
         // Clear results from form filler handler
         if (this.formFillerHandler) {
             this.formFillerHandler.clearAllResults();
         }
         
-        // Hide all states
-        this.hideAllStates();
         this.updateSubmitButtonState();
         
         // Show success message

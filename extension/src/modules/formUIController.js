@@ -293,6 +293,50 @@ class FormUIController {
     }
     
     /**
+     * Reset form detection state in UI
+     */
+    resetFormDetectionState() {
+        // Hide form detection results
+        const formDetectionResults = document.getElementById("formDetectionResults");
+        if (formDetectionResults) {
+            formDetectionResults.classList.add("hidden");
+        }
+        
+        // Clear forms list
+        const formsList = document.getElementById("formsList");
+        if (formsList) {
+            formsList.innerHTML = "";
+        }
+        
+        // Reset counters
+        const formsFoundCount = document.getElementById("formsFoundCount");
+        const fieldsFoundCount = document.getElementById("fieldsFoundCount");
+        const sourceStats = document.getElementById("sourceStats");
+        
+        if (formsFoundCount) formsFoundCount.textContent = "0";
+        if (fieldsFoundCount) fieldsFoundCount.textContent = "0";
+        if (sourceStats) sourceStats.textContent = "Main + 0 iframes";
+    }
+    
+    /**
+     * Reset fill state in UI
+     */
+    resetFillState() {
+        // Hide fill results
+        const fillResults = document.getElementById("fillResults");
+        if (fillResults) {
+            fillResults.classList.add("hidden");
+            fillResults.innerHTML = "";
+        }
+        
+        // Hide fill actions section
+        const fillActionsSection = document.getElementById("advancedFillActions");
+        if (fillActionsSection) {
+            fillActionsSection.classList.add("hidden");
+        }
+    }
+
+    /**
      * Show success message
      * @param {string} message - Success message
      */

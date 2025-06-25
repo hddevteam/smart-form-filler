@@ -542,12 +542,17 @@ class FormFillerHandler {
             this.uiController.updateFillButtonStates(false);
         }
         
-        // Hide all result sections
+        // Hide all result sections and their containers
         const sectionsToHide = [
             'formDetectionResults',
-            'analysisResultsSection',
-            'fieldMappingSection', 
-            'fillActionsSection'
+            'analysisResultsSection', 
+            'analysisResultsContainer',
+            'fieldMappingSection',
+            'mappingResultsContainer', 
+            'fillActionsSection',
+            'advancedContentAnalysis',
+            'advancedFieldMapping',
+            'advancedFillActions'
         ];
         
         sectionsToHide.forEach(sectionId => {
@@ -557,17 +562,57 @@ class FormFillerHandler {
             }
         });
         
-        // Reset the generate mapping button
-        const generateBtn = document.getElementById("generateMappingBtn");
-        if (generateBtn) {
-            generateBtn.disabled = true;
-        }
+        // Hide all section headers to restore initial state
+        const sectionHeadersToHide = [
+            'advancedFormDetection .section__header.advanced-mode__section-header--collapsible',
+            'advancedContentAnalysis .section__header.advanced-mode__section-header--collapsible',
+            'advancedFieldMapping .section__header.advanced-mode__section-header--collapsible'
+        ];
         
-        // Reset the analyze content button
-        const analyzeBtn = document.getElementById("analyzeContentBtn");
-        if (analyzeBtn) {
-            analyzeBtn.disabled = true;
-        }
+        sectionHeadersToHide.forEach(headerSelector => {
+            const header = document.querySelector(headerSelector);
+            if (header) {
+                header.classList.add('hidden');
+            }
+        });
+        
+        // Clear dynamic content containers
+        const containersToClear = [
+            'formsList', 
+            'analysisResults', 
+            'mappingResults', 
+            'fillResults'
+        ];
+        
+        containersToClear.forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = "";
+            }
+        });
+        
+        // Reset counters
+        const formsFoundCount = document.getElementById("formsFoundCount");
+        const fieldsFoundCount = document.getElementById("fieldsFoundCount");
+        const sourceStats = document.getElementById("sourceStats");
+        
+        if (formsFoundCount) formsFoundCount.textContent = "0";
+        if (fieldsFoundCount) fieldsFoundCount.textContent = "0";
+        if (sourceStats) sourceStats.textContent = "Main + 0 iframes";
+        
+        // Reset button states
+        const buttonsToDisable = [
+            'analyzeContentBtn',
+            'generateMappingBtn',
+            'fillFormsBtn'
+        ];
+        
+        buttonsToDisable.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.disabled = true;
+            }
+        });
         
         console.log("✅ All form filler results cleared");
         

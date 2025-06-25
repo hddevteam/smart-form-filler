@@ -596,6 +596,34 @@ class PopupEventHandlers {
                 }
             });
             
+            // Hide all section headers to restore initial state
+            const sectionHeadersToHide = [
+                'advancedFormDetection .section__header.advanced-mode__section-header--collapsible',
+                'advancedContentAnalysis .section__header.advanced-mode__section-header--collapsible',
+                'advancedFieldMapping .section__header.advanced-mode__section-header--collapsible'
+            ];
+            
+            sectionHeadersToHide.forEach(headerSelector => {
+                const header = document.querySelector(headerSelector);
+                if (header) {
+                    header.classList.add('hidden');
+                }
+            });
+            
+            // Hide advanced mode sections that should be hidden initially
+            const advancedSectionsToHide = [
+                'advancedContentAnalysis',
+                'advancedFieldMapping',
+                'advancedFillActions'
+            ];
+            
+            advancedSectionsToHide.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.classList.add('hidden');
+                }
+            });
+            
             // Clear dynamic content containers
             const containersToClear = [
                 'formsList', 'analysisResults', 'mappingResults', 'fillResults'
