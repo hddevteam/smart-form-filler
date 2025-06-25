@@ -173,7 +173,20 @@ class UIController {
      * Get selected language
      */
     getSelectedLanguage() {
-        return this.elements.languageSelect?.value || "auto";
+        // Check if we're in Simple mode by looking for visible Simple mode container
+        const simpleModeContainer = document.getElementById('formFillerSimpleMode');
+        const isSimpleMode = simpleModeContainer && !simpleModeContainer.classList.contains('hidden');
+        
+        if (isSimpleMode) {
+            // Use Simple mode language select
+            const simpleModeLanguageSelect = document.getElementById("simpleModeLanguageSelect");
+            if (simpleModeLanguageSelect && simpleModeLanguageSelect.value) {
+                return simpleModeLanguageSelect.value;
+            }
+        }
+        
+        // Use Advanced mode language select or default to "zh" if not available
+        return this.elements.languageSelect?.value || "zh";
     }
 
     /**

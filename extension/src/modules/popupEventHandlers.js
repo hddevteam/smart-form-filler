@@ -582,6 +582,12 @@ class PopupEventHandlers {
                 languageSelect.value = "zh";
             }
             
+            // Also reset Simple mode language select
+            const simpleModeLanguageSelect = document.getElementById("simpleModeLanguageSelect");
+            if (simpleModeLanguageSelect) {
+                simpleModeLanguageSelect.value = "zh";
+            }
+            
             // Hide and clear all result sections
             const sectionsToHide = [
                 this.popupManager.elements.formDetectionResults,

@@ -509,6 +509,11 @@ class SimpleMode {
             this.autoResizeTextarea();
         }
         
+        // Reset language select to default (zh)
+        if (this.languageSelect) {
+            this.languageSelect.value = 'zh';
+        }
+        
         // Reset state
         this.currentStep = 'idle';
         this.currentStepIndex = -1;
@@ -560,14 +565,10 @@ class SimpleMode {
     }
 
     handleLanguageChange() {
-        // Update global language setting
-        if (this.languageSelect) {
-            const globalLanguageSelect = document.getElementById('languageSelect');
-            if (globalLanguageSelect) {
-                globalLanguageSelect.value = this.languageSelect.value;
-                globalLanguageSelect.dispatchEvent(new Event('change'));
-            }
-        }
+        // Simple mode language selection is independent
+        // Don't automatically sync to global language setting
+        // The language will be properly picked up by getSelectedLanguage() methods
+        console.log('[SimpleMode] Language changed to:', this.languageSelect?.value);
     }
 
     showTemporaryMessage(message, type = 'info') {
