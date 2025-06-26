@@ -2,11 +2,17 @@
 
 A standalone browser extension for intelligent data extraction and form filling using AI technology. Now with **Ollama local model support**!
 
-## 🎬 Demo Video
+## � Language Versions
+
+- [🇺🇸 English](README.md) | [🇨🇳 中文](README_zh.md)
+
+## �🎬 Demo Video
 
 **📹 Watch the complete demonstration** of Smart Form Filler in action:
 
-[![Smart Form Filler Demo](https://img.shields.io/badge/📺_Watch_Demo-MP4_Video-blue?style=for-the-badge)](../../releases/latest/download/smart-form-filler-demo.mp4)
+**🎥 Online Preview**: [**Watch Video Directly in Browser**](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4) *(Click to play instantly)*
+
+**📥 Alternative**: [![Smart Form Filler Demo](https://img.shields.io/badge/📺_Download_Demo-MP4_Video-blue?style=for-the-badge)](../../releases/latest/download/smart-form-filler-demo.mp4)
 
 ## 📸 Screenshots
 
