@@ -29,7 +29,7 @@ A standalone browser extension for intelligent data extraction and form filling 
 - **Multi-format Output**: Raw HTML, cleaned HTML, and Markdown formats
 - **Chat with Data**: Interactive Q&A with extracted content
 - **Local AI Models**: Full Ollama integration for privacy-focused AI
-- **Cloud AI Models**: Support for GPT-4, DeepSeek, and other cloud providers
+- **Cloud AI Models**: Support for GPT-4o, o series, DeepSeek, and other cloud providers
 - **Backend Configuration**: Built-in settings interface for configuring backend connections
 - **Service Status Monitoring**: Real-time backend connection status and error handling
 - **Intelligent Field Analysis**: Enhanced field descriptions including available options for dropdowns, radio buttons, and checkboxes
