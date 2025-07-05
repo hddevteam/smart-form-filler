@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile - TechCorp Solutions</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+            font-size: 1.8em;
+        }
+
+        .employee-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-right: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .profile-info h3 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+            font-size: 1.8em;
+        }
+
+        .profile-info .title {
+            color: #3498db;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+        }
+
+        .profile-info .department {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #34495e;
+            flex: 0 0 40%;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            flex: 1;
+            text-align: right;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .project-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .project-item h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+
+        .project-item p {
+            margin: 0 0 10px 0;
+            color: #7f8c8d;
+        }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #95a5a6;
+        }
+
+        .emergency-contact {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .emergency-contact h4 {
+            color: #856404;
+            margin-top: 0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .navigation-hint {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .navigation-hint h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .employee-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="header">
+            <h1>🏢 Employee Profile System</h1>
+            <p class="subtitle">TechCorp Solutions - Human Resources Database</p>
+        </div>
+
+        <div class="content-grid">
+            <!-- Personal Information Card -->
+            <div class="card">
+                <h2>👤 Personal Information</h2>
+                <div class="employee-profile">
+                    <div class="profile-avatar">
+                        AS
+                    </div>
+                    <div class="profile-info">
+                        <h3>Alex Sarah Johnson</h3>
+                        <p class="title">Senior Full-Stack Developer</p>
+                        <p class="department">Engineering Department</p>
+                    </div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Employee ID:</span>
+                        <span class="info-value">EMP-2024-0847</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date of Birth:</span>
+                        <span class="info-value">March 15, 1990</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Gender:</span>
+                        <span class="info-value">Female</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Marital Status:</span>
+                        <span class="info-value">Married</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nationality:</span>
+                        <span class="info-value">American</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Social Security:</span>
+                        <span class="info-value">***-**-4789</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Card -->
+            <div class="card">
+                <h2>📞 Contact Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">alex.johnson@techcorp.com</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Personal Email:</span>
+                        <span class="info-value">alex.sarah.j@gmail.com</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">+1 (415) 555-2847</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mobile:</span>
+                        <span class="info-value">+1 (415) 555-2848</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Address:</span>
+                        <span class="info-value">1456 Market Street, Apt 2B</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">City:</span>
+                        <span class="info-value">San Francisco</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">State:</span>
+                        <span class="info-value">California</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">ZIP Code:</span>
+                        <span class="info-value">94102</span>
+                    </div>
+                </div>
+
+                <div class="emergency-contact">
+                    <h4>🚨 Emergency Contact</h4>
+                    <div class="info-item">
+                        <span class="info-label">Contact Name:</span>
+                        <span class="info-value">Michael Johnson (Spouse)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value">+1 (415) 555-2850</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Relationship:</span>
+                        <span class="info-value">Husband</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Details Card -->
+            <div class="card">
+                <h2>💼 Employment Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Start Date:</span>
+                        <span class="info-value">June 15, 2021</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Employment Type:</span>
+                        <span class="info-value">Full-time</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Work Location:</span>
+                        <span class="info-value">Hybrid (SF Office + Remote)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Manager:</span>
+                        <span class="info-value">David Chen</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Base Salary:</span>
+                        <span class="info-value">$125,000 annually</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Performance Rating:</span>
+                        <span class="info-value">Exceeds Expectations</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Next Review Date:</span>
+                        <span class="info-value">June 15, 2025</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Vacation Days:</span>
+                        <span class="info-value">15 remaining</span>
+                    </div>
+                </div>
+
+                <h4>🛠️ Technical Skills</h4>
+                <div class="skills-list">
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">React</span>
+                    <span class="skill-tag">Node.js</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">PostgreSQL</span>
+                    <span class="skill-tag">AWS</span>
+                    <span class="skill-tag">Docker</span>
+                    <span class="skill-tag">Git</span>
+                </div>
+            </div>
+
+            <!-- Benefits & Education Card -->
+            <div class="card">
+                <h2>🎓 Education & Benefits</h2>
+                
+                <h4>📚 Education Background</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Degree:</span>
+                        <span class="info-value">Master of Computer Science</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">University:</span>
+                        <span class="info-value">Stanford University</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Graduation Year:</span>
+                        <span class="info-value">2020</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">GPA:</span>
+                        <span class="info-value">3.8/4.0</span>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px;">🏥 Benefits Enrollment</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Health Insurance:</span>
+                        <span class="info-value">Premium Plan (Employee + Spouse)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Dental Coverage:</span>
+                        <span class="info-value">Standard Plan</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">401(k) Contribution:</span>
+                        <span class="info-value">8% with company match</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Life Insurance:</span>
+                        <span class="info-value">2x Annual Salary</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Projects Card -->
+            <div class="card full-width">
+                <h2>🚀 Current Projects & Achievements</h2>
+                
+                <div class="project-item">
+                    <h4>Customer Portal Redesign</h4>
+                    <p>Leading the frontend development for the new customer portal using React and TypeScript. The project aims to improve user experience and reduce customer support tickets by 30%.</p>
+                    <div class="project-meta">
+                        <span>Status: In Progress (80% complete)</span>
+                        <span>Team Size: 5 developers</span>
+                        <span>Expected Completion: July 2024</span>
+                    </div>
+                </div>
+
+                <div class="project-item">
+                    <h4>API Performance Optimization</h4>
+                    <p>Optimizing backend APIs to reduce response times by implementing caching strategies and database query optimization. Successfully reduced average response time from 250ms to 95ms.</p>
+                    <div class="project-meta">
+                        <span>Status: Completed</span>
+                        <span>Impact: 60% performance improvement</span>
+                        <span>Completed: May 2024</span>
+                    </div>
+                </div>
+
+                <div class="project-item">
+                    <h4>Mentorship Program</h4>
+                    <p>Mentoring 3 junior developers in JavaScript, React best practices, and code review processes. Organized weekly training sessions and contributed to the internal developer documentation.</p>
+                    <div class="project-meta">
+                        <span>Status: Ongoing</span>
+                        <span>Mentees: 3 junior developers</span>
+                        <span>Started: January 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-hint">
+            <h3>🎯 Demo Navigation</h3>
+            <p>This page contains employee data that can be extracted using the Smart Form Filler extension. After extracting the data, navigate to the form page to see intelligent form filling in action.</p>
+            <p><strong>💡 Tip:</strong> For form filling prompts, visit the <a href="index.html#prompts" style="color: #2ecc71;">main demo page</a> to copy the appropriate prompts before filling the form.</p>
+            <a href="employee-form.html" class="nav-button">📝 Go to Employee Form</a>
+            <a href="index.html" class="nav-button">🏠 Back to Main Demo</a>
+        </div>
+    </div>
+</body>
+</html>
