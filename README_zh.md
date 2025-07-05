@@ -2,17 +2,16 @@
 
 一个独立的浏览器扩展，使用 AI 技术实现智能数据提取和表单填充。现已支持 **Ollama 本地模型**！
 
-## 🌐 语言版本
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/hddevteam/smart-form-filler/releases)
+[![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-orange.svg)](https://github.com/hddevteam/smart-form-filler)
+[![AI Powered](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com/hddevteam/smart-form-filler)
+
+🌐 **[在线演示与文档](https://hddevteam.github.io/smart-form-filler/)** | 📦 **[下载最新版本](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[查看文档](https://github.com/hddevteam/smart-form-filler/wiki)** | 🎥 **[观看演示视频](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4)**
+
+## 🌍 语言版本
 
 - [🇺🇸 English](README.md) | [🇨🇳 中文](README_zh.md)
-
-## 🎬 演示视频
-
-**📹 观看智能表单填充器的完整演示**：
-
-**🎥 在线预览**：[**直接在浏览器中观看视频**](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4) *（点击立即播放）*
-
-**📥 备选方案**：[![智能表单填充器演示](https://img.shields.io/badge/📺_下载演示-MP4_视频-blue?style=for-the-badge)](../../releases/latest/download/smart-form-filler-demo.mp4)
 
 ## 📸 截图
 
