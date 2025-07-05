@@ -45,8 +45,8 @@ jobs:
     - name: Build extension
       run: npm run build:extension
     
-    - name: Build demo
-      run: npm run build:demo
+    - name: Build GitHub Pages
+      run: npm run build:pages
 
   security:
     runs-on: ubuntu-latest
@@ -66,4 +66,3 @@ jobs:
       run: |
         npm audit --audit-level moderate
         cd backend && npm audit --audit-level moderate
-        cd ../demo && npm audit --audit-level moderate

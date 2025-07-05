@@ -23,18 +23,18 @@ jobs:
     - name: Build extension
       run: npm run build:extension
     
-    - name: Build demo
-      run: npm run build:demo
+    - name: Build GitHub Pages
+      run: npm run build:pages
     
     - name: Create extension package
       run: |
         cd extension
         zip -r ../smart-form-filler-extension-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
     
-    - name: Create demo package
+    - name: Create docs package
       run: |
-        cd demo
-        zip -r ../smart-form-filler-demo-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
+        cd docs
+        zip -r ../smart-form-filler-docs-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
     
     - name: Create Release
       id: create_release
@@ -59,7 +59,7 @@ jobs:
           
           ### Downloads
           - **Extension Package**: Smart Form Filler browser extension
-          - **Demo Package**: Interactive demo application
+          - **Documentation Package**: GitHub Pages documentation
           
           ### Installation
           1. Download the extension package
@@ -80,12 +80,12 @@ jobs:
         asset_name: smart-form-filler-extension-${{ github.ref_name }}.zip
         asset_content_type: application/zip
     
-    - name: Upload Demo Package
+    - name: Upload Documentation Package
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./smart-form-filler-demo-${{ github.ref_name }}.zip
-        asset_name: smart-form-filler-demo-${{ github.ref_name }}.zip
+        asset_path: ./smart-form-filler-docs-${{ github.ref_name }}.zip
+        asset_name: smart-form-filler-docs-${{ github.ref_name }}.zip
         asset_content_type: application/zip
