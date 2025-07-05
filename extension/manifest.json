@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Smart Form Filler",
-  "version": "1.0.0",
-  "description": "AI-powered form filling and data extraction browser extension",
+  "version": "2.0.0",
+  "description": "AI-powered form filling and data extraction browser extension with Ollama support",
   "permissions": [
     "activeTab",
     "storage",

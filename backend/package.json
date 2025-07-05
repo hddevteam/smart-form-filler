@@ -1,7 +1,7 @@
 {
   "name": "smart-form-filler-backend",
-  "version": "1.0.0",
-  "description": "Backend API for Smart Form Filler extension",
+  "version": "2.0.0",
+  "description": "Backend API for Smart Form Filler extension with AI model integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm run install:all
+    
+    - name: Build extension
+      run: npm run build:extension
+    
+    - name: Build demo
+      run: npm run build:demo
+    
+    - name: Create extension package
+      run: |
+        cd extension
+        zip -r ../smart-form-filler-extension-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
+    
+    - name: Create demo package
+      run: |
+        cd demo
+        zip -r ../smart-form-filler-demo-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Smart Form Filler ${{ github.ref_name }}
+        body: |
+          ## Smart Form Filler ${{ github.ref_name }}
+          
+          ### New Features
+          - Enhanced AI-powered form filling capabilities
+          - Improved Ollama local model integration
+          - Better form field detection and mapping
+          
+          ### Improvements
+          - Optimized performance and reliability
+          - Enhanced user interface and experience
+          - Better error handling and feedback
+          
+          ### Downloads
+          - **Extension Package**: Smart Form Filler browser extension
+          - **Demo Package**: Interactive demo application
+          
+          ### Installation
+          1. Download the extension package
+          2. Extract and load in your browser's extension manager
+          3. Follow the setup guide in the README
+          
+          For detailed installation and usage instructions, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
+        draft: false
+        prerelease: false
+    
+    - name: Upload Extension Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./smart-form-filler-extension-${{ github.ref_name }}.zip
+        asset_name: smart-form-filler-extension-${{ github.ref_name }}.zip
+        asset_content_type: application/zip
+    
+    - name: Upload Demo Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./smart-form-filler-demo-${{ github.ref_name }}.zip
+        asset_name: smart-form-filler-demo-${{ github.ref_name }}.zip
+        asset_content_type: application/zip

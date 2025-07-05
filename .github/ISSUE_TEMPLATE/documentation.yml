@@ -1,0 +1,100 @@
+name: 📖 Documentation
+description: Report issues with documentation or suggest documentation improvements
+title: "[Docs] "
+labels: ["documentation", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Please provide details about the documentation issue or suggestion.
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation does this relate to?
+      options:
+        - README
+        - Installation Guide
+        - API Documentation
+        - Code Comments
+        - Configuration Guide
+        - Troubleshooting
+        - Examples/Tutorials
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing Information
+        - Incorrect Information
+        - Unclear Instructions
+        - Outdated Content
+        - Broken Links
+        - Typo/Grammar
+        - Formatting Issue
+        - New Documentation Needed
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Where is the documentation issue located? (file path, URL, section, etc.)
+      placeholder: "e.g., README.md line 45, or https://github.com/..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_content
+    attributes:
+      label: Current Content
+      description: What does the current documentation say? (copy/paste the relevant section)
+      render: markdown
+
+  - type: textarea
+    id: suggested_content
+    attributes:
+      label: Suggested Content
+      description: What should the documentation say instead? (provide your suggested improvements)
+      render: markdown
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Why is this change needed? What problem does it solve?
+      placeholder: "This would help users who..."
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who would benefit from this documentation improvement?
+      options:
+        - New Users
+        - Experienced Users
+        - Developers
+        - Contributors
+        - All Users
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have clearly identified the documentation issue
+          required: true
+        - label: I have provided a specific location for the issue
+          required: true

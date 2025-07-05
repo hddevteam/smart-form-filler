@@ -2,6 +2,13 @@
 
 A standalone browser extension for intelligent data extraction and form filling using AI technology. Now with **Ollama local model support**!
 
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/hddevteam/smart-form-filler/releases)
+[![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-orange.svg)](https://github.com/hddevteam/smart-form-filler)
+[![AI Powered](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com/hddevteam/smart-form-filler)
+
+🚀 **[Try Interactive Demo](https://hddevteam.github.io/smart-form-filler/)** | 📦 **[Download Latest Release](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[View Documentation](https://github.com/hddevteam/smart-form-filler/wiki)**
+
 ## � Language Versions
 
 - [🇺🇸 English](README.md) | [🇨🇳 中文](README_zh.md)
@@ -13,6 +20,8 @@ A standalone browser extension for intelligent data extraction and form filling 
 **🎥 Online Preview**: [**Watch Video Directly in Browser**](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4) *(Click to play instantly)*
 
 **📥 Alternative**: [![Smart Form Filler Demo](https://img.shields.io/badge/📺_Download_Demo-MP4_Video-blue?style=for-the-badge)](../../releases/latest/download/smart-form-filler-demo.mp4)
+
+**🌐 Interactive Demo**: [**Try Smart Form Filler Live**](https://hddevteam.github.io/smart-form-filler/) *(Experience all features in your browser)*
 
 ## 📸 Screenshots
 

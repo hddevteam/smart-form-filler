@@ -1,11 +1,13 @@
 {
   "name": "smart-form-filler-demo",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Demo page for Smart Form Filler extension",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "mkdir -p dist && cp -r *.html *.js *.css modules dist/",
+    "serve": "node server.js"
   },
   "dependencies": {
     "express": "^4.21.2"
