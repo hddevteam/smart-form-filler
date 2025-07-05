@@ -7,7 +7,7 @@ A standalone browser extension for intelligent data extraction and form filling 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-orange.svg)](https://github.com/hddevteam/smart-form-filler)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com/hddevteam/smart-form-filler)
 
-🚀 **[Try Interactive Demo](https://hddevteam.github.io/smart-form-filler/)** | 📦 **[Download Latest Release](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[View Documentation](https://github.com/hddevteam/smart-form-filler/wiki)**
+🌐 **[Live Demo & Documentation](https://hddevteam.github.io/smart-form-filler/)** | 📦 **[Download Latest Release](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[View Documentation](https://github.com/hddevteam/smart-form-filler/wiki)**
 
 ## � Language Versions
 
@@ -135,33 +135,18 @@ npm run dev
 3. Click "Load unpacked" and select the `extension` folder
 4. The extension should now appear in your browser toolbar
 
-### 🎯 Demo Page
-Experience the extension features with our interactive demo:
+### 🎯 Interactive Demo
+Experience all extension features with our **live interactive demo** at:
 
-```bash
-# Install demo dependencies
-npm run install:demo
-
-# Start the demo server
-npm run demo
-```
-
-Then open http://localhost:3002 in your browser.
+**🌐 [https://hddevteam.github.io/smart-form-filler/](https://hddevteam.github.io/smart-form-filler/)**
 
 The demo includes:
-- **Interactive walkthroughs** for all major features
-- **Sample data** for testing extraction and form filling  
-- **Realistic form scenarios** with specific prompt examples
-- **Step-by-step guides** with visual feedback
-- **Restaurant feedback form** for testing smart form filling
-
-#### Demo Features
 - **🍽️ Restaurant Feedback Form**: Complete with realistic scenarios
 - **📊 Data Extraction**: Interactive profile extraction demo  
 - **💬 AI Chat**: Chat with extracted data functionality
 - **🎯 Prompt Examples**: Specific scenarios like birthday celebrations, business dinners, family meals
 
-#### Prompt Examples for Testing
+#### Demo Features & Prompt Examples
 ```
 🍽️ Satisfied Customer:
 "Fill this restaurant feedback form as John Smith (john.smith@techcorp.com) who just had dinner at Mario's Italian Restaurant. Give a 5-star rating and positive detailed comments about the seafood pasta and excellent service."
@@ -172,8 +157,6 @@ The demo includes:
 💼 Business Lunch:
 "Complete this form as a business professional who brought clients here. Focus on the quiet atmosphere, prompt service, and quality food that impressed the clients."
 ```
-
-**Note**: If you get permission errors, the demo server method is recommended over direct file access.
 
 ## 🔧 Development
 
