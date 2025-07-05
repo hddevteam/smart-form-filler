@@ -24,6 +24,18 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     
     <style>
+        :root {
+            --primary-color: #0366d6;
+            --secondary-color: #586069;
+            --background-color: #fafbfc;
+            --card-background: #ffffff;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+            --accent-color: #28a745;
+            --hover-color: #0366d6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -31,324 +43,578 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: var(--card-background);
+            box-shadow: 0 1px 3px rgba(106, 115, 125, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 24px;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        main {
+            margin-top: 80px;
         }
         
         .hero {
             text-align: center;
-            padding: 4rem 0;
-            background: rgba(255, 255, 255, 0.1);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            margin: 2rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 80px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         
         .hero h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-size: clamp(2.5rem, 6vw, 4rem);
             font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #fff, #f0f0f0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 24px;
+            line-height: 1.1;
         }
         
         .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
+            font-size: 1.5rem;
+            margin-bottom: 32px;
+            opacity: 0.9;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
         
-        .badges {
+        .cta-buttons {
             display: flex;
             justify-content: center;
-            gap: 0.5rem;
-            margin: 2rem 0;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #22863a;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
             flex-wrap: wrap;
         }
         
-        .badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin: 4rem 0;
-        }
-        
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            padding: 2.5rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
+        .stat {
             text-align: center;
         }
         
-        .feature:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.15);
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 64px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 64px;
+        }
+        
+        .feature-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
         
         .feature-icon {
             font-size: 3rem;
-            margin-bottom: 1rem;
+            margin-bottom: 16px;
             display: block;
         }
         
-        .feature h3 {
+        .feature-card h3 {
             font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #fff;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
         }
         
-        .feature p {
-            opacity: 0.9;
+        .feature-card p {
+            color: var(--text-secondary);
             line-height: 1.6;
         }
         
         .demo-section {
-            background: rgba(255, 255, 255, 0.05);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 3rem;
-            margin: 4rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 48px;
             text-align: center;
+        }
+        
+        .demo-section h2 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .demo-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
         }
         
         .demo-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 32px;
         }
         
-        .btn {
-            display: inline-block;
-            padding: 1.2rem 2rem;
-            border: none;
-            border-radius: 15px;
+        .demo-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 16px 32px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid transparent;
+            min-width: 200px;
+            justify-content: center;
         }
         
-        .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+        .demo-btn-primary {
+            background-color: var(--accent-color);
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
         }
         
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
+        .demo-btn-primary:hover {
+            background-color: #22863a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .demo-btn-secondary {
+            background-color: var(--primary-color);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(3, 102, 214, 0.2);
         }
         
-        .btn-github {
-            background: linear-gradient(45deg, #333, #555);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-primary:hover {
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        .demo-btn-secondary:hover {
+            background-color: #0256cc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 102, 214, 0.3);
         }
         
         .quick-start {
-            background: rgba(255, 255, 255, 0.05);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin: 4rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--background-color);
         }
         
-        .quick-start h3 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .steps {
+        .steps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 2rem 0;
+            gap: 32px;
         }
         
-        .step {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .step-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
             position: relative;
         }
         
         .step-number {
             position: absolute;
-            top: -15px;
-            left: 20px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            top: -16px;
+            left: 24px;
+            background: var(--primary-color);
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-weight: 700;
+            font-size: 14px;
         }
         
-        .footer {
+        .step-card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .step-card p {
+            color: var(--text-secondary);
+        }
+        
+        footer {
+            background: var(--text-primary);
+            color: white;
             text-align: center;
-            padding: 3rem 0;
-            opacity: 0.8;
+            padding: 48px 0;
         }
         
-        .footer a {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            margin: 0 1rem;
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .footer-section h4 {
             font-size: 1.1rem;
-            transition: color 0.3s ease;
+            margin-bottom: 16px;
         }
         
-        .footer a:hover {
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover {
             color: white;
         }
         
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 24px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
+            .nav-links {
+                display: none;
+            }
+            
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.25rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stats {
+                gap: 20px;
+            }
+            
+            .section {
+                padding: 60px 0;
             }
             
             .demo-links {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                align-items: center;
             }
             
-            .steps {
-                grid-template-columns: 1fr;
+            .demo-btn {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="hero">
-            <h1>🤖 Smart Form Filler</h1>
-            <p>AI-Powered Browser Extension for Intelligent Data Extraction and Form Filling</p>
-            
-            <div class="badges">
-                <span class="badge">🚀 Version 2.0.0</span>
-                <span class="badge">🔒 Privacy-First</span>
-                <span class="badge">🤖 Ollama Ready</span>
-                <span class="badge">⚡ Chrome & Edge</span>
-            </div>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <span class="logo-icon">🤖</span>
+                    Smart Form Filler
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="https://github.com/hddevteam/smart-form-filler">GitHub</a></li>
+                </ul>
+            </nav>
         </div>
-        
-        <div class="features">
-            <div class="feature">
-                <span class="feature-icon">🎯</span>
-                <h3>Smart Form Filling</h3>
-                <p>AI-powered automatic form completion with intelligent field mapping and context understanding. Supports complex nested forms and dynamic content.</p>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">📊</span>
-                <h3>Data Extraction</h3>
-                <p>Extract structured data from web pages in multiple formats: Raw HTML, cleaned HTML, and Markdown. Perfect for research and data collection.</p>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">💬</span>
-                <h3>Chat with Data</h3>
-                <p>Interactive Q&A with extracted content using advanced AI models for deeper insights and analysis of web page content.</p>
-            </div>
-            <div class="feature">
-                <span class="feature-icon">🔒</span>
-                <h3>Local AI Models</h3>
-                <p>Full Ollama integration for privacy-focused AI processing. Your data never leaves your machine with local model support.</p>
-            </div>
-        </div>
-        
-        <div class="demo-section">
-            <h2>🎪 Try Interactive Demos</h2>
-            <p>Experience Smart Form Filler in action with our realistic demo scenarios</p>
-            
-            <div class="demo-links">
-                <a href="./employee-form.html" class="btn btn-primary">🍽️ Restaurant Feedback Demo</a>
-                <a href="./data-source.html" class="btn btn-secondary">📊 Data Extraction Demo</a>
-                <a href="https://github.com/hddevteam/smart-form-filler/releases/latest" class="btn btn-github">📦 Download Extension</a>
-            </div>
-        </div>
-        
-        <div class="quick-start">
-            <h3>🚀 Quick Start Guide</h3>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h4>Try the Demos</h4>
-                    <p>Experience the extension's capabilities with our interactive demo scenarios above.</p>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>AI-Powered Form Filling</h1>
+                <p>A powerful browser extension that seamlessly fills forms and extracts data using advanced AI models with privacy-first local processing.</p>
+                
+                <div class="cta-buttons">
+                    <a href="https://github.com/hddevteam/smart-form-filler/releases/latest" class="btn btn-primary">
+                        📦 Download Extension
+                    </a>
+                    <a href="https://github.com/hddevteam/smart-form-filler" class="btn btn-secondary">
+                        🔍 View Source
+                    </a>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h4>Download Extension</h4>
-                    <p>Get the latest release from GitHub and extract the extension package.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h4>Install in Browser</h4>
-                    <p>Load the extension in Chrome/Edge developer mode and configure your AI model.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h4>Start Filling Forms</h4>
-                    <p>Begin using AI-powered form filling and data extraction on any website!</p>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">AI Models</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Data Formats</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Form Types</span>
+                    </div>
                 </div>
             </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="container">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">Everything you need to automate form filling and data extraction efficiently and accurately</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🎯</span>
+                        <h3>Smart Form Filling</h3>
+                        <p>AI-powered automatic form completion with intelligent field mapping and context understanding for complex nested forms.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📊</span>
+                        <h3>Data Extraction</h3>
+                        <p>Extract structured data from web pages in multiple formats: Raw HTML, cleaned HTML, and Markdown for research and analysis.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">💬</span>
+                        <h3>Chat with Data</h3>
+                        <p>Interactive Q&A with extracted content using advanced AI models for deeper insights and analysis of web page content.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔒</span>
+                        <h3>Local AI Models</h3>
+                        <p>Full Ollama integration for privacy-focused AI processing. Your data never leaves your machine with local model support.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Batch Processing</h3>
+                        <p>Process multiple forms and extract data from entire web pages at once with intelligent content detection and bulk operations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🌐</span>
+                        <h3>Cross-Platform</h3>
+                        <p>Works seamlessly on Chrome and Edge browsers with consistent performance and feature parity across platforms.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="installation">
+            <div class="container">
+                <h2 class="section-title">Quick Installation</h2>
+                <p class="section-subtitle">Get started in less than 30 seconds</p>
+                
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>Download Extension</h4>
+                        <p>Get the latest release from GitHub and extract the extension package to your local machine.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>Enable Developer Mode</h4>
+                        <p>Open Chrome/Edge extensions page and enable "Developer mode" in the top right corner.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>Load Extension</h4>
+                        <p>Click "Load unpacked" and select the extracted extension folder to install it in your browser.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h4>Configure & Start</h4>
+                        <p>Set up your preferred AI model (Ollama or cloud) and start filling forms automatically!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="demo">
+            <div class="container">
+                <div class="demo-section">
+                    <h2>🎪 Try Interactive Demos</h2>
+                    <p>Experience Smart Form Filler in action with our realistic demo scenarios</p>
+                    
+                    <div class="demo-links">
+                        <a href="./employee-form.html" class="demo-btn demo-btn-primary">🍽️ Restaurant Feedback Demo</a>
+                        <a href="./data-source.html" class="demo-btn demo-btn-secondary">📊 Data Extraction Demo</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/releases/latest">Download</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler">GitHub Repository</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler#readme">Documentation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/issues">Report Issues</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/blob/main/.github/CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/blob/main/LICENSE">License</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://github.com/hddevteam">GitHub Organization</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/discussions">Discussions</a></li>
+                        <li><a href="https://github.com/hddevteam/smart-form-filler/security">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2025 hddevteam. Licensed under MIT License.
+            </div>
         </div>
-        
-        <div class="footer">
-            <a href="https://github.com/hddevteam/smart-form-filler">⭐ Star on GitHub</a>
-            <a href="https://github.com/hddevteam/smart-form-filler/blob/main/README.md">📖 Documentation</a>
-            <a href="https://github.com/hddevteam/smart-form-filler/issues">🐛 Report Issues</a>
-            <a href="https://github.com/hddevteam/smart-form-filler/blob/main/.github/CONTRIBUTING.md">🤝 Contribute</a>
-        </div>
-    </div>
+    </footer>
 </body>
 </html>
