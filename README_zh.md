@@ -7,7 +7,7 @@
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-orange.svg)](https://github.com/hddevteam/smart-form-filler)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com/hddevteam/smart-form-filler)
 
-🌐 **[在线演示与文档](https://hddevteam.github.io/smart-form-filler/)** | 📦 **[下载最新版本](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[查看文档](https://github.com/hddevteam/smart-form-filler/wiki)** | 🎥 **[观看演示视频](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4)**
+🌐 **[在线演示与文档](https://hddevteam.github.io/smart-form-filler/index-zh.html)** | 📦 **[下载最新版本](https://github.com/hddevteam/smart-form-filler/releases/latest)** | 📖 **[查看文档](https://github.com/hddevteam/smart-form-filler/wiki)** | 🎥 **[观看演示视频](https://demoforgithub.blob.core.windows.net/videos/smart-form-filler-demo.mp4)**
 
 ## 🌍 语言版本
 
@@ -128,7 +128,7 @@ npm run dev
 ### 🎯 在线演示
 通过我们的**在线交互式演示**体验所有扩展功能：
 
-**🌐 [https://hddevteam.github.io/smart-form-filler/](https://hddevteam.github.io/smart-form-filler/)**
+**🌐 [https://hddevteam.github.io/smart-form-filler/index-zh.html](https://hddevteam.github.io/smart-form-filler/index-zh.html)**
 
 演示包括：
 - **🍽️ 餐厅反馈表单**：完整的真实场景
