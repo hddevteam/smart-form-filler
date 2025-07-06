@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://hddevteam.github.io/smart-form-filler/
+    about: Check our comprehensive documentation and demo
+  - name: 💬 Discussions
+    url: https://github.com/hddevteam/smart-form-filler/discussions
+    about: Ask questions and discuss ideas with the community

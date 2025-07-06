@@ -1,0 +1,115 @@
+name: 🔧 Development Task
+description: Create a development task for roadmap features
+title: "[Task] "
+labels: ["enhancement", "task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Create a development task for implementing roadmap features. This template is for breaking down epic features into actionable development tasks.
+        
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Target Milestone
+      description: Which milestone does this task belong to?
+      options:
+        - "v3.0.0 - Cloud-First Architecture"
+        - "v4.0.0 - Document Processing Engine"
+        - "v5.0.0 - Visual Intelligence"
+        - "v6.0.0 - Advanced Data Management"
+        - "Other"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: What is the priority level of this task?
+      options:
+        - "High"
+        - "Medium"
+        - "Low"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort Estimate
+      description: How much effort is expected for this task?
+      options:
+        - "Small (1-3 days)"
+        - "Medium (1-2 weeks)"
+        - "Large (2-4 weeks)"
+        - "Extra Large (1+ months)"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Detailed description of what needs to be implemented
+      placeholder: Describe the task goal and requirements...
+    validations:
+      required: true
+      
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: List the criteria that must be met for this task to be considered complete
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+      
+  - type: textarea
+    id: technical_tasks
+    attributes:
+      label: Technical Tasks
+      description: Break down the implementation into specific technical tasks
+      placeholder: |
+        - [ ] Technical task 1
+        - [ ] Technical task 2
+        - [ ] Technical task 3
+      
+  - type: input
+    id: related_epic
+    attributes:
+      label: Related Epic Issue
+      description: Link to the epic issue this task belongs to
+      placeholder: "#1"
+      
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any dependencies or blockers for this task
+      placeholder: This task depends on...
+      
+  - type: textarea
+    id: testing_notes
+    attributes:
+      label: Testing Requirements
+      description: Specific testing requirements or scenarios for this task
+      placeholder: Testing should cover...
+      
+  - type: checkboxes
+    id: task_type
+    attributes:
+      label: Task Type
+      description: What type of development work is this?
+      options:
+        - label: "Frontend Development"
+        - label: "Backend Development"
+        - label: "API Integration"
+        - label: "UI/UX Design"
+        - label: "Testing"
+        - label: "Documentation"
+        - label: "Performance Optimization"
+        - label: "Security Implementation"
