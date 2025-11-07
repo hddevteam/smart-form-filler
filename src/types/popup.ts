@@ -20,6 +20,9 @@ export interface PopupElements {
 export interface ApiClientLike {
   setBackendUrl(url: string): void;
   testConnection(): Promise<{ success: boolean; error?: string }>;
+  // Optional: model API used by PopupModelManager
+  getAvailableModels?: () => Promise<Array<{ id: string; name?: string; description?: string; source?: 'ollama' | 'cloud' | string }>>;
+  refreshOllamaModels?: () => Promise<void>;
 }
 
 export interface ModelManagerLike {

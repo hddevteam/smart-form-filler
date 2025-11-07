@@ -21,8 +21,10 @@ export class PopupModelManager {
 
   async loadModels(): Promise<void> {
     try {
-      if (!this.popupManager.apiClient) throw new Error('API client not initialized');
-      const models = await (this.popupManager.apiClient as any).getAvailableModels();
+      if (!this.popupManager.apiClient || !this.popupManager.apiClient.getAvailableModels) {
+        throw new Error('API client not initialized');
+      }
+      const models = await this.popupManager.apiClient.getAvailableModels();
       if (!models || models.length === 0) {
         this.handleNoModelsAvailable();
         return;
@@ -36,13 +38,22 @@ export class PopupModelManager {
       }
       this.popupManager.uiController?.setModelDependentButtonsEnabled(true);
       this.popupManager.uiController?.setSystemButtonsEnabled(true);
-    } catch (error: any) {
-      this.handleModelLoadError(error);
+    } catch (error) {
+      const err = error as { message?: string };
+      this.handleModelLoadError(err);
     }
   }
 
-  groupModelsByType(models: any[]): { cloud: any[]; ollama: any[] } {
-    const grouped = { cloud: [] as any[], ollama: [] as any[] };
+  groupModelsByType(
+    models: Array<{ id: string; name?: string; description?: string; source?: string }>
+  ): {
+    cloud: Array<{ id: string; name?: string; description?: string; source?: string }>;
+    ollama: Array<{ id: string; name?: string; description?: string; source?: string }>;
+  } {
+    const grouped = {
+      cloud: [] as Array<{ id: string; name?: string; description?: string; source?: string }>,
+      ollama: [] as Array<{ id: string; name?: string; description?: string; source?: string }>,
+    };
     for (const model of models) {
       if (
         model.source === 'ollama' ||
@@ -57,8 +68,11 @@ export class PopupModelManager {
 
   populateModelSelect(
     selectElement: HTMLSelectElement,
-    grouped: { cloud: any[]; ollama: any[] },
-    allModels: any[]
+    grouped: {
+      cloud: Array<{ id: string; name?: string; description?: string }>;
+      ollama: Array<{ id: string; name?: string; description?: string }>;
+    },
+    allModels: Array<{ id: string; name?: string; description?: string }>
   ): void {
     selectElement.innerHTML = '';
     if (grouped.cloud.length > 0) {
@@ -103,7 +117,7 @@ export class PopupModelManager {
     }
   }
 
-  getPreferredModel(models: any[]): string | null {
+  getPreferredModel(models: Array<{ id: string }>): string | null {
     if (!models || models.length === 0) return null;
     const saved = localStorage.getItem('smart-form-filler-selected-model');
     if (saved && models.find(m => m.id === saved)) return saved;
@@ -121,7 +135,7 @@ export class PopupModelManager {
     this.popupManager.updateAuthenticationStatus?.();
   }
 
-  handleModelLoadError(error: any): void {
+  handleModelLoadError(error: { message?: string }): void {
     if (this.popupManager.elements.globalModelSelect) {
       this.popupManager.elements.globalModelSelect.innerHTML =
         '<option value="">Service unavailable</option>';
@@ -145,18 +159,18 @@ export class PopupModelManager {
         btn.innerHTML = '<span class="btn__icon">⏳</span>';
       }
       try {
-        await (this.popupManager.apiClient as any).refreshOllamaModels();
-      } catch (err: any) {
+        await this.popupManager.apiClient?.refreshOllamaModels?.();
+      } catch (err) {
         // eslint-disable-next-line no-console
         console.warn(
           'Failed to refresh Ollama models (this is normal if Ollama is not running):',
-          err.message
+          (err as { message?: string }).message
         );
       }
       await this.loadModels();
       this.showRefreshSuccess();
-    } catch (error: any) {
-      this.showRefreshError(error);
+    } catch (error) {
+      this.showRefreshError(error as { message?: string });
     } finally {
       const btn = this.popupManager.elements.globalRefreshModelsBtn;
       if (btn) {
@@ -176,11 +190,11 @@ export class PopupModelManager {
     }
   }
 
-  showRefreshError(error: any): void {
+  showRefreshError(error: { message?: string }): void {
     const btn = this.popupManager.elements.globalRefreshModelsBtn;
     if (btn) {
       btn.innerHTML = '<span class="btn__icon">❌</span>';
-      btn.title = `Refresh failed: ${error.message}`;
+      btn.title = `Refresh failed: ${error.message ?? 'Unknown error'}`;
       setTimeout(() => {
         if (btn) {
           btn.innerHTML = '<span class="btn__icon">🔄</span>';
