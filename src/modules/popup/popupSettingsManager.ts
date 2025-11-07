@@ -131,7 +131,12 @@ export class PopupSettingsManager {
     }
 
     try {
-      const tempClient = new (this.popupManager.apiClient as any).constructor() as ApiClientLike;
+      const ctor = this.popupManager.apiClient?.constructor;
+      if (typeof ctor !== 'function') {
+        this.showConnectionStatus('❌ Connection failed: client unavailable', 'error');
+        return;
+      }
+      const tempClient = new (ctor as new () => ApiClientLike)();
       tempClient.setBackendUrl(testUrl);
       const response = await tempClient.testConnection();
       if (response.success) {
@@ -142,10 +147,9 @@ export class PopupSettingsManager {
           'error'
         );
       }
-    } catch (error: any) {
-      // eslint-disable-next-line no-console
-      console.error('Connection test failed:', error);
-      this.showConnectionStatus(`❌ Connection failed: ${error.message}`, 'error');
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'Unknown error';
+      this.showConnectionStatus(`❌ Connection failed: ${message}`, 'error');
     } finally {
       if (testConnectionBtn) testConnectionBtn.removeAttribute('data-loading');
     }
@@ -187,10 +191,9 @@ export class PopupSettingsManager {
       }
       this.showConnectionStatus('✅ Settings saved successfully', 'success');
       setTimeout(() => this.closeSettingsModal(), 1500);
-    } catch (error: any) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to save settings:', error);
-      this.showConnectionStatus(`❌ Failed to save settings: ${error.message}`, 'error');
+    } catch (error) {
+      const message = (error as { message?: string })?.message || 'Unknown error';
+      this.showConnectionStatus(`❌ Failed to save settings: ${message}`, 'error');
     } finally {
       saveSettingsBtn?.removeAttribute('data-loading');
     }
@@ -214,9 +217,8 @@ export class PopupSettingsManager {
       a.download = 'smart-form-filler-settings.json';
       a.click();
       URL.revokeObjectURL(url);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to export settings:', error);
+    } catch {
+      // swallow export error silently; UI remains unchanged
     }
   }
 
@@ -231,9 +233,7 @@ export class PopupSettingsManager {
         return true;
       }
       throw new Error('Invalid settings file format');
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to import settings:', error);
+    } catch {
       return false;
     }
   }

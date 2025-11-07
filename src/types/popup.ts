@@ -21,7 +21,9 @@ export interface ApiClientLike {
   setBackendUrl(url: string): void;
   testConnection(): Promise<{ success: boolean; error?: string }>;
   // Optional: model API used by PopupModelManager
-  getAvailableModels?: () => Promise<Array<{ id: string; name?: string; description?: string; source?: 'ollama' | 'cloud' | string }>>;
+  getAvailableModels?(): Promise<
+    Array<{ id: string; name?: string; description?: string; source?: string }>
+  >;
   refreshOllamaModels?: () => Promise<void>;
 }
 

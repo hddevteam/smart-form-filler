@@ -19,7 +19,10 @@ describe('PopupSettingsManager', () => {
     };
     popupManager = {
       elements,
-      apiClient: { setBackendUrl: vi.fn(), testConnection: vi.fn().mockResolvedValue({ success: true }) },
+      apiClient: {
+        setBackendUrl: vi.fn(),
+        testConnection: vi.fn().mockResolvedValue({ success: true }),
+      },
       modelManager: { loadModels: vi.fn().mockResolvedValue(undefined) },
     };
     manager = new PopupSettingsManager(popupManager);

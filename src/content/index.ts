@@ -1,4 +1,6 @@
 // Content script entry point
-console.log('Smart Form Filler - Content script initialized');
+import { Logger } from '@/utils/logger';
+const logger = Logger.forScope('Content');
+logger.info('Smart Form Filler - Content script initialized');
 
 export {};

@@ -66,8 +66,8 @@ describe('DataSourceUIController', () => {
     ui.init();
 
     ui.openModalForContext('chat');
-    const modal = elements.dataSourceModal as HTMLElement;
-    expect(modal.classList.contains('hidden')).toBe(false);
+    const modal = elements.dataSourceModal;
+    expect(modal?.classList.contains('hidden')).toBe(false);
     expect(spy).toHaveBeenCalledWith('modalOpened', { context: 'chat' });
 
     ui.closeModal();

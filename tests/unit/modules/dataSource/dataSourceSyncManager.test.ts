@@ -10,7 +10,10 @@ describe('DataSourceSyncManager', () => {
   beforeEach(() => {
     emitter = new DataSourceEventEmitter();
     storage = {
-      loadConfigurations: vi.fn().mockResolvedValue({ chatConfig: new DataSourceConfig(), formFillerConfig: new DataSourceConfig() }),
+      loadConfigurations: vi.fn().mockResolvedValue({
+        chatConfig: new DataSourceConfig(),
+        formFillerConfig: new DataSourceConfig(),
+      }),
       saveChatConfig: vi.fn().mockResolvedValue(undefined),
       saveFormFillerConfig: vi.fn().mockResolvedValue(undefined),
     };
@@ -26,7 +29,11 @@ describe('DataSourceSyncManager', () => {
     const mgr = new DataSourceSyncManager(storage, emitter);
     const spy = vi.spyOn(emitter, 'emit');
     mgr.updateAvailableDataSources([
-      { title: 'T', url: 'U', dataSources: { markdown: { content: 'M' }, cleaned: { content: 'C' } } },
+      {
+        title: 'T',
+        url: 'U',
+        dataSources: { markdown: { content: 'M' }, cleaned: { content: 'C' } },
+      },
     ]);
     expect(mgr.getAvailableDataSources().length).toBe(1);
     expect(spy).toHaveBeenCalled();

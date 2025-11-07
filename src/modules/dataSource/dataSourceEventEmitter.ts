@@ -16,13 +16,17 @@ export class DataSourceEventEmitter {
   }
 
   on(eventType: string, listener: (data: unknown) => void): void {
-    if (!this.listeners.has(eventType)) this.listeners.set(eventType, []);
-    this.listeners.get(eventType)!.push(listener);
+    let arr = this.listeners.get(eventType);
+    if (!arr) {
+      arr = [];
+      this.listeners.set(eventType, arr);
+    }
+    arr.push(listener);
   }
 
   off(eventType: string, listener: (data: unknown) => void): void {
-    if (!this.listeners.has(eventType)) return;
-    const arr = this.listeners.get(eventType)!;
+    const arr = this.listeners.get(eventType);
+    if (!arr) return;
     const idx = arr.indexOf(listener);
     if (idx > -1) arr.splice(idx, 1);
   }
@@ -58,7 +62,8 @@ export class DataSourceEventEmitter {
   }
 
   getListenerCount(eventType: string): number {
-    return this.listeners.has(eventType) ? this.listeners.get(eventType)!.length : 0;
+    const arr = this.listeners.get(eventType);
+    return arr ? arr.length : 0;
   }
 
   hasListeners(eventType: string): boolean {

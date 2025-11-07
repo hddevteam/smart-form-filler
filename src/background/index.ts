@@ -1,4 +1,6 @@
 // Background script entry point
-console.log('Smart Form Filler - Background script initialized');
+import { Logger } from '@/utils/logger';
+const logger = Logger.forScope('Background');
+logger.info('Smart Form Filler - Background script initialized');
 
 export {};

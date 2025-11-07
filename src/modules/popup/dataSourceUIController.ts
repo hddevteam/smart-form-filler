@@ -1,4 +1,5 @@
 import { DataSourceEventEmitter } from '@/modules/dataSource/dataSourceEventEmitter';
+import { Logger } from '@/utils/logger';
 import type { PopupElements } from '@/types/popup';
 import type { AvailableDataSource } from '@/types/dataSource';
 import type { DataSourceConfig } from '@/modules/dataSource/dataSourceConfig';
@@ -7,6 +8,7 @@ export class DataSourceUIController {
   private elements: PopupElements;
   private eventEmitter: DataSourceEventEmitter;
   private currentModalContext: 'chat' | 'formFiller' | null = null;
+  private logger = Logger.forScope('DataSourceUIController');
 
   constructor(elements: PopupElements, eventEmitter: DataSourceEventEmitter) {
     this.elements = elements;
@@ -15,8 +17,7 @@ export class DataSourceUIController {
 
   init(): void {
     this.setupEventListeners();
-    // eslint-disable-next-line no-console
-    console.log('[DataSourceUIController] Initialized');
+    this.logger.info('Initialized');
   }
 
   private setupEventListeners(): void {
@@ -54,23 +55,20 @@ export class DataSourceUIController {
         );
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Error setting up event listeners:', error);
+      this.logger.error('Error setting up event listeners:', error);
     }
   }
 
   openModalForContext(context: 'chat' | 'formFiller'): void {
     if (!this.elements.dataSourceModal) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Modal element not found');
+      this.logger.error('Modal element not found');
       return;
     }
     this.currentModalContext = context;
     this.elements.dataSourceModal.classList.remove('hidden');
     this.elements.dataSourceModal.style.display = 'flex';
     this.eventEmitter.emit(DataSourceEventEmitter.EVENTS.MODAL_OPENED, { context });
-    // eslint-disable-next-line no-console
-    console.log(`[DataSourceUIController] Modal opened for context: ${context}`);
+    this.logger.info(`Modal opened for context: ${context}`);
   }
 
   closeModal(): void {
@@ -81,8 +79,7 @@ export class DataSourceUIController {
     const previous = this.currentModalContext;
     this.currentModalContext = null;
     this.eventEmitter.emit(DataSourceEventEmitter.EVENTS.MODAL_CLOSED, { context: previous });
-    // eslint-disable-next-line no-console
-    console.log('[DataSourceUIController] Modal closed');
+    this.logger.info('Modal closed');
   }
 
   updateDataSourceList(
@@ -105,7 +102,12 @@ export class DataSourceUIController {
           const isSelected = currentConfig.selectedItems.some(
             item => (typeof item === 'object' ? item.id : item) === source.id
           );
-          const content = (source as any)[currentConfig.type] || (source as any).markdown || '';
+          const contentByType: Record<string, string> = {
+            markdown: source.markdown || '',
+            cleaned: source.cleaned || '',
+            raw: source.raw || '',
+          };
+          const content = contentByType[currentConfig.type as string] || source.markdown || '';
           return `
             <div class="data-source-item ${isSelected ? 'data-source-item--selected' : ''}" data-source-id="${source.id}">
               <input type="checkbox" class="data-source-item__checkbox" value="${source.id}" ${isSelected ? 'checked' : ''}>
@@ -123,11 +125,9 @@ export class DataSourceUIController {
         .join('');
       list.innerHTML = html;
       this.attachDataSourceListeners(list);
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceUIController] Data source list updated');
+      this.logger.debug('Data source list updated');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Error updating data source list:', error);
+      this.logger.error('Error updating data source list:', error);
     }
   }
 
@@ -165,7 +165,11 @@ export class DataSourceUIController {
   }
 
   private handleDataSourceSelection(item: HTMLElement): void {
-    const sourceId = item.dataset.sourceId!; // non-null: element created with data-source-id
+    const sourceId = item.dataset.sourceId;
+    if (!sourceId) {
+      this.logger.warn('Missing sourceId in data-source-item');
+      return;
+    }
     const checkbox = item.querySelector<HTMLInputElement>('input[type="checkbox"]');
     const isSelected = !!checkbox?.checked;
     if (isSelected) item.classList.add('data-source-item--selected');
@@ -208,8 +212,7 @@ export class DataSourceUIController {
       });
       this.updateDataSourceList(availableDataSources, config);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Error populating modal:', error);
+      this.logger.error('Error populating modal:', error);
     }
   }
 
@@ -242,16 +245,14 @@ export class DataSourceUIController {
         if (buttonText)
           buttonText.textContent = config.isValid() ? 'Reconfigure Sources' : 'Configure Sources';
       }
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceUIController] Chat UI updated:', {
+      this.logger.debug('Chat UI updated:', {
         isValid: config.isValid(),
         count: config.getCount(),
         type: config.type,
         elementFound: !!dataSourceSummaryText,
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Error updating chat UI:', error);
+      this.logger.error('Error updating chat UI:', error);
     }
   }
 
@@ -285,8 +286,7 @@ export class DataSourceUIController {
         }
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceUIController] Error updating form filler UI:', error);
+      this.logger.error('Error updating form filler UI:', error);
     }
   }
 

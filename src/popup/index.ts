@@ -2,8 +2,10 @@
 import PopupDataSourceManagerRefactored from '@/modules/popup/popupDataSourceManagerRefactored';
 import DataSourceUIController from '@/modules/popup/dataSourceUIController';
 import type { PopupElements, PopupManagerLike } from '@/types/popup';
+import { Logger } from '@/utils/logger';
 
-console.log('Smart Form Filler - Popup initialized');
+const logger = Logger.forScope('Popup');
+logger.info('Smart Form Filler - Popup initialized');
 
 // Wire up Data Source Manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,8 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements,
     resultsHandler: {
       showError: (msg: string) => {
-        // eslint-disable-next-line no-console
-        console.error('[Popup] Error:', msg);
+        logger.error('Error:', msg);
       },
     },
   };
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   void mgr.init().then(() => {
     const ui = new DataSourceUIController(elements, mgr.eventEmitter);
     // Inject controller and initialize
-    (mgr as any).uiController = ui;
+    (mgr as unknown as { uiController?: DataSourceUIController }).uiController = ui;
     ui.init();
     // Refresh UI now that controller is ready
     mgr.updateAvailableDataSources();

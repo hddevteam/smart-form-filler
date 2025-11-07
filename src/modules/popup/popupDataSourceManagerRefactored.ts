@@ -3,6 +3,7 @@ import { DataSourceEventEmitter } from '@/modules/dataSource/dataSourceEventEmit
 import { DataSourceSyncManager } from '@/modules/dataSource/dataSourceSyncManager';
 import { DataSourceConfig } from '@/modules/dataSource/dataSourceConfig';
 import type { PopupElements, PopupManagerLike } from '@/types/popup';
+import { Logger } from '@/utils/logger';
 import type { AvailableDataSource, DataSourceConfigObject } from '@/types/dataSource';
 
 export type ModalContext = 'chat' | 'formFiller';
@@ -32,6 +33,7 @@ export class PopupDataSourceManagerRefactored {
   readonly eventEmitter: DataSourceEventEmitter;
   readonly syncManager: DataSourceSyncManager;
   private uiController?: UIControllerLike;
+  private logger = Logger.forScope('PopupDataSourceManagerRefactored');
 
   constructor(
     elements: PopupElements,
@@ -62,8 +64,7 @@ export class PopupDataSourceManagerRefactored {
       document.dispatchEvent(new CustomEvent('dataSourcesUpdated'));
       document.dispatchEvent(new CustomEvent('formFillerConfigChanged'));
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error during initialization:', error);
+      this.logger.error('Error during initialization:', error);
     }
   }
 
@@ -84,25 +85,34 @@ export class PopupDataSourceManagerRefactored {
     );
 
     // Config change events -> update UIs and bubble DOM events
-    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED, (data: any) => {
-      this.uiController?.updateChatUI(data.config);
-      document.dispatchEvent(new CustomEvent('chatConfigChanged', { detail: data }));
-    });
+    this.eventEmitter.on(
+      DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED,
+      (data: { config: DataSourceConfig }) => {
+        this.uiController?.updateChatUI(data.config);
+        document.dispatchEvent(new CustomEvent('chatConfigChanged', { detail: data }));
+      }
+    );
 
-    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.FORM_FILLER_CONFIG_CHANGED, (data: any) => {
-      this.uiController?.updateFormFillerUI(
-        data.config,
-        this.syncManager.getAvailableDataSources()
-      );
-      document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: data }));
-    });
+    this.eventEmitter.on(
+      DataSourceEventEmitter.EVENTS.FORM_FILLER_CONFIG_CHANGED,
+      (data: { config: DataSourceConfig }) => {
+        this.uiController?.updateFormFillerUI(
+          data.config,
+          this.syncManager.getAvailableDataSources()
+        );
+        document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: data }));
+      }
+    );
 
-    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED, (data: any) => {
-      this.updateAllUI();
-      document.dispatchEvent(new CustomEvent('dataSourcesUpdated', { detail: data }));
-    });
+    this.eventEmitter.on(
+      DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED,
+      (data: { sources: AvailableDataSource[] }) => {
+        this.updateAllUI();
+        document.dispatchEvent(new CustomEvent('dataSourcesUpdated', { detail: data }));
+      }
+    );
 
-    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CONFIGURATION_APPLIED, (data: any) => {
+    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CONFIGURATION_APPLIED, (data: unknown) => {
       this.notifyConfigurationChanged();
       document.dispatchEvent(new CustomEvent('configurationApplied', { detail: data }));
     });
@@ -113,23 +123,25 @@ export class PopupDataSourceManagerRefactored {
     });
   }
 
-  private handleModalOpened = (data: any): void => {
-    const { context } = (data ?? ({ context: 'chat' } as { context: ModalContext })) as {
-      context: ModalContext;
-    };
+  private handleModalOpened = (data: { context?: ModalContext } | null): void => {
+    const context: ModalContext = (data?.context as ModalContext) ?? 'chat';
     const configs = this.syncManager.getConfigurations();
     const config = context === 'formFiller' ? configs.formFiller : configs.chat;
     const availableDataSources = this.syncManager.getAvailableDataSources();
     this.uiController?.populateModal(config, availableDataSources);
   };
 
-  private handleApplyConfiguration = async (data: any): Promise<void> => {
+  private handleApplyConfiguration = async (
+    data: {
+      type?: DataSourceConfig['type'];
+      selectedItemIds?: string[];
+      context?: ModalContext;
+    } | null
+  ): Promise<void> => {
     try {
-      const { type, selectedItemIds, context } = (data || {}) as {
-        type: DataSourceConfig['type'];
-        selectedItemIds: string[];
-        context: ModalContext;
-      };
+      const type = data?.type ?? 'markdown';
+      const selectedItemIds = data?.selectedItemIds ?? [];
+      const context: ModalContext = (data?.context as ModalContext) ?? 'chat';
 
       const newConfig = new DataSourceConfig(
         type,
@@ -142,21 +154,22 @@ export class PopupDataSourceManagerRefactored {
 
       this.uiController?.closeModal();
       this.notifyConfigurationChanged();
-      // eslint-disable-next-line no-console
-      console.log(`[PopupDataSourceManagerRefactored] Configuration applied for ${context}`);
+      this.logger.info(`Configuration applied for ${context}`);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error applying configuration:', error);
+      this.logger.error('Error applying configuration:', error);
     }
   };
 
   // Immediate UI feedback already handled by UI controller in legacy
-  private handleDataSourceSelectionChanged = (data: any): void => {
-    // eslint-disable-next-line no-console
-    console.log('[PopupDataSourceManagerRefactored] Data source selection changed:', data);
+  private handleDataSourceSelectionChanged = (
+    data: { sourceId?: string; isSelected?: boolean; context?: ModalContext } | null
+  ): void => {
+    this.logger.debug('Data source selection changed:', data);
   };
 
-  private handleDataSourceTypeChanged = (data: any): void => {
+  private handleDataSourceTypeChanged = (
+    data: { context?: ModalContext; type?: DataSourceConfig['type'] } | null
+  ): void => {
     const context: ModalContext = (data?.context as ModalContext) || 'chat';
     const newType: DataSourceConfig['type'] = data?.type || 'markdown';
     const configs = this.syncManager.getConfigurations();
@@ -168,7 +181,12 @@ export class PopupDataSourceManagerRefactored {
   };
 
   updateAvailableDataSources(): void {
-    const history = this.moduleManager?.resultsHandler?.extractionHistory as any;
+    interface ExtractionHistory {
+      [key: string]: unknown;
+    }
+    const history = this.moduleManager?.resultsHandler?.extractionHistory as
+      | ExtractionHistory
+      | undefined;
     this.syncManager.updateAvailableDataSources(history);
   }
 
@@ -195,8 +213,7 @@ export class PopupDataSourceManagerRefactored {
       await this.syncManager.updateChatConfig(newCfg);
       setTimeout(() => this.updateAllUI(), 100);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error updating chat configuration:', error);
+      this.logger.error('Error updating chat configuration:', error);
     }
   }
 
@@ -207,11 +224,7 @@ export class PopupDataSourceManagerRefactored {
       await this.syncManager.updateFormFillerConfig(newCfg);
       setTimeout(() => this.updateAllUI(), 100);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
-        '[PopupDataSourceManagerRefactored] Error updating form filler configuration:',
-        error
-      );
+      this.logger.error('Error updating form filler configuration:', error);
     }
   }
 
@@ -237,11 +250,7 @@ export class PopupDataSourceManagerRefactored {
       });
       return selected;
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(
-        '[PopupDataSourceManagerRefactored] Error getting form filler selected sources:',
-        err
-      );
+      this.logger.error('Error getting form filler selected sources:', err);
       return [];
     }
   }
@@ -260,8 +269,7 @@ export class PopupDataSourceManagerRefactored {
       });
       return selected;
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error getting chat selected sources:', err);
+      this.logger.error('Error getting chat selected sources:', err);
       return [];
     }
   }
@@ -303,14 +311,9 @@ export class PopupDataSourceManagerRefactored {
         const cfg = this.syncManager.getConfigurations().chat.toObject();
         handler(cfg);
       }
-      // eslint-disable-next-line no-console
-      console.log('[PopupDataSourceManagerRefactored] Configuration change notification sent');
+      this.logger.info('Configuration change notification sent');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
-        '[PopupDataSourceManagerRefactored] Error notifying configuration change:',
-        error
-      );
+      this.logger.error('Error notifying configuration change:', error);
     }
   }
 }
