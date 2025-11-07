@@ -2,7 +2,7 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export class Logger {
-  private scope?: string;
+  private scope: string | undefined;
 
   constructor(scope?: string) {
     this.scope = scope;

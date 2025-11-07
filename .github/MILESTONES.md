@@ -882,6 +882,32 @@ CHECKPOINT: CP-M5-6"
 
 ---
 
+## Fast Track: Edge TS Delivery (Priority)
+
+**Duration:** 1–2 days  
+**Goal:** Deliver a loadable MV3 Edge extension built from TypeScript without expanding scope.
+
+### Scope & Tasks
+
+- Migrate remaining JavaScript in extension (background/content/popup) to TypeScript with minimal typing, no logic change.
+- Create TS entry points: `background.ts`, `content.ts`, `popup.ts` mapped to existing functionality.
+- Configure Vite multi-entry build to output MV3-friendly bundle to `dist/`.
+- Copy `manifest.json` and icons to `dist/`; update script references to built files.
+- Perform Edge “Load unpacked” smoke test: popup opens, content injects, background messaging works without console errors.
+
+### Acceptance Criteria
+
+- Build produces `dist/` that loads in Edge via “Load unpacked”.
+- No new features; existing flows operate as before, no console errors.
+- Lint and existing unit tests pass; no new tests required for this track.
+
+### Testing Strategy Adjustment
+
+- Pause adding new tests temporarily; keep existing tests and lint green.
+- Use manual smoke testing in Edge to validate runtime behavior.
+
+---
+
 ## M6: Content Scripts
 
 **Duration:** 5 days  
@@ -1598,6 +1624,5 @@ CHECKPOINT: CP-M9-4"
 
 ### Next Steps
 
-- Continue removing remaining `any` types where applicable
-- Proceed with M5 remaining components (CP-M5-1..CP-M5-6): Popup HTML/CSS, ConfigurationUI, ModelSelector, ConnectionTest, Popup main controller
-- Prepare and implement UI integration tests (Vitest + minimal DOM), then plan Playwright E2E
+- Kick off Fast Track: Edge TS Delivery (migrate background/content/popup to TS, set up Vite multi-entry, update manifest).
+- Minimize new tests; ensure lint/tests green; perform Edge load-unpacked smoke test.

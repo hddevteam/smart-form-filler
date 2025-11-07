@@ -122,7 +122,7 @@ export class PopupModelManager {
     if (!models || models.length === 0) return null;
     const saved = localStorage.getItem('smart-form-filler-selected-model');
     if (saved && models.find(m => m.id === saved)) return saved;
-    return models[0].id;
+    return models[0]?.id ?? null;
   }
 
   handleNoModelsAvailable(): void {

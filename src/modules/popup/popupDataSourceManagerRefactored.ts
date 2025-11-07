@@ -32,7 +32,7 @@ export class PopupDataSourceManagerRefactored {
   readonly storage: DataSourceStorage;
   readonly eventEmitter: DataSourceEventEmitter;
   readonly syncManager: DataSourceSyncManager;
-  private uiController?: UIControllerLike;
+  private uiController: UIControllerLike | undefined;
   private logger = Logger.forScope('PopupDataSourceManagerRefactored');
 
   constructor(
@@ -70,7 +70,10 @@ export class PopupDataSourceManagerRefactored {
 
   private setupEventListeners(): void {
     // UI events
-    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.MODAL_OPENED, this.handleModalOpened);
+    this.eventEmitter.on(
+      DataSourceEventEmitter.EVENTS.MODAL_OPENED,
+      this.handleModalOpened as (d: unknown) => void
+    );
     this.eventEmitter.on(
       'applyConfiguration',
       this.handleApplyConfiguration as (d: unknown) => void
@@ -85,32 +88,29 @@ export class PopupDataSourceManagerRefactored {
     );
 
     // Config change events -> update UIs and bubble DOM events
-    this.eventEmitter.on(
-      DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED,
-      (data: { config: DataSourceConfig }) => {
-        this.uiController?.updateChatUI(data.config);
-        document.dispatchEvent(new CustomEvent('chatConfigChanged', { detail: data }));
-      }
-    );
+    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED, (data: unknown) => {
+      const typed = data as { config: DataSourceConfig };
+      this.uiController?.updateChatUI(typed.config);
+      document.dispatchEvent(new CustomEvent('chatConfigChanged', { detail: typed }));
+    });
 
     this.eventEmitter.on(
       DataSourceEventEmitter.EVENTS.FORM_FILLER_CONFIG_CHANGED,
-      (data: { config: DataSourceConfig }) => {
+      (data: unknown) => {
+        const typed = data as { config: DataSourceConfig };
         this.uiController?.updateFormFillerUI(
-          data.config,
+          typed.config,
           this.syncManager.getAvailableDataSources()
         );
-        document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: data }));
+        document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: typed }));
       }
     );
 
-    this.eventEmitter.on(
-      DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED,
-      (data: { sources: AvailableDataSource[] }) => {
-        this.updateAllUI();
-        document.dispatchEvent(new CustomEvent('dataSourcesUpdated', { detail: data }));
-      }
-    );
+    this.eventEmitter.on(DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED, (data: unknown) => {
+      const typed = data as { sources: AvailableDataSource[] };
+      this.updateAllUI();
+      document.dispatchEvent(new CustomEvent('dataSourcesUpdated', { detail: typed }));
+    });
 
     this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CONFIGURATION_APPLIED, (data: unknown) => {
       this.notifyConfigurationChanged();
@@ -181,11 +181,8 @@ export class PopupDataSourceManagerRefactored {
   };
 
   updateAvailableDataSources(): void {
-    interface ExtractionHistory {
-      [key: string]: unknown;
-    }
     const history = this.moduleManager?.resultsHandler?.extractionHistory as
-      | ExtractionHistory
+      | import('@/types/dataSource').ExtractionHistoryItem[]
       | undefined;
     this.syncManager.updateAvailableDataSources(history);
   }

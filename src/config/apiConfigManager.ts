@@ -63,8 +63,11 @@ export class ApiConfigManager {
     this.validate(config);
     const all = await this.readAll();
     const toStore: ApiConfig = {
-      ...config,
-      apiKey: config.apiKey ? encodeBase64(config.apiKey) : undefined,
+      provider: config.provider,
+      name: config.name,
+      endpoint: config.endpoint,
+      ...(config.model ? { model: config.model } : {}),
+      ...(config.apiKey ? { apiKey: encodeBase64(config.apiKey) } : {}),
     };
     all[config.name] = toStore;
     this.memory = all;
@@ -75,10 +78,14 @@ export class ApiConfigManager {
     const all = await this.readAll();
     const found = all[name];
     if (!found) return undefined;
-    return {
-      ...found,
-      apiKey: found.apiKey ? decodeBase64(found.apiKey) : undefined,
+    const decoded: ApiConfig = {
+      provider: found.provider,
+      name: found.name,
+      endpoint: found.endpoint,
+      ...(found.model ? { model: found.model } : {}),
+      ...(found.apiKey ? { apiKey: decodeBase64(found.apiKey) } : {}),
     };
+    return decoded;
   }
 
   async deleteConfig(name: string): Promise<void> {
@@ -118,8 +125,11 @@ export class ApiConfigManager {
   async listConfigs(): Promise<ApiConfig[]> {
     const all = await this.readAll();
     const values = Object.values(all).map(c => ({
-      ...c,
-      apiKey: c.apiKey ? decodeBase64(c.apiKey) : undefined,
+      provider: c.provider,
+      name: c.name,
+      endpoint: c.endpoint,
+      ...(c.model ? { model: c.model } : {}),
+      ...(c.apiKey ? { apiKey: decodeBase64(c.apiKey) } : {}),
     }));
     // Sort by name for deterministic order
     values.sort((a, b) => a.name.localeCompare(b.name));

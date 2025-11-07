@@ -28,7 +28,7 @@ describe('ConnectionTest', () => {
     const deps = { validate: vi.fn().mockResolvedValue({ success: true }) };
     const ct = new ConnectionTest(container, deps);
     ct.render();
-    const input = container.querySelector('input');
+    const input = container.querySelector('input') as HTMLInputElement;
     expect(input).toBeTruthy();
     input.value = 'http://localhost:3001';
     const btn = container.querySelector('button');
@@ -49,7 +49,7 @@ describe('ConnectionTest', () => {
     const deps = { validate: vi.fn().mockResolvedValue({ success: false, error: 'down' }) };
     const ct = new ConnectionTest(container, deps);
     ct.render();
-    const input = container.querySelector('input');
+    const input = container.querySelector('input') as HTMLInputElement;
     expect(input).toBeTruthy();
     input.value = 'http://localhost:3001';
     const btn = container.querySelector('button');

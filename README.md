@@ -1,4 +1,4 @@
-# Smart Form Filler - AI-Powered Browser Extension
+# Smart Form Filler - AI-Powered Browser Extension (TypeScript Migration)
 
 A standalone browser extension for intelligent data extraction and form filling using AI technology.
 
@@ -13,26 +13,23 @@ A standalone browser extension for intelligent data extraction and form filling 
 
 ```
 smart-form-filler/
-├── backend/                 # Backend API server
-│   ├── controllers/         # API controllers
-│   ├── services/           # Business logic services
-│   ├── routes/             # API routes
-│   ├── config/             # Configuration files
-│   └── server.js           # Main server file
-├── extension/              # Browser extension
-│   ├── src/                # Extension source code
-│   ├── manifest.json       # Extension manifest
-│   └── popup.html          # Extension popup UI
-└── package.json            # Root package configuration
+├── src/                     # TypeScript source (popup/content/background, config, services, utils)
+├── extension/               # Legacy extension assets (manifest, icons, html)
+├── tests/                   # Vitest unit & integration tests
+├── dist/                    # Build output for MV3 (Edge/Chrome) (generated)
+├── .github/                 # Workflows and project docs
+└── package.json             # Root package configuration
 ```
 
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
+
+- Node.js (v18 or higher)
+- pnpm
 
 ### Backend Setup
+
 ```bash
 # Install dependencies
 npm run install:all
@@ -41,15 +38,22 @@ npm run install:all
 npm run dev
 ```
 
-### Extension Setup
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked" and select the `extension` folder
-4. The extension should now appear in your browser toolbar
+### Extension Setup (Edge Load-Unpacked)
+
+1. Build MV3 bundle
+   ```bash
+   pnpm install
+   pnpm build
+   ```
+2. Edge 打开 `edge://extensions/`（或 Chrome `chrome://extensions/`）
+3. 打开“开发者模式”→ “加载已解压的扩展”
+4. 选择仓库下的 `dist/` 目录
+5. 确认工具栏显示扩展，打开 Popup 即可预览
 
 ## 🔧 Development
 
 ### Backend Development
+
 ```bash
 cd backend
 npm run dev
@@ -57,7 +61,8 @@ npm run dev
 
 The backend server will start on `http://localhost:3001`
 
-### API Endpoints
+### API Endpoints (Backend)
+
 - `GET /api/extension/health` - Health check
 - `GET /api/extension/models` - Available AI models
 - `POST /api/extension/extract-data-sources` - Extract page data
@@ -77,15 +82,15 @@ cp .env.example .env
 ## 🧪 Testing
 
 ```bash
-# Run tests
-npm test
+pnpm test          # unit tests
+pnpm lint          # eslint + prettier
+pnpm test:ci       # CI-friendly run
 ```
 
-## 📦 Building for Production
+## 📦 Build
 
 ```bash
-# Build extension for production
-npm run build:extension
+pnpm build   # outputs MV3 bundle to dist/
 ```
 
 ## 🤝 Contributing

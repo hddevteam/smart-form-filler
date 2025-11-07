@@ -44,27 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const cfgMgr = new ApiConfigManager();
       const configUI = new ConfigurationUI(configContainer, {
         saveConfig: async cfg => {
-          await cfgMgr.saveConfig(
-            cfg as {
-              provider: 'azure' | 'ollama';
-              name: string;
-              endpoint: string;
-              apiKey?: string;
-              model?: string;
-            }
-          );
+          await cfgMgr.saveConfig(cfg as unknown as import('@/config/apiConfigManager').ApiConfig);
         },
         loadConfig: async () => {
           // For popup load, try default named config; if none, undefined
           // In future we may support multiple named configs; pick the first one
-          const defaultName = 'Default';
-          const loaded = await cfgMgr.getConfig(defaultName);
-          return (loaded as unknown) ?? undefined;
-        },
-        listConfigs: async () => {
           const list = await cfgMgr.listConfigs();
-          return list as unknown[];
+          return list[0];
         },
+        listConfigs: async () => cfgMgr.listConfigs(),
       });
       void configUI.render();
     }

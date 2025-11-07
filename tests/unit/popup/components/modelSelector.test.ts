@@ -28,11 +28,11 @@ describe('ModelSelector', () => {
     const groups = Array.from((select as HTMLSelectElement).children) as HTMLOptGroupElement[];
     // Expect two groups: Cloud and Local
     expect(groups.length).toBe(2);
-    expect(groups[0].label).toBe('Cloud Models');
-    expect(groups[1].label).toBe('Local Models (Ollama)');
+    expect(groups[0]?.label).toBe('Cloud Models');
+    expect(groups[1]?.label).toBe('Local Models (Ollama)');
 
-    const cloudOptions = Array.from(groups[0].querySelectorAll('option')).map(o => o.value);
-    const localOptions = Array.from(groups[1].querySelectorAll('option')).map(o => o.value);
+    const cloudOptions = Array.from(groups[0]?.querySelectorAll('option') ?? []).map(o => o.value);
+    const localOptions = Array.from(groups[1]?.querySelectorAll('option') ?? []).map(o => o.value);
     expect(cloudOptions).toEqual(expect.arrayContaining(['gpt-4o', 'gpt-4o-mini']));
     expect(localOptions).toEqual(['llama3']);
   });

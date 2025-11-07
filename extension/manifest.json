@@ -3,14 +3,7 @@
   "name": "Smart Form Filler",
   "version": "1.0.0",
   "description": "AI-powered form filling and data extraction browser extension",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting",
-    "sidePanel",
-    "tabs",
-    "clipboardWrite"
-  ],
+  "permissions": ["activeTab", "storage", "scripting", "sidePanel", "tabs", "clipboardWrite"],
   "host_permissions": [
     "http://*/*",
     "https://*/*",
@@ -22,7 +15,7 @@
     "default_title": "Page Summarizer"
   },
   "side_panel": {
-    "default_path": "popup.html"
+    "default_path": "dist/extension/popup_ts.html"
   },
   "content_scripts": [
     {
@@ -31,14 +24,14 @@
         "src/modules/formDetector.js",
         "src/modules/formFiller.js",
         "content-iframe.js",
-        "src/content-script.js",
+        "dist/content.js",
         "src/content-analyzer.js"
       ],
       "run_at": "document_end"
     }
   ],
   "background": {
-    "service_worker": "src/background-sidepanel.js"
+    "service_worker": "dist/background.js"
   },
   "web_accessible_resources": [
     {
