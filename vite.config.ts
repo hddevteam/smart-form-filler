@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 
 export default defineConfig({
+  // Use relative asset paths for Chrome/Edge extension pages
+  base: './',
   plugins: [react()],
 
   resolve: {
