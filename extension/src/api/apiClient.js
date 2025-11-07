@@ -11,33 +11,8 @@ class ApiClient {
     }
 
     getBaseUrl() {
-        // Get backend URL from storage or use default
-        return this.getStoredBackendUrl() || "http://localhost:3001";
-    }
-
-    getStoredBackendUrl() {
-        try {
-            return localStorage.getItem('smart-form-filler-backend-url');
-        } catch (error) {
-            console.warn('Could not access localStorage:', error);
-            return null;
-        }
-    }
-
-    setBackendUrl(url) {
-        try {
-            if (url && url.trim()) {
-                // Ensure URL doesn't end with slash
-                const cleanUrl = url.trim().replace(/\/$/, '');
-                localStorage.setItem('smart-form-filler-backend-url', cleanUrl);
-                this.baseUrl = cleanUrl;
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Could not save backend URL:', error);
-            return false;
-        }
+        // Smart Form Filler backend
+        return "http://localhost:3001";
     }
 
     async makeRequest(endpoint, options = {}) {
@@ -101,12 +76,23 @@ class ApiClient {
                 return data.models;
             }
             
-            // If response doesn't have models array, throw error to indicate service issue
-            throw new Error("Invalid response format from models endpoint");
+            // Fallback models with GPT-4.1 Nano as preferred default
+            return [
+                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
+                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
+                { id: "gpt-4o", name: "GPT-4o" },
+                { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
+                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
+            ];
         } catch (error) {
             console.error("Failed to fetch models:", error);
-            // Don't return fallback models - let the UI handle service unavailable state
-            throw error;
+            // Return fallback models with GPT-4.1 Nano as preferred default
+            return [
+                { id: "gpt-4.1-nano", name: "GPT-4.1 Nano" },
+                { id: "gpt-4o-mini", name: "GPT-4o Mini" },
+                { id: "gpt-4o", name: "GPT-4o" },
+                { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
+            ];
         }
     }
 
@@ -126,25 +112,20 @@ class ApiClient {
             }));
         }
 
-        // If no valid data, throw error instead of returning fallback
-        throw new Error("Invalid models data format received from backend");
+        // Fallback
+        return [
+            { id: "gpt-4", name: "GPT-4" },
+            { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
+        ];
     }
 
     async testConnection() {
         try {
-            console.log("🔧 Testing connection to:", this.backendUrl);
             const response = await this.makeRequest("/extension/health");
-            if (response.ok) {
-                const data = await response.json();
-                console.log("✅ Connection test successful:", data);
-                return { success: true, data };
-            } else {
-                console.warn("⚠️ Connection test failed with status:", response.status);
-                return { success: false, error: `HTTP ${response.status}: ${response.statusText}` };
-            }
+            return response.ok;
         } catch (error) {
-            console.error("❌ Connection test failed:", error);
-            return { success: false, error: error.message };
+            console.error("Connection test failed:", error);
+            return false;
         }
     }
 
@@ -154,22 +135,6 @@ class ApiClient {
             return await response.json();
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
-            throw error;
-        }
-    }
-
-    async refreshOllamaModels() {
-        try {
-            console.log("🔧 Refreshing Ollama models...");
-            const response = await this.makeRequest("/extension/refresh-ollama-models", {
-                method: "POST"
-            });
-            const data = await response.json();
-            
-            console.log("🔧 Ollama models refresh response:", data);
-            return data;
-        } catch (error) {
-            console.error("❌ Failed to refresh Ollama models:", error);
             throw error;
         }
     }

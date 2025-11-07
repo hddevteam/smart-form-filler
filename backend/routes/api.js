@@ -8,22 +8,16 @@ const controllers = require('../controllers');
 // Extension Core APIs
 router.get('/extension/health', controllers.extensionCore.healthCheck);
 router.get('/extension/models', controllers.extensionCore.getAvailableModels);
-router.post('/extension/refresh-ollama-models', controllers.extensionCore.refreshOllamaModels);
 
 // Data Extraction APIs
 router.post('/extension/extract-data-sources', controllers.dataExtraction.extractDataSources);
 
 // Data Analysis APIs
-router.post('/extension/chat-with-data', controllers.dataAnalysis.chatWithDataSources);
+router.post('/extension/chat-with-data', controllers.dataAnalysis.chatWithData);
 
 // Form Filler APIs
 router.post('/form-filler/analyze-form-relevance', controllers.formFiller.analyzeFormRelevance);
 router.post('/form-filler/analyze-field-mapping', controllers.formFiller.analyzeFieldMapping);
-
-// Logging APIs
-router.get('/logs/stats', controllers.logs.getLogStats);
-router.get('/logs/recent', controllers.logs.getRecentLogs);
-router.post('/logs/test', controllers.logs.testLogging);
 
 // API Information endpoint
 router.get('/info', (req, res) => {
@@ -37,10 +31,7 @@ router.get('/info', (req, res) => {
             extractDataSources: '/api/extension/extract-data-sources',
             chatWithData: '/api/extension/chat-with-data',
             analyzeFormRelevance: '/api/form-filler/analyze-form-relevance',
-            analyzeFieldMapping: '/api/form-filler/analyze-field-mapping',
-            logStats: '/api/logs/stats',
-            recentLogs: '/api/logs/recent',
-            testLogging: '/api/logs/test'
+            analyzeFieldMapping: '/api/form-filler/analyze-field-mapping'
         },
         timestamp: new Date().toISOString()
     });

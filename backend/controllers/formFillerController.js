@@ -78,11 +78,8 @@ class FormFillerController {
             
             // Get API configuration for the model
             const apiConfig = gptService.getApiConfig(model);
-            if (!apiConfig.apiKey && !apiConfig.isOllama) {
+            if (!apiConfig.apiKey || !apiConfig.apiUrl) {
                 throw new Error(`API configuration not found for model: ${model}`);
-            }
-            if (!apiConfig.apiUrl) {
-                throw new Error(`API URL not found for model: ${model}`);
             }
 
             const response = await gptService.makeRequest({
@@ -93,9 +90,7 @@ class FormFillerController {
                 params: {
                     temperature: 0.2,
                     max_tokens: 1500
-                },
-                ollamaUrl: apiConfig.ollamaUrl,
-                isOllama: apiConfig.isOllama
+                }
             });
 
             if (!response.data || !response.data.choices || !response.data.choices[0]) {
@@ -175,18 +170,13 @@ class FormFillerController {
                 selectedForm,
                 model = "gpt-4.1-nano",
                 language = "zh",
-                analysisResult = null, // Previous Analyze Content results
-                dataSources = null // Selected data sources for context
+                analysisResult = null // Previous Analyze Content results
             } = req.body;
 
-            // Check if we have either user content or data sources
-            const hasUserContent = content && content.trim().length > 0;
-            const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
-            
-            if (!hasUserContent && !hasDataSources) {
+            if (!content || content.trim().length === 0) {
                 return res.status(400).json({ 
-                    error: "No content or data sources provided",
-                    message: "Please provide content to analyze or configure data sources" 
+                    error: "No content provided",
+                    message: "Please provide content to analyze" 
                 });
             }
 
@@ -203,17 +193,13 @@ class FormFillerController {
             if (analysisResult) {
                 console.log("📊 Using previous Analyze Content results for enhanced mapping");
             }
-            if (dataSources && dataSources.sources && dataSources.sources.length > 0) {
-                console.log(`📊 Using selected data sources for context - Type: ${dataSources.type}, Sources: ${dataSources.sources.length}, Content length: ${dataSources.combinedText.length}`);
-            }
 
-            // Create enhanced field mapping prompt that includes user content, analysis results, and data sources
+            // Create enhanced field mapping prompt that includes both user content and analysis results
             const mappingPrompt = this.createEnhancedFieldMappingPrompt(
-                content || "", // Use empty string if no user content
+                content, 
                 targetForm, 
                 analysisResult, 
-                language,
-                dataSources // Pass data sources to prompt generation
+                language
             );
 
             const messages = [
@@ -231,11 +217,8 @@ class FormFillerController {
             
             // Get API configuration for the model
             const apiConfig = gptService.getApiConfig(model);
-            if (!apiConfig.apiKey && !apiConfig.isOllama) {
+            if (!apiConfig.apiKey || !apiConfig.apiUrl) {
                 throw new Error(`API configuration not found for model: ${model}`);
-            }
-            if (!apiConfig.apiUrl) {
-                throw new Error(`API URL not found for model: ${model}`);
             }
 
             const response = await gptService.makeRequest({
@@ -246,9 +229,7 @@ class FormFillerController {
                 params: {
                     temperature: 0.1,
                     max_tokens: 2000
-                },
-                ollamaUrl: apiConfig.ollamaUrl,
-                isOllama: apiConfig.isOllama
+                }
             });
 
             if (!response.data || !response.data.choices || !response.data.choices[0]) {
@@ -288,10 +269,9 @@ class FormFillerController {
                     fieldSource: originalField?.source || "main",
                     fieldIframePath: originalField?.iframePath || "",
                     fieldOriginalId: originalField?.originalId || "",
-                    // Preserve additional field attributes for friendly display
+                    // Preserve additional field attributes
                     fieldLabel: originalField?.label || "",
-                    fieldType: originalField?.type || "",
-                    title: originalField?.title || "" // Include title for caption display
+                    fieldType: originalField?.type || ""
                 };
                 
                 // Simplified debug log for iframe fields
@@ -427,19 +407,6 @@ ${content}`;
                     fieldDesc += ` (${field.type})`;
                     if (field.required) fieldDesc += " [Required]";
                     if (field.category) fieldDesc += ` [Category: ${field.category}]`;
-                    
-                    // Add options for select fields
-                    if (field.options && field.options.length > 0) {
-                        const optionTexts = field.options.map(opt => `"${opt.text || opt.value}"`).join(", ");
-                        fieldDesc += ` [Options: ${optionTexts}]`;
-                    }
-                    
-                    // Add options for radio buttons (if grouped)
-                    if (field.type === "radio" && field.radioOptions) {
-                        const radioTexts = field.radioOptions.map(opt => `"${opt.label || opt.value}"`).join(", ");
-                        fieldDesc += ` [Radio options: ${radioTexts}]`;
-                    }
-                    
                     formInfo.push(fieldDesc);
                 });
             }
@@ -448,7 +415,7 @@ ${content}`;
         }).join("\n\n");
 
         // Always use English prompts, with flexible language output instruction
-        const languageInstruction = "Please respond in the most appropriate language";
+        const languageInstruction = language ? `Please respond in ${language} language` : "Please respond in the most appropriate language";
         
         return `Please analyze webpage content and user input to identify the most relevant forms and generate field descriptions for the target form. ${languageInstruction}.
 
@@ -467,7 +434,7 @@ Please complete the following analysis tasks:
 1. **Form Relevance Analysis**: Based on page context and user content, analyze the relevance of each form
 2. **Target Form Selection**: Select the most relevant form
 3. **Form Description Generation**: Create a concise description of what the recommended form is for (its purpose, context, what it's used to apply for, etc.)
-4. **Field Description Generation**: Generate detailed descriptions for each field in the target form, including specific value options for selection fields
+4. **Field Description Generation**: Generate descriptions for each field in the target form
 
 Return JSON format:
 
@@ -480,12 +447,12 @@ Return JSON format:
   ],
   "recommendedForm": "recommended form ID",
   "confidence": 0.90,
-  "recommendedLanguage": "recommended language for this form based on form content and page context",
+  "recommendedLanguage": "en or zh - recommended language for this form based on form content and page context",
   "formDescription": "A concise description of what the recommended form is for, based on form title, purpose, and context",
   "fieldDescriptions": {
     "recommended_form_field_ID": {
       "fieldId": "field ID",
-      "description": "Comprehensive field description that includes both purpose and available options. Examples: 'Country selection dropdown with options: United States, Canada, Mexico, Other' or 'Rating selection with options: Excellent (5), Good (4), Average (3), Poor (2), Very Poor (1)' or 'Gender selection with radio options: Male, Female, Other' or 'Newsletter subscription checkbox: Yes/No choice for receiving email updates'"
+      "description": "Field description based on page context"
     }
   }
 }
@@ -493,57 +460,29 @@ Return JSON format:
 Analysis requirements:
 1. Prioritize page context information (titles, descriptions, text around forms)
 2. Combine field attributes like label, title, placeholder to understand field meaning
-3. Generate clear, practical descriptions for each field that include:
-   - Field purpose and what it's used for
-   - For selection fields (select, radio, checkbox): List available options/values when detectable
-   - For text fields: Expected format or type of content
-   - For number fields: Expected range or unit if apparent
+3. Generate clear, practical descriptions for each field
 4. Relevance scores should realistically reflect form-content matching
-5. Field descriptions should be based on page context, not just repeat field labels
-6. When options are available in the HTML (option tags, radio values, etc.), include them in the description`;
+5. Field descriptions should be based on page context, not just repeat field labels`;
     }
 
     /**
-     * Create enhanced field mapping prompt that uses user content, analysis results, and data sources
+     * Create enhanced field mapping prompt that uses both user content and analysis results
      */
-    createEnhancedFieldMappingPrompt(content, targetForm, analysisResult, language, dataSources = null) {
+    createEnhancedFieldMappingPrompt(content, targetForm, analysisResult, language) {
         // Use the language directly as provided by user selection
         const targetLanguage = language || "English";
         
         console.log(`🌐 Using user-selected language: ${targetLanguage} for field mapping`);
 
-        // Check what data we have available
-        const hasUserContent = content && content.trim().length > 0;
-        const hasDataSources = dataSources && dataSources.sources && dataSources.sources.length > 0;
-        
         // Always use English for the prompt itself, but specify target language for output
         const languageInstruction = `Please respond in ${targetLanguage} language`;
         let promptParts = [];
 
-        // Start with instruction and language guidance - adapt based on available data
-        if (hasUserContent && hasDataSources) {
-            promptParts.push(`Analyze user content and data sources to generate appropriate values for each form field. ${languageInstruction}.`);
-        } else if (hasDataSources && !hasUserContent) {
-            promptParts.push(`Generate appropriate form field values based on the provided data sources and form structure. ${languageInstruction}.`);
-        } else {
-            promptParts.push(`Analyze user content and generate appropriate values for each form field. ${languageInstruction}.`);
-        }
+        // Start with instruction and language guidance
+        promptParts.push(`Analyze user content and generate appropriate values for each form field. ${languageInstruction}.`);
 
-        // Add user content if available
-        if (hasUserContent) {
-            promptParts.push(`\nUser input content:\n"${content}"\n`);
-        }
-
-        // Add data sources if available
-        if (hasDataSources) {
-            promptParts.push(`\n${hasUserContent ? 'Additional' : 'Primary'} context from selected data sources (${dataSources.type} format):`);
-            promptParts.push(`${dataSources.combinedText}\n`);
-            if (hasUserContent) {
-                promptParts.push("Note: Use this additional context to enhance field mapping accuracy and provide more relevant information.\n");
-            } else {
-                promptParts.push("Note: Use this data source content as the primary source for generating appropriate field values.\n");
-            }
-        }
+        // Add user content
+        promptParts.push(`\nUser input content:\n"${content}"\n`);
 
         // Add form description - prioritize analysis result over original form description
         let formDesc = null;
@@ -587,22 +526,17 @@ Analysis requirements:
 
         promptParts.push(`Target form structure:\n${JSON.stringify(simplifiedForm, null, 2)}\n`);
 
-        // Add simplified instructions based on available data
+        // Add simplified instructions
         promptParts.push(`Analysis instructions:
-1. ${hasUserContent ? 'User content may contain:' : 'No user content provided - generate values based on form structure and data sources:'}
-   ${hasUserContent ? '- Direct field values (e.g., "Name: John, Phone: 123456")' : ''}
-   ${hasUserContent ? '- Instructional guidance (e.g., "please help fill this form based on my info to make it persuasive")' : ''}
-   ${hasUserContent ? '- A combination of both' : ''}
+1. User content may contain:
+   - Direct field values (e.g., "Name: John, Phone: 123456")
+   - Instructional guidance (e.g., "please help fill this form based on my info to make it persuasive")
+   - A combination of both
 
-2. ${hasDataSources ? (hasUserContent ? 'Additional data sources are provided for context:' : 'Data sources are your primary information source:') : 'Processing strategy:'}
-   ${hasDataSources ? '- Use the ' + (hasUserContent ? 'additional' : 'available') + ' context from data sources to ' + (hasUserContent ? 'enhance field mapping accuracy' : 'generate appropriate field values') : ''}
-   ${hasDataSources && hasUserContent ? '- Combine user input with relevant information from data sources' : ''}
-   ${hasDataSources && hasUserContent ? '- Prioritize user input but supplement with data source information when appropriate' : ''}
-   ${hasUserContent ? '- For direct information: extract exact field values' : ''}
-   ${hasUserContent ? '- For instructional content: generate appropriate values based on field descriptions' + (hasDataSources ? ' and available data sources' : '') : ''}
-   ${!hasUserContent && hasDataSources ? '- Extract relevant information from data sources that matches form field requirements' : ''}
-   ${!hasUserContent && hasDataSources ? '- Generate contextually appropriate values based on form purpose and available data' : ''}
-   - Consider ${hasUserContent ? 'user intent and ' : ''}form context and field types
+2. Processing strategy:
+   - For direct information: extract exact field values
+   - For instructional content: generate appropriate values based on field descriptions
+   - Consider user intent and form context
 
 3. **CRITICAL LANGUAGE REQUIREMENT**: ALL field values MUST be generated in ${targetLanguage}. This is mandatory.
 
