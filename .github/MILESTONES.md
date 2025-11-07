@@ -17,18 +17,18 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 
 **Legend:** d = days, BG = Background Script
 
-| Milestone | Goal | Duration | Dependencies |
-|-----------|------|----------|--------------|
-| [M0](#m0-project-initialization) | Project initialization | 2 days | None |
-| [M1](#m1-core-type-system) | Core type system | 3 days | M0 |
-| [M2](#m2-configuration-management) | Configuration management | 5 days | M1 |
-| [M3](#m3-ai-service-layer) | AI service layer | 7 days | M1, M2 |
-| [M4](#m4-data-processing-layer) | Data processing layer | 4 days | M1 |
-| [M5](#m5-ui-layer) | UI layer | 6 days | M2, M3 |
-| [M6](#m6-content-scripts) | Content scripts | 5 days | M3, M4 |
-| [M7](#m7-background-script) | Background script | 3 days | M3 |
-| [M8](#m8-integration-testing) | Integration testing | 4 days | M5, M6, M7 |
-| [M9](#m9-optimization--release) | Optimization & release | 4 days | M8 |
+| Milestone                          | Goal                     | Duration | Dependencies |
+| ---------------------------------- | ------------------------ | -------- | ------------ |
+| [M0](#m0-project-initialization)   | Project initialization   | 2 days   | None         |
+| [M1](#m1-core-type-system)         | Core type system         | 3 days   | M0           |
+| [M2](#m2-configuration-management) | Configuration management | 5 days   | M1           |
+| [M3](#m3-ai-service-layer)         | AI service layer         | 7 days   | M1, M2       |
+| [M4](#m4-data-processing-layer)    | Data processing layer    | 4 days   | M1           |
+| [M5](#m5-ui-layer)                 | UI layer                 | 6 days   | M2, M3       |
+| [M6](#m6-content-scripts)          | Content scripts          | 5 days   | M3, M4       |
+| [M7](#m7-background-script)        | Background script        | 3 days   | M3           |
+| [M8](#m8-integration-testing)      | Integration testing      | 4 days   | M5, M6, M7   |
+| [M9](#m9-optimization--release)    | Optimization & release   | 4 days   | M8           |
 
 **Total Duration:** 43 days (approximately 6-7 weeks)
 
@@ -42,6 +42,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 ### Checkpoints
 
 #### CP-M0-1: Project Scaffolding
+
 - [ ] Initialize Git repository
 - [ ] Create project structure (`src/`, `tests/`, `public/`)
 - [ ] Initialize pnpm (`pnpm init`)
@@ -50,6 +51,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 **Deliverable:** Basic folder structure
 
 #### CP-M0-2: TypeScript Configuration
+
 - [ ] Install TypeScript and dependencies
 - [ ] Create `tsconfig.json` (strict mode)
 - [ ] Create `tsconfig.node.json`
@@ -58,6 +60,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 **Deliverable:** `tsconfig.json`, `tsconfig.node.json`
 
 #### CP-M0-3: Build Tool Setup
+
 - [ ] Install and configure Vite
 - [ ] Create `vite.config.ts`
 - [ ] Test development build
@@ -66,6 +69,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 **Deliverable:** Working Vite build system
 
 #### CP-M0-4: Testing Framework
+
 - [ ] Install Vitest and dependencies
 - [ ] Create `vitest.config.ts`
 - [ ] Create test setup file (`tests/setup.ts`)
@@ -75,6 +79,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 **Deliverable:** `vitest.config.ts`, working test command
 
 #### CP-M0-5: Code Quality Tools
+
 - [ ] Install and configure ESLint
 - [ ] Install and configure Prettier
 - [ ] Setup Husky (Git hooks)
@@ -84,6 +89,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 **Deliverable:** `.eslintrc.cjs`, `.prettierrc`, `.husky/`
 
 #### CP-M0-6: CI/CD Pipeline
+
 - [ ] Create `.github/workflows/test.yml`
 - [ ] Create `.github/workflows/build.yml`
 - [ ] Test GitHub Actions locally (act)
@@ -128,6 +134,7 @@ CHECKPOINT: CP-M0-6"
 ### Checkpoints
 
 #### CP-M1-1: API Types
+
 - [ ] Define `ApiConfig` interface
 - [ ] Define `ApiProvider` type
 - [ ] Define `ChatMessage` interface
@@ -138,6 +145,7 @@ CHECKPOINT: CP-M0-6"
 **Deliverable:** `src/types/api.ts`
 
 **Example:**
+
 ```typescript
 export interface ApiConfig {
   provider: 'azure' | 'ollama';
@@ -170,6 +178,7 @@ export interface ChatResponse {
 ```
 
 #### CP-M1-2: Configuration Types
+
 - [ ] Define `StorageConfig` interface
 - [ ] Define `ModelConfig` interface
 - [ ] Define `ExtensionConfig` interface
@@ -178,6 +187,7 @@ export interface ChatResponse {
 **Deliverable:** `src/types/config.ts`
 
 #### CP-M1-3: Model Types
+
 - [ ] Define `ModelInfo` interface
 - [ ] Define `ModelCapability` type
 - [ ] Define `ModelRegistry` type
@@ -186,6 +196,7 @@ export interface ChatResponse {
 **Deliverable:** `src/types/models.ts`
 
 #### CP-M1-4: Chrome Extension Types
+
 - [ ] Extend Chrome API types as needed
 - [ ] Define custom message types
 - [ ] Define storage schema types
@@ -193,6 +204,7 @@ export interface ChatResponse {
 **Deliverable:** `src/types/chrome.d.ts`
 
 #### CP-M1-5: Utility Functions
+
 - [ ] Implement HTTP client
 - [ ] Implement logger utility
 - [ ] Implement crypto utilities (encrypt/decrypt)
@@ -201,6 +213,7 @@ export interface ChatResponse {
 **Deliverable:** `src/utils/`, utility tests
 
 **Example Test:**
+
 ```typescript
 // src/utils/__tests__/logger.test.ts
 import { describe, it, expect, vi } from 'vitest';
@@ -259,6 +272,7 @@ CHECKPOINT: CP-M1-5"
 #### CP-M2-1: Storage Manager (TDD)
 
 **Test First:**
+
 ```typescript
 // src/config/__tests__/storageManager.test.ts
 describe('StorageManager', () => {
@@ -277,6 +291,7 @@ describe('StorageManager', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write tests (Red)
 - [ ] Implement `StorageManager` class (Green)
 - [ ] Add type safety with generics
@@ -288,6 +303,7 @@ describe('StorageManager', () => {
 #### CP-M2-2: API Config Manager (TDD)
 
 **Test First:**
+
 ```typescript
 describe('ApiConfigManager', () => {
   it('should save Azure config', async () => {
@@ -317,6 +333,7 @@ describe('ApiConfigManager', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases (Red)
 - [ ] Implement `ApiConfigManager` (Green)
 - [ ] Add encryption for API keys
@@ -329,6 +346,7 @@ describe('ApiConfigManager', () => {
 #### CP-M2-3: Model Registry
 
 **Implementation:**
+
 - [ ] Define model metadata (capabilities, context window, pricing)
 - [ ] Implement model lookup functions
 - [ ] Add provider-specific model lists
@@ -337,6 +355,7 @@ describe('ApiConfigManager', () => {
 **Deliverable:** `src/config/modelRegistry.ts`, tests
 
 **Example:**
+
 ```typescript
 export const MODEL_REGISTRY: Record<string, ModelInfo> = {
   'gpt-4': {
@@ -345,7 +364,7 @@ export const MODEL_REGISTRY: Record<string, ModelInfo> = {
     contextWindow: 8192,
     capabilities: ['chat', 'function-calling'],
   },
-  'llama2': {
+  llama2: {
     provider: 'ollama',
     name: 'llama2',
     contextWindow: 4096,
@@ -406,6 +425,7 @@ CHECKPOINT: CP-M2-5"
 #### CP-M3-1: Base Adapter Interface
 
 **Type Definition:**
+
 ```typescript
 export interface IAIService {
   chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResponse>;
@@ -420,6 +440,7 @@ export abstract class BaseAdapter implements IAIService {
 ```
 
 **Tasks:**
+
 - [ ] Define `IAIService` interface
 - [ ] Implement `BaseAdapter` abstract class
 - [ ] Add common error handling
@@ -431,13 +452,12 @@ export abstract class BaseAdapter implements IAIService {
 #### CP-M3-2: Azure OpenAI Adapter (TDD)
 
 **Test First:**
+
 ```typescript
 describe('AzureOpenAIAdapter', () => {
   it('should send chat request successfully', async () => {
     const adapter = new AzureOpenAIAdapter(azureConfig);
-    const response = await adapter.chat([
-      { role: 'user', content: 'Hello' }
-    ]);
+    const response = await adapter.chat([{ role: 'user', content: 'Hello' }]);
     expect(response.content).toBeDefined();
   });
 
@@ -450,7 +470,7 @@ describe('AzureOpenAIAdapter', () => {
     mockFetch
       .mockResolvedValueOnce({ status: 429 })
       .mockResolvedValueOnce({ status: 200, json: async () => mockResponse });
-    
+
     const response = await adapter.chat(messages);
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
@@ -458,6 +478,7 @@ describe('AzureOpenAIAdapter', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement Azure OpenAI adapter
 - [ ] Add authentication header handling
@@ -470,20 +491,19 @@ describe('AzureOpenAIAdapter', () => {
 #### CP-M3-3: Ollama Adapter (TDD)
 
 **Test First:**
+
 ```typescript
 describe('OllamaAdapter', () => {
   it('should send chat request to Ollama', async () => {
     const adapter = new OllamaAdapter(ollamaConfig);
-    const response = await adapter.chat([
-      { role: 'user', content: 'Hello' }
-    ]);
+    const response = await adapter.chat([{ role: 'user', content: 'Hello' }]);
     expect(response.content).toBeDefined();
   });
 
   it('should handle Ollama-specific errors', async () => {
-    mockFetch.mockResolvedValue({ 
-      status: 404, 
-      json: async () => ({ error: 'Model not found' })
+    mockFetch.mockResolvedValue({
+      status: 404,
+      json: async () => ({ error: 'Model not found' }),
     });
     await expect(adapter.chat(messages)).rejects.toThrow('Model not found');
   });
@@ -496,6 +516,7 @@ describe('OllamaAdapter', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement Ollama adapter
 - [ ] Add Ollama API format handling
@@ -507,6 +528,7 @@ describe('OllamaAdapter', () => {
 #### CP-M3-4: AI Service Factory
 
 **Implementation:**
+
 ```typescript
 export class AIServiceFactory {
   static create(config: ApiConfig): IAIService {
@@ -523,6 +545,7 @@ export class AIServiceFactory {
 ```
 
 **Tasks:**
+
 - [ ] Implement factory pattern
 - [ ] Add provider detection
 - [ ] Write tests
@@ -532,6 +555,7 @@ export class AIServiceFactory {
 #### CP-M3-5: CORS Proxy (Background Script)
 
 **Implementation:**
+
 ```typescript
 // src/background/apiProxy.ts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -546,6 +570,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 ```
 
 **Tasks:**
+
 - [ ] Implement API proxy in background script
 - [ ] Add request/response handling
 - [ ] Add timeout handling
@@ -601,6 +626,7 @@ CHECKPOINT: CP-M3-6"
 #### CP-M4-1: HTML Processor (TDD)
 
 **Test First:**
+
 ```typescript
 describe('HTMLProcessor', () => {
   it('should extract text from HTML', () => {
@@ -626,6 +652,7 @@ describe('HTMLProcessor', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement HTML parsing
 - [ ] Implement text extraction
@@ -637,6 +664,7 @@ describe('HTMLProcessor', () => {
 #### CP-M4-2: Markdown Converter (TDD)
 
 **Test First:**
+
 ```typescript
 describe('MarkdownConverter', () => {
   it('should convert HTML to Markdown', () => {
@@ -654,6 +682,7 @@ describe('MarkdownConverter', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement HTML to Markdown conversion
 - [ ] Handle common HTML elements
@@ -664,6 +693,7 @@ describe('MarkdownConverter', () => {
 #### CP-M4-3: Data Sanitization
 
 **Implementation:**
+
 - [ ] Implement XSS prevention
 - [ ] Implement data validation
 - [ ] Add content security checks
@@ -715,6 +745,7 @@ CHECKPOINT: CP-M4-4"
 #### CP-M5-1: Popup HTML Structure
 
 **Tasks:**
+
 - [ ] Design popup UI layout
 - [ ] Create HTML structure (`public/popup.html`)
 - [ ] Add CSS styles (`src/styles/popup.css`)
@@ -725,6 +756,7 @@ CHECKPOINT: CP-M4-4"
 #### CP-M5-2: Configuration UI Component (TDD)
 
 **Test First:**
+
 ```typescript
 describe('ConfigurationUI', () => {
   it('should render config form', () => {
@@ -736,7 +768,7 @@ describe('ConfigurationUI', () => {
     const ui = new ConfigurationUI(container);
     fillForm({ provider: 'azure', name: 'Test', ... });
     await submitForm();
-    
+
     const saved = await configManager.getConfig('Test');
     expect(saved).toBeDefined();
   });
@@ -745,13 +777,14 @@ describe('ConfigurationUI', () => {
     const ui = new ConfigurationUI(container);
     fillForm({ provider: 'azure', name: '', ... }); // Invalid
     await submitForm();
-    
+
     expect(container.querySelector('.error')).toBeDefined();
   });
 });
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement configuration form
 - [ ] Add form validation
@@ -763,6 +796,7 @@ describe('ConfigurationUI', () => {
 #### CP-M5-3: Model Selector Component (TDD)
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement model dropdown
 - [ ] Add provider filtering
@@ -773,6 +807,7 @@ describe('ConfigurationUI', () => {
 #### CP-M5-4: Connection Test Component
 
 **Implementation:**
+
 - [ ] Add "Test Connection" button
 - [ ] Implement connection validation
 - [ ] Add loading states
@@ -783,6 +818,7 @@ describe('ConfigurationUI', () => {
 #### CP-M5-5: Popup Main Controller
 
 **Implementation:**
+
 ```typescript
 // src/popup/index.ts
 import { ConfigurationUI } from './components/ConfigurationUI';
@@ -791,11 +827,8 @@ import { ApiConfigManager } from '@/config/apiConfigManager';
 
 async function initPopup() {
   const configManager = new ApiConfigManager();
-  const configUI = new ConfigurationUI(
-    document.getElementById('config-container'),
-    configManager
-  );
-  
+  const configUI = new ConfigurationUI(document.getElementById('config-container'), configManager);
+
   await configUI.render();
 }
 
@@ -803,6 +836,7 @@ document.addEventListener('DOMContentLoaded', initPopup);
 ```
 
 **Tasks:**
+
 - [ ] Implement popup initialization
 - [ ] Wire up all components
 - [ ] Add event handlers
@@ -813,6 +847,7 @@ document.addEventListener('DOMContentLoaded', initPopup);
 #### CP-M5-6: UI Integration Tests
 
 #### CP-M5-7: Data Source Management (Popup) Migration (TDD)
+
 - [x] Characterize legacy `PopupDataSourceManagerRefactored.js` behavior
 - [x] Migrate manager to TypeScript (`popupDataSourceManagerRefactored.ts`) with event parity
 - [x] Extend popup types (`PopupElements`, `PopupManagerLike`) for data source context
@@ -825,12 +860,14 @@ document.addEventListener('DOMContentLoaded', initPopup);
 **Deliverable:** Fully migrated popup data source coordination layer (manager + UI controller) with ≥90% logic parity and new TypeScript tests.
 
 **Acceptance Criteria:**
+
 - Manager emits legacy DOM CustomEvents (`dataSourceManagerReady`, `dataSourcesUpdated`, `formFillerConfigChanged`, `configurationApplied`)
 - UI controller updates chat and form filler status elements correctly
 - All new modules satisfy strict TypeScript without `any` (except intentional test casts)
 - Added tests pass consistently and do not introduce flakiness
 
 **Commit Template:**
+
 ```bash
 git commit -m "feat(ui): migrate popup data source manager and UI controller to TypeScript
 
@@ -887,6 +924,7 @@ CHECKPOINT: CP-M5-6"
 #### CP-M6-1: Form Detector (TDD)
 
 **Test First:**
+
 ```typescript
 describe('FormDetector', () => {
   it('should detect forms on page', () => {
@@ -911,6 +949,7 @@ describe('FormDetector', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement form detection
 - [ ] Implement field extraction
@@ -921,6 +960,7 @@ describe('FormDetector', () => {
 #### CP-M6-2: Form Filler (TDD)
 
 **Test First:**
+
 ```typescript
 describe('FormFiller', () => {
   it('should fill form with data', async () => {
@@ -930,10 +970,10 @@ describe('FormFiller', () => {
         <input name="email" type="email" />
       </form>
     `;
-    
+
     const data = { name: 'John Doe', email: 'john@example.com' };
     await filler.fillForm(form, data);
-    
+
     expect(document.querySelector('[name="name"]').value).toBe('John Doe');
     expect(document.querySelector('[name="email"]').value).toBe('john@example.com');
   });
@@ -947,7 +987,7 @@ describe('FormFiller', () => {
         </select>
       </form>
     `;
-    
+
     await filler.fillForm(form, { country: 'uk' });
     expect(document.querySelector('[name="country"]').value).toBe('uk');
   });
@@ -955,6 +995,7 @@ describe('FormFiller', () => {
 ```
 
 **Implementation:**
+
 - [ ] Write test cases
 - [ ] Implement form filling logic
 - [ ] Handle different input types
@@ -965,6 +1006,7 @@ describe('FormFiller', () => {
 #### CP-M6-3: Data Extraction Integration
 
 **Implementation:**
+
 - [ ] Integrate with HTML processor
 - [ ] Extract page data for AI context
 - [ ] Handle large pages efficiently
@@ -974,6 +1016,7 @@ describe('FormFiller', () => {
 #### CP-M6-4: Content Script Main
 
 **Implementation:**
+
 ```typescript
 // src/content/index.ts
 import { FormDetector } from './formDetector';
@@ -988,7 +1031,7 @@ class ContentScript {
   async init() {
     // Detect forms
     const forms = this.detector.detectForms();
-    
+
     // Listen for fill commands
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.type === 'FILL_FORM') {
@@ -1003,6 +1046,7 @@ new ContentScript().init();
 ```
 
 **Tasks:**
+
 - [ ] Implement content script initialization
 - [ ] Add message listeners
 - [ ] Wire up all components
@@ -1052,6 +1096,7 @@ CHECKPOINT: CP-M6-5"
 #### CP-M7-1: API Proxy (from M3)
 
 **Already implemented in M3-CP5, enhance here:**
+
 - [ ] Add request queuing
 - [ ] Add rate limiting
 - [ ] Add request caching (if applicable)
@@ -1061,6 +1106,7 @@ CHECKPOINT: CP-M6-5"
 #### CP-M7-2: Message Router
 
 **Implementation:**
+
 ```typescript
 // src/background/messageRouter.ts
 export class MessageRouter {
@@ -1081,6 +1127,7 @@ export class MessageRouter {
 ```
 
 **Tasks:**
+
 - [ ] Implement message routing
 - [ ] Add error handling
 - [ ] Write tests
@@ -1090,6 +1137,7 @@ export class MessageRouter {
 #### CP-M7-3: Background Main
 
 **Implementation:**
+
 ```typescript
 // src/background/index.ts
 import { MessageRouter } from './messageRouter';
@@ -1101,7 +1149,8 @@ router.register('API_CALL', apiCallHandler);
 router.register('GET_CONFIG', configHandler);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  router.handle(request, sender)
+  router
+    .handle(request, sender)
     .then(response => sendResponse(response))
     .catch(error => sendResponse({ error: error.message }));
   return true;
@@ -1109,6 +1158,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 ```
 
 **Tasks:**
+
 - [ ] Implement background script initialization
 - [ ] Register all message handlers
 - [ ] Add lifecycle management
@@ -1157,6 +1207,7 @@ CHECKPOINT: CP-M7-4"
 #### CP-M8-1: E2E Test Setup
 
 **Tasks:**
+
 - [ ] Configure Playwright for extension testing
 - [ ] Create test fixtures
 - [ ] Setup test data
@@ -1166,23 +1217,25 @@ CHECKPOINT: CP-M7-4"
 #### CP-M8-2: Configuration Workflow Tests
 
 **Tests:**
+
 ```typescript
 test('should configure Azure OpenAI', async ({ page }) => {
   await page.goto('chrome-extension://[id]/popup.html');
-  
+
   await page.fill('[name="provider"]', 'azure');
   await page.fill('[name="name"]', 'My Azure');
   await page.fill('[name="endpoint"]', 'https://test.openai.azure.com');
   await page.fill('[name="apiKey"]', 'sk-test-key');
   await page.fill('[name="model"]', 'gpt-4');
-  
+
   await page.click('button[type="submit"]');
-  
+
   await expect(page.locator('.success-message')).toBeVisible();
 });
 ```
 
 **Tasks:**
+
 - [ ] Test adding configurations
 - [ ] Test editing configurations
 - [ ] Test deleting configurations
@@ -1193,20 +1246,21 @@ test('should configure Azure OpenAI', async ({ page }) => {
 #### CP-M8-3: Form Filling Workflow Tests
 
 **Tests:**
+
 ```typescript
 test('should detect and fill form', async ({ page, context }) => {
   // Load extension
   await context.addInitScript({ path: 'dist/content.js' });
-  
+
   // Navigate to test page
   await page.goto('http://localhost:3000/test-form.html');
-  
+
   // Trigger form filling
   await page.click('#smart-fill-button');
-  
+
   // Wait for AI response
   await page.waitForSelector('.filling-complete');
-  
+
   // Verify form is filled
   await expect(page.locator('[name="name"]')).toHaveValue('John Doe');
   await expect(page.locator('[name="email"]')).toHaveValue('john@example.com');
@@ -1214,6 +1268,7 @@ test('should detect and fill form', async ({ page, context }) => {
 ```
 
 **Tasks:**
+
 - [ ] Test form detection
 - [ ] Test form filling
 - [ ] Test AI integration
@@ -1224,6 +1279,7 @@ test('should detect and fill form', async ({ page, context }) => {
 #### CP-M8-4: Performance Tests
 
 **Tests:**
+
 - [ ] Test large form handling
 - [ ] Test concurrent requests
 - [ ] Test memory usage
@@ -1234,6 +1290,7 @@ test('should detect and fill form', async ({ page, context }) => {
 #### CP-M8-5: Cross-Browser Tests
 
 **Tasks:**
+
 - [ ] Test on Chrome
 - [ ] Test on Edge
 - [ ] Document compatibility
@@ -1275,6 +1332,7 @@ CHECKPOINT: CP-M8-5"
 #### CP-M9-1: Performance Optimization
 
 **Tasks:**
+
 - [ ] Analyze bundle size
 - [ ] Code splitting
 - [ ] Lazy loading
@@ -1285,6 +1343,7 @@ CHECKPOINT: CP-M8-5"
 #### CP-M9-2: Documentation
 
 **Tasks:**
+
 - [ ] Update README.md
 - [ ] Add API documentation
 - [ ] Add user guide
@@ -1295,6 +1354,7 @@ CHECKPOINT: CP-M8-5"
 #### CP-M9-3: Security Audit
 
 **Tasks:**
+
 - [ ] Review data handling
 - [ ] Review permissions
 - [ ] Test XSS prevention
@@ -1305,6 +1365,7 @@ CHECKPOINT: CP-M8-5"
 #### CP-M9-4: Release Preparation
 
 **Tasks:**
+
 - [ ] Create release notes
 - [ ] Package extension
 - [ ] Test installation
@@ -1339,21 +1400,22 @@ CHECKPOINT: CP-M9-4"
 
 ### Overall Progress
 
-| Milestone | Status | Completion Date |
-|-----------|--------|-----------------|
-| M0 | ✅ Completed | 2025-11-07 |
-| M1 | 🟡 In Progress | 2025-11-07 |
-| M2 | 🟡 In Progress | 2025-11-07 |
-| M3 | 🔲 Not Started | - |
-| M4 | 🔲 Not Started | - |
-| M5 | 🟡 In Progress | 2025-11-07 |
-| M5 Data Source Sub-layer | ✅ Completed | 2025-11-07 |
-| M6 | 🔲 Not Started | - |
-| M7 | 🔲 Not Started | - |
-| M8 | 🔲 Not Started | - |
-| M9 | 🔲 Not Started | - |
+| Milestone                | Status         | Completion Date |
+| ------------------------ | -------------- | --------------- |
+| M0                       | ✅ Completed   | 2025-11-07      |
+| M1                       | 🟡 In Progress | 2025-11-07      |
+| M2                       | 🟡 In Progress | 2025-11-07      |
+| M3                       | 🔲 Not Started | -               |
+| M4                       | 🔲 Not Started | -               |
+| M5                       | 🟡 In Progress | 2025-11-07      |
+| M5 Data Source Sub-layer | ✅ Completed   | 2025-11-07      |
+| M6                       | 🔲 Not Started | -               |
+| M7                       | 🔲 Not Started | -               |
+| M8                       | 🔲 Not Started | -               |
+| M9                       | 🔲 Not Started | -               |
 
 **Legend:**
+
 - 🔲 Not Started
 - 🟡 In Progress
 - ✅ Completed
@@ -1361,35 +1423,36 @@ CHECKPOINT: CP-M9-4"
 
 ### Test Coverage Progress
 
-| Module | Target | Current | Status |
-|--------|--------|---------|--------|
-| Utilities | 100% | - | 🔲 |
-| Configuration | ≥90% | - | 🔲 |
-| AI Services | ≥85% | - | 🔲 |
-| Data Processing | ≥85% | - | 🔲 |
-| UI Components | ≥70% | - | 🔲 |
-| Content Scripts | ≥75% | - | 🔲 |
-| Background Script | ≥80% | - | 🔲 |
-| **Overall** | **≥80%** | - | 🔲 |
+| Module            | Target   | Current | Status |
+| ----------------- | -------- | ------- | ------ |
+| Utilities         | 100%     | -       | 🔲     |
+| Configuration     | ≥90%     | -       | 🔲     |
+| AI Services       | ≥85%     | -       | 🔲     |
+| Data Processing   | ≥85%     | -       | 🔲     |
+| UI Components     | ≥70%     | -       | 🔲     |
+| Content Scripts   | ≥75%     | -       | 🔲     |
+| Background Script | ≥80%     | -       | 🔲     |
+| **Overall**       | **≥80%** | -       | 🔲     |
 
 ## 📊 Progress Tracking
 
 ### Overall Progress
 
-| Milestone | Status | Completion Date |
-|-----------|--------|-----------------|
-| M0 | 🔲 Not Started | - |
-| M1 | 🔲 Not Started | - |
-| M2 | 🔲 Not Started | - |
-| M3 | 🔲 Not Started | - |
-| M4 | 🔲 Not Started | - |
-| M5 | 🔲 Not Started | - |
-| M6 | 🔲 Not Started | - |
-| M7 | 🔲 Not Started | - |
-| M8 | 🔲 Not Started | - |
-| M9 | 🔲 Not Started | - |
+| Milestone | Status         | Completion Date |
+| --------- | -------------- | --------------- |
+| M0        | 🔲 Not Started | -               |
+| M1        | 🔲 Not Started | -               |
+| M2        | 🔲 Not Started | -               |
+| M3        | 🔲 Not Started | -               |
+| M4        | 🔲 Not Started | -               |
+| M5        | 🔲 Not Started | -               |
+| M6        | 🔲 Not Started | -               |
+| M7        | 🔲 Not Started | -               |
+| M8        | 🔲 Not Started | -               |
+| M9        | 🔲 Not Started | -               |
 
 **Legend:**
+
 - 🔲 Not Started
 - 🟡 In Progress
 - ✅ Completed
@@ -1397,73 +1460,73 @@ CHECKPOINT: CP-M9-4"
 
 ### Test Coverage Progress
 
-| Module | Target | Current | Status |
-|--------|--------|---------|--------|
-| Utilities | 100% | - | 🔲 |
-| Configuration | ≥90% | - | 🔲 |
-| AI Services | ≥85% | - | 🔲 |
-| Data Processing | ≥85% | - | 🔲 |
-| UI Components | ≥70% | - | 🔲 |
-| Content Scripts | ≥75% | - | 🔲 |
-| Background Script | ≥80% | - | 🔲 |
-| **Overall** | **≥80%** | - | 🔲 |
+| Module            | Target   | Current | Status |
+| ----------------- | -------- | ------- | ------ |
+| Utilities         | 100%     | -       | 🔲     |
+| Configuration     | ≥90%     | -       | 🔲     |
+| AI Services       | ≥85%     | -       | 🔲     |
+| Data Processing   | ≥85%     | -       | 🔲     |
+| UI Components     | ≥70%     | -       | 🔲     |
+| Content Scripts   | ≥75%     | -       | 🔲     |
+| Background Script | ≥80%     | -       | 🔲     |
+| **Overall**       | **≥80%** | -       | 🔲     |
 
 ### Detailed Checkpoint Progress
 
-| Milestone | Checkpoint | Description | Status | Date | Notes |
-|-----------|-----------|-------------|--------|------|-------|
-| M0 | CP-M0-1 | Project scaffolding | ✅ | 2025-11-07 | Initialized repo, folders, gitignore |
-| M0 | CP-M0-2 | TypeScript config | ✅ | 2025-11-07 | Strict mode tsconfig + node config |
-| M0 | CP-M0-3 | Build tool setup | ✅ | 2025-11-07 | Vite build (dev/prod) verified |
-| M0 | CP-M0-4 | Testing framework | ✅ | 2025-11-07 | Vitest + chrome mocks working |
-| M0 | CP-M0-5 | Code quality tools | ✅ | 2025-11-07 | ESLint, Prettier, Husky, commitlint |
-| M0 | CP-M0-6 | CI/CD pipeline | ✅ | 2025-11-07 | Workflows created & validated |
-| M1 | CP-M1-1 | API types | 🔲 | - | - |
-| M1 | CP-M1-2 | Config types | 🔲 | - | - |
-| M1 | CP-M1-3 | Model types | 🔲 | - | - |
-| M1 | CP-M1-4 | Chrome types | 🔲 | - | - |
-| M1 | CP-M1-5 | Utility functions | 🔲 | - | 100% coverage required |
-| M2 | CP-M2-1 | Storage manager | 🔲 | - | TDD approach |
-| M2 | CP-M2-2 | API config manager | 🔲 | - | TDD approach |
-| M2 | CP-M2-3 | Model registry | 🔲 | - | - |
-| M2 | CP-M2-4 | Config validation | 🔲 | - | - |
-| M2 | CP-M2-5 | Integration tests | 🔲 | - | ≥90% coverage |
-| M3 | CP-M3-1 | Base adapter | 🔲 | - | Abstract class |
-| M3 | CP-M3-2 | Azure adapter | 🔲 | - | TDD approach |
-| M3 | CP-M3-3 | Ollama adapter | 🔲 | - | TDD approach |
-| M3 | CP-M3-4 | Azure service | 🔲 | - | - |
-| M3 | CP-M3-5 | Ollama service | 🔲 | - | - |
-| M3 | CP-M3-6 | Service factory | 🔲 | - | - |
-| M3 | CP-M3-7 | CORS proxy | 🔲 | - | Background script |
-| M4 | CP-M4-1 | HTML processor | 🔲 | - | TDD approach |
-| M4 | CP-M4-2 | Markdown converter | 🔲 | - | TDD approach |
-| M4 | CP-M4-3 | Data sanitization | 🔲 | - | Security focus |
-| M4 | CP-M4-4 | Integration tests | 🔲 | - | - |
-| M5 | CP-M5-1 | Popup HTML structure | 🔲 | - | - |
-| M5 | CP-M5-2 | Config UI component | 🔲 | - | TDD approach |
-| M5 | CP-M5-3 | Model selector | 🔲 | - | - |
-| M5 | CP-M5-4 | Connection test | 🔲 | - | - |
-| M5 | CP-M5-5 | Popup controller | 🔲 | - | - |
-| M5 | CP-M5-6 | UI integration tests | 🔲 | - | Pending after core components |
-| M5 | CP-M5-7 | Data source management migration | ✅ | 2025-11-07 | Manager + UI controller + tests (30/30 pass) |
-| M6 | CP-M6-1 | Form detector | 🔲 | - | TDD approach |
-| M6 | CP-M6-2 | Form filler | 🔲 | - | TDD approach |
-| M6 | CP-M6-3 | Data extraction | 🔲 | - | - |
-| M6 | CP-M6-4 | Content script main | 🔲 | - | - |
-| M6 | CP-M6-5 | E2E tests | 🔲 | - | Playwright |
-| M7 | CP-M7-1 | API proxy | 🔲 | - | Enhanced from M3 |
-| M7 | CP-M7-2 | Message router | 🔲 | - | - |
-| M7 | CP-M7-3 | Background main | 🔲 | - | - |
-| M7 | CP-M7-4 | Integration tests | 🔲 | - | - |
-| M8 | CP-M8-1 | E2E test setup | 🔲 | - | Playwright config |
-| M8 | CP-M8-2 | Config workflow tests | 🔲 | - | - |
-| M8 | CP-M8-3 | Form filling tests | 🔲 | - | - |
-| M8 | CP-M8-4 | Performance tests | 🔲 | - | - |
-| M8 | CP-M8-5 | Cross-browser tests | 🔲 | - | Chrome + Edge |
-| M9 | CP-M9-1 | Performance optimization | 🔲 | - | - |
-| M9 | CP-M9-2 | Documentation | 🔲 | - | Complete |
-| M9 | CP-M9-3 | Security audit | 🔲 | - | - |
-| M9 | CP-M9-4 | Release prep | 🔲 | - | Packaging |
+| Milestone | Checkpoint | Description                      | Status | Date       | Notes                                        |
+| --------- | ---------- | -------------------------------- | ------ | ---------- | -------------------------------------------- |
+| M0        | CP-M0-1    | Project scaffolding              | ✅     | 2025-11-07 | Initialized repo, folders, gitignore         |
+| M0        | CP-M0-2    | TypeScript config                | ✅     | 2025-11-07 | Strict mode tsconfig + node config           |
+| M0        | CP-M0-3    | Build tool setup                 | ✅     | 2025-11-07 | Vite build (dev/prod) verified               |
+| M0        | CP-M0-4    | Testing framework                | ✅     | 2025-11-07 | Vitest + chrome mocks working                |
+| M0        | CP-M0-5    | Code quality tools               | ✅     | 2025-11-07 | ESLint, Prettier, Husky, commitlint          |
+| M0        | CP-M0-6    | CI/CD pipeline                   | ✅     | 2025-11-07 | Workflows created & validated                |
+| M1        | CP-M1-1    | API types                        | 🔲     | -          | -                                            |
+| M1        | CP-M1-2    | Config types                     | 🔲     | -          | -                                            |
+| M1        | CP-M1-3    | Model types                      | 🔲     | -          | -                                            |
+| M1        | CP-M1-4    | Chrome types                     | 🔲     | -          | -                                            |
+| M1        | CP-M1-5    | Utility functions                | 🔲     | -          | 100% coverage required                       |
+| M2        | CP-M2-1    | Storage manager                  | 🔲     | -          | TDD approach                                 |
+| M2        | CP-M2-2    | API config manager               | 🔲     | -          | TDD approach                                 |
+| M2        | CP-M2-3    | Model registry                   | 🔲     | -          | -                                            |
+| M2        | CP-M2-4    | Config validation                | 🔲     | -          | -                                            |
+| M2        | CP-M2-5    | Integration tests                | 🔲     | -          | ≥90% coverage                                |
+| M3        | CP-M3-1    | Base adapter                     | 🔲     | -          | Abstract class                               |
+| M3        | CP-M3-2    | Azure adapter                    | 🔲     | -          | TDD approach                                 |
+| M3        | CP-M3-3    | Ollama adapter                   | 🔲     | -          | TDD approach                                 |
+| M3        | CP-M3-4    | Azure service                    | 🔲     | -          | -                                            |
+| M3        | CP-M3-5    | Ollama service                   | 🔲     | -          | -                                            |
+| M3        | CP-M3-6    | Service factory                  | 🔲     | -          | -                                            |
+| M3        | CP-M3-7    | CORS proxy                       | 🔲     | -          | Background script                            |
+| M4        | CP-M4-1    | HTML processor                   | 🔲     | -          | TDD approach                                 |
+| M4        | CP-M4-2    | Markdown converter               | 🔲     | -          | TDD approach                                 |
+| M4        | CP-M4-3    | Data sanitization                | 🔲     | -          | Security focus                               |
+| M4        | CP-M4-4    | Integration tests                | 🔲     | -          | -                                            |
+| M5        | CP-M5-1    | Popup HTML structure             | 🔲     | -          | -                                            |
+| M5        | CP-M5-2    | Config UI component              | 🔲     | -          | TDD approach                                 |
+| M5        | CP-M5-3    | Model selector                   | 🔲     | -          | -                                            |
+| M5        | CP-M5-4    | Connection test                  | 🔲     | -          | -                                            |
+| M5        | CP-M5-5    | Popup controller                 | 🔲     | -          | -                                            |
+| M5        | CP-M5-6    | UI integration tests             | 🔲     | -          | Pending after core components                |
+| M5        | CP-M5-7    | Data source management migration | ✅     | 2025-11-07 | Manager + UI controller + tests (30/30 pass) |
+| M6        | CP-M6-1    | Form detector                    | 🔲     | -          | TDD approach                                 |
+| M6        | CP-M6-2    | Form filler                      | 🔲     | -          | TDD approach                                 |
+| M6        | CP-M6-3    | Data extraction                  | 🔲     | -          | -                                            |
+| M6        | CP-M6-4    | Content script main              | 🔲     | -          | -                                            |
+| M6        | CP-M6-5    | E2E tests                        | 🔲     | -          | Playwright                                   |
+| M7        | CP-M7-1    | API proxy                        | 🔲     | -          | Enhanced from M3                             |
+| M7        | CP-M7-2    | Message router                   | 🔲     | -          | -                                            |
+| M7        | CP-M7-3    | Background main                  | 🔲     | -          | -                                            |
+| M7        | CP-M7-4    | Integration tests                | 🔲     | -          | -                                            |
+| M8        | CP-M8-1    | E2E test setup                   | 🔲     | -          | Playwright config                            |
+| M8        | CP-M8-2    | Config workflow tests            | 🔲     | -          | -                                            |
+| M8        | CP-M8-3    | Form filling tests               | 🔲     | -          | -                                            |
+| M8        | CP-M8-4    | Performance tests                | 🔲     | -          | -                                            |
+| M8        | CP-M8-5    | Cross-browser tests              | 🔲     | -          | Chrome + Edge                                |
+| M9        | CP-M9-1    | Performance optimization         | 🔲     | -          | -                                            |
+| M9        | CP-M9-2    | Documentation                    | 🔲     | -          | Complete                                     |
+| M9        | CP-M9-3    | Security audit                   | 🔲     | -          | -                                            |
+| M9        | CP-M9-4    | Release prep                     | 🔲     | -          | Packaging                                    |
 
 ### Daily Update Template
 
@@ -1471,20 +1534,25 @@ CHECKPOINT: CP-M9-4"
 ## Date: YYYY-MM-DD
 
 ### Completed Today
+
 - [ ] CP-Mx-n: Description
 - [ ] CP-Mx-n: Description
 
 ### In Progress
+
 - [ ] CP-Mx-n: Description (X% complete)
 
 ### Blockers
+
 - Issue description and impact
 
 ### Coverage Stats
+
 - Module: X%
 - Overall: X%
 
 ### Next Steps
+
 - [ ] Task 1
 - [ ] Task 2
 ```
@@ -1495,26 +1563,32 @@ CHECKPOINT: CP-M9-4"
 ## Week N (YYYY-MM-DD to YYYY-MM-DD)
 
 ### Milestones Completed
+
 - Mx: Milestone Name ✅
 
 ### Checkpoints Completed
+
 - CP-Mx-1: Description ✅
 - CP-Mx-2: Description ✅
 
 ### Test Coverage
+
 - Week Start: X%
 - Week End: X%
 - Improvement: +X%
 
 ### Key Achievements
+
 1. Achievement 1
 2. Achievement 2
 
 ### Challenges & Solutions
+
 - Challenge: Description
   - Solution: Description
 
 ### Next Week Goals
+
 1. Complete Mx milestone
 2. Achieve X% test coverage
 ```
@@ -1523,3 +1597,33 @@ CHECKPOINT: CP-M9-4"
 
 **Last Updated:** November 7, 2025  
 **Document Version:** 2.0.0
+
+---
+
+## Date: 2025-11-07
+
+### Completed Today
+
+- ✅ CP-M5-7: Migrate popup Data Source Manager and UI Controller to TypeScript with tests (30/30 green)
+- ✅ Step 3: Narrow UI controller types, add scoped Logger, replace console in popup/background/content
+- ✅ Reduce lint issues: removed non-null assertions in `DataSourceEventEmitter`, tightened types in `PopupSettingsManager`
+- ✅ Dev tooling fixes: pnpm PATH repair; Husky hooks updated per v10 guidance; `.commitlintrc.cjs` switched to CommonJS
+
+### In Progress
+
+- 🟡 M5 UI Layer alignment: continuing type tightening and logging standardization across popup modules
+
+### Blockers
+
+- None (pnpm PATH issue resolved)
+
+### Coverage Stats
+
+- Unit tests: 30 passed (30 total)
+- Coverage: to be reported via `pnpm test:coverage` in the next update
+
+### Next Steps
+
+- Add `test:ci` script and adjust `lint-staged` to use `--silent` for stability
+- Continue removing any types and finalize Logger adoption across UI modules
+- Begin M5 remaining components (CP-M5-1..CP-M5-6) and prepare UI integration tests
