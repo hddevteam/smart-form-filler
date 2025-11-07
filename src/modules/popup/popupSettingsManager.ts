@@ -1,4 +1,5 @@
 import type { PopupManagerLike, ApiClientLike } from '@/types/popup';
+import { Logger } from '@/utils/logger';
 
 interface SettingsState {
   backendUrl: string;
@@ -8,6 +9,7 @@ interface SettingsState {
 
 export class PopupSettingsManager {
   private popupManager: PopupManagerLike;
+  private logger = Logger.forScope('PopupSettingsManager');
   private settings: SettingsState = {
     backendUrl: 'http://localhost:3001',
     preferredModel: null,
@@ -31,8 +33,7 @@ export class PopupSettingsManager {
       const saved = localStorage.getItem('smart-form-filler-settings');
       if (saved) this.settings = { ...this.settings, ...JSON.parse(saved) };
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to load settings from localStorage:', error);
+      this.logger.warn('Failed to load settings from localStorage', error);
     }
   }
 
@@ -40,8 +41,7 @@ export class PopupSettingsManager {
     try {
       localStorage.setItem('smart-form-filler-settings', JSON.stringify(this.settings));
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to save settings:', error);
+      this.logger.error('Failed to save settings', error);
     }
   }
 
@@ -59,8 +59,7 @@ export class PopupSettingsManager {
     if (client && this.settings.backendUrl) {
       client.setBackendUrl(this.settings.backendUrl);
     } else {
-      // eslint-disable-next-line no-console
-      console.warn('Cannot apply backend URL:', {
+      this.logger.warn('Cannot apply backend URL', {
         hasApiClient: !!client,
         hasBackendUrl: !!this.settings.backendUrl,
       });

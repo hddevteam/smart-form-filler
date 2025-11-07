@@ -30,9 +30,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 | [M8](#m8-integration-testing)      | Integration testing      | 4 days   | M5, M6, M7   |
 | [M9](#m9-optimization--release)    | Optimization & release   | 4 days   | M8           |
 
-**Total Duration:** 43 days (approximately 6-7 weeks)
-
----
+<!-- Consolidated to avoid duplication -->
 
 ## M0: Project Initialization
 
@@ -97,31 +95,16 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 
 **Deliverable:** GitHub Actions workflows
 
-### Acceptance Criteria
+### Acceptance Criteria (Completed)
 
-- [x] `pnpm dev` starts development server
-- [x] `pnpm build` creates production bundle
-- [x] `pnpm test` runs test suite
-- [x] `pnpm lint` checks code quality
-- [x] Pre-commit hooks work
-- [x] CI pipeline passes
+- `pnpm dev` starts development server
+- `pnpm build` creates production bundle
+- `pnpm test` runs test suite
+- `pnpm lint` checks code quality
+- Pre-commit hooks work
+- CI pipeline passes
 
-### Commit Template
-
-```bash
-git commit -m "chore(setup): initialize TypeScript project infrastructure
-
-- Setup project structure (src/, tests/, public/)
-- Configure TypeScript with strict mode
-- Setup Vite build system
-- Configure Vitest testing framework
-- Add ESLint + Prettier
-- Setup Husky + lint-staged
-- Add GitHub Actions CI/CD
-
-MILESTONE: M0 - Project Initialization
-CHECKPOINT: CP-M0-6"
-```
+<!-- Commit templates omitted for completed milestone to reduce noise -->
 
 ---
 
@@ -235,29 +218,15 @@ describe('Logger', () => {
 });
 ```
 
-### Acceptance Criteria
+### Acceptance Criteria (In Progress)
 
-- [x] All type files compile without errors
-- [x] No use of `any` type (or documented exceptions)
-- [x] Utility functions have ≥100% test coverage
-- [x] All utilities have JSDoc comments
-- [x] Types are exported from `src/types/index.ts`
+- All type files compile without errors
+- No use of `any` type (or documented exceptions)
+- Utility functions have ≥100% test coverage
+- All utilities have JSDoc comments
+- Types are exported from `src/types/index.ts`
 
-### Commit Template
-
-```bash
-git commit -m "feat(types): define core type system
-
-- Add API types (ApiConfig, ChatMessage, ChatResponse)
-- Add configuration types (StorageConfig, ModelConfig)
-- Add model registry types
-- Extend Chrome API types
-- Implement utility functions (HTTP, logger, crypto)
-- Add comprehensive tests (100% coverage)
-
-MILESTONE: M1 - Core Type System
-CHECKPOINT: CP-M1-5"
-```
+<!-- Commit template samples trimmed; use Conventional Commits with milestone tags -->
 
 ---
 
@@ -588,14 +557,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 **Deliverable:** Integration test suite
 
-### Acceptance Criteria
+### Acceptance Criteria (Planned)
 
-- [x] Azure OpenAI adapter works correctly
-- [x] Ollama adapter works correctly
-- [x] Factory creates correct adapter instances
-- [x] CORS issues resolved via background script proxy
-- [x] Retry logic handles transient failures
-- [x] Test coverage ≥85% for all adapters
+- Azure OpenAI adapter works correctly
+- Ollama adapter works correctly
+- Factory creates correct adapter instances
+- CORS issues resolved via background script proxy
+- Retry logic handles transient failures
+- Test coverage ≥85% for all adapters
 
 ### Commit Template
 
@@ -709,13 +678,13 @@ describe('MarkdownConverter', () => {
 
 **Deliverable:** Integration tests
 
-### Acceptance Criteria
+### Acceptance Criteria (Planned)
 
-- [x] HTML processing handles all common elements
-- [x] Markdown conversion is accurate
-- [x] XSS prevention works correctly
-- [x] Large documents (>1MB) process efficiently
-- [x] Test coverage ≥85%
+- HTML processing handles all common elements
+- Markdown conversion is accurate
+- XSS prevention works correctly
+- Large documents (>1MB) process efficiently
+- Test coverage ≥85%
 
 ### Commit Template
 
@@ -1608,10 +1577,14 @@ CHECKPOINT: CP-M9-4"
 - ✅ Step 3: Narrow UI controller types, add scoped Logger, replace console in popup/background/content
 - ✅ Reduce lint issues: removed non-null assertions in `DataSourceEventEmitter`, tightened types in `PopupSettingsManager`
 - ✅ Dev tooling fixes: pnpm PATH repair; Husky hooks updated per v10 guidance; `.commitlintrc.cjs` switched to CommonJS
+- ✅ Logger standardization: replaced console usages with `Logger` in `PopupSettingsManager` and `DataSourceUIController`; lint and tests green
+- ✅ Initial scaffolding for `ConfigurationUI`, `ModelSelector`, and `ConnectionTest` components; integrated into `src/popup/index.ts` (guarded by container presence); lint/tests remain green
+- ✅ Added unit tests for `ConfigurationUI`, `ModelSelector`, and `ConnectionTest` (grouping, validation, success/error paths); all tests passing (38/38)
 
 ### In Progress
 
 - 🟡 M5 UI Layer alignment: continuing type tightening and logging standardization across popup modules
+- 🟡 CP-M5-2/CP-M5-3/CP-M5-4: Wiring components to real services (`ApiConfigManager`, `modelRegistry`, backend validator) pending; expand tests to cover service integration
 
 ### Blockers
 
@@ -1624,6 +1597,6 @@ CHECKPOINT: CP-M9-4"
 
 ### Next Steps
 
-- Add `test:ci` script and adjust `lint-staged` to use `--silent` for stability
-- Continue removing any types and finalize Logger adoption across UI modules
-- Begin M5 remaining components (CP-M5-1..CP-M5-6) and prepare UI integration tests
+- Continue removing remaining `any` types where applicable
+- Proceed with M5 remaining components (CP-M5-1..CP-M5-6): Popup HTML/CSS, ConfigurationUI, ModelSelector, ConnectionTest, Popup main controller
+- Prepare and implement UI integration tests (Vitest + minimal DOM), then plan Playwright E2E

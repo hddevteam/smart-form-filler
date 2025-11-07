@@ -89,8 +89,7 @@ export class DataSourceUIController {
     try {
       const list = document.getElementById('dataSourceList');
       if (!list) {
-        // eslint-disable-next-line no-console
-        console.error('[DataSourceUIController] dataSourceList element not found');
+        this.logger.error('dataSourceList element not found');
         return;
       }
       if (!availableDataSources.length) {
