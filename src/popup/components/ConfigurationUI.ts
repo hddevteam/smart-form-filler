@@ -4,6 +4,7 @@ export interface ConfigurationUIDeps<Config = unknown> {
   saveConfig: (config: Config) => Promise<void>;
   loadConfig?: () => Promise<Config | undefined>;
   validateConfig?: (config: Config) => string[]; // return list of errors
+  listConfigs?: () => Promise<Config[]>; // optional: used to prefill
 }
 
 export type ProviderType = 'azure' | 'ollama';
@@ -30,6 +31,7 @@ export class ConfigurationUI<TConfig extends BasicApiConfig = BasicApiConfig> {
     this.container.innerHTML = this.getTemplate();
     this.bindEvents();
     await this.prefillFromLoadedConfig();
+    await this.addRecentList();
   }
 
   private getTemplate(): string {
@@ -95,6 +97,53 @@ export class ConfigurationUI<TConfig extends BasicApiConfig = BasicApiConfig> {
       if (modelEl) modelEl.value = apiCfg.model ?? '';
     } catch (error) {
       this.logger.warn('Failed to prefill config', error);
+    }
+  }
+
+  private async addRecentList(): Promise<void> {
+    try {
+      if (!this.deps.listConfigs) return;
+      const list = await this.deps.listConfigs();
+      if (!list || list.length === 0) return;
+      const form = this.container.querySelector<HTMLFormElement>('form');
+      if (!form) return;
+      const actions = form.querySelector('.form-actions');
+      if (!actions) return;
+      const sel = document.createElement('select');
+      sel.className = 'input';
+      sel.ariaLabel = 'Recent Configurations';
+      for (const c of list as BasicApiConfig[]) {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = `${c.name} (${c.provider})`;
+        sel.appendChild(opt);
+      }
+      const wrapper = document.createElement('div');
+      wrapper.className = 'form-row';
+      const label = document.createElement('label');
+      label.textContent = 'Recent';
+      wrapper.appendChild(label);
+      wrapper.appendChild(sel);
+      actions.parentElement?.insertBefore(wrapper, actions);
+
+      sel.addEventListener('change', () => {
+        const items = list as BasicApiConfig[];
+        const picked = items.find(c => c.name === sel.value);
+        if (!picked) return;
+        const providerEl = form.querySelector<HTMLSelectElement>('select[name="provider"]');
+        const nameEl = form.querySelector<HTMLInputElement>('input[name="name"]');
+        const endpointEl = form.querySelector<HTMLInputElement>('input[name="endpoint"]');
+        const apiKeyEl = form.querySelector<HTMLInputElement>('input[name="apiKey"]');
+        const modelEl = form.querySelector<HTMLInputElement>('input[name="model"]');
+        if (providerEl) providerEl.value = picked.provider;
+        if (nameEl) nameEl.value = picked.name ?? '';
+        if (endpointEl) endpointEl.value = picked.endpoint ?? '';
+        if (apiKeyEl) apiKeyEl.value = picked.apiKey ?? '';
+        if (modelEl) modelEl.value = picked.model ?? '';
+        this.setStatus(`Loaded configuration: ${picked.name}`, 'info');
+      });
+    } catch (error) {
+      this.logger.warn('Failed to add recent list', error);
     }
   }
 

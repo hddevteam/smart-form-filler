@@ -114,6 +114,17 @@ export class ApiConfigManager {
     if (!config.endpoint || !config.endpoint.trim()) errors.push('Endpoint is required');
     if (errors.length) throw new Error(`Invalid config: ${errors.join(', ')}`);
   }
+
+  async listConfigs(): Promise<ApiConfig[]> {
+    const all = await this.readAll();
+    const values = Object.values(all).map(c => ({
+      ...c,
+      apiKey: c.apiKey ? decodeBase64(c.apiKey) : undefined,
+    }));
+    // Sort by name for deterministic order
+    values.sort((a, b) => a.name.localeCompare(b.name));
+    return values;
+  }
 }
 
 export default ApiConfigManager;

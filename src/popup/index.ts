@@ -4,6 +4,8 @@ import DataSourceUIController from '@/modules/popup/dataSourceUIController';
 import ConfigurationUI from '@/popup/components/ConfigurationUI';
 import ModelSelector from '@/popup/components/ModelSelector';
 import ConnectionTest from '@/popup/components/ConnectionTest';
+import { ApiConfigManager } from '@/config/apiConfigManager';
+import { fetchModels, healthCheck } from '@/popup/apis/backend';
 import type { PopupElements, PopupManagerLike } from '@/types/popup';
 import { Logger } from '@/utils/logger';
 
@@ -39,16 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render configuration UI if container exists
     const configContainer = document.getElementById('config-container');
     if (configContainer) {
+      const cfgMgr = new ApiConfigManager();
       const configUI = new ConfigurationUI(configContainer, {
         saveConfig: async cfg => {
-          // Placeholder: integrate with ApiConfigManager in M2
-          localStorage.setItem('sff-config', JSON.stringify(cfg));
-          await Promise.resolve();
+          await cfgMgr.saveConfig(
+            cfg as {
+              provider: 'azure' | 'ollama';
+              name: string;
+              endpoint: string;
+              apiKey?: string;
+              model?: string;
+            }
+          );
         },
         loadConfig: async () => {
-          const saved = localStorage.getItem('sff-config');
-          await Promise.resolve();
-          return saved ? (JSON.parse(saved) as unknown) : undefined;
+          // For popup load, try default named config; if none, undefined
+          // In future we may support multiple named configs; pick the first one
+          const defaultName = 'Default';
+          const loaded = await cfgMgr.getConfig(defaultName);
+          return (loaded as unknown) ?? undefined;
+        },
+        listConfigs: async () => {
+          const list = await cfgMgr.listConfigs();
+          return list as unknown[];
         },
       });
       void configUI.render();
@@ -59,6 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modelContainer) {
       const selector = new ModelSelector(modelContainer, {
         loadModels: async () => {
+          const backendUrlInput = document.querySelector<HTMLInputElement>('#backend-url');
+          const base = backendUrlInput?.value?.trim();
+          const data = await fetchModels(base);
+          if (data.length > 0) return data;
           const models = await moduleManager.apiClient?.getAvailableModels?.();
           return models ?? [];
         },
@@ -70,18 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const connTestContainer = document.getElementById('connection-test');
     if (connTestContainer) {
       const test = new ConnectionTest(connTestContainer, {
-        validate: async endpoint => {
-          const ctor = moduleManager.apiClient?.constructor as unknown as
-            | (new () => {
-                setBackendUrl: (url: string) => void;
-                testConnection: () => Promise<{ success: boolean; error?: string }>;
-              })
-            | undefined;
-          if (!ctor) return { success: false, error: 'Client unavailable' };
-          const client = new ctor();
-          client.setBackendUrl(endpoint);
-          return await client.testConnection();
-        },
+        validate: async endpoint => healthCheck(endpoint),
       });
       test.render();
     }
