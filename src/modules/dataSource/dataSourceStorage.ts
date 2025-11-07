@@ -33,7 +33,10 @@ export class DataSourceStorage {
     }
   }
 
-  async loadConfigurations(): Promise<{ chatConfig: DataSourceConfig; formFillerConfig: DataSourceConfig }>{
+  async loadConfigurations(): Promise<{
+    chatConfig: DataSourceConfig;
+    formFillerConfig: DataSourceConfig;
+  }> {
     try {
       const result = await chrome.storage.local.get([
         STORAGE_KEYS.CHAT_CONFIG,
@@ -74,7 +77,10 @@ export class DataSourceStorage {
     }
   }
 
-  async saveConfigurations(chatConfig: DataSourceConfig, formFillerConfig: DataSourceConfig): Promise<void> {
+  async saveConfigurations(
+    chatConfig: DataSourceConfig,
+    formFillerConfig: DataSourceConfig
+  ): Promise<void> {
     try {
       await chrome.storage.local.set({
         [STORAGE_KEYS.CHAT_CONFIG]: chatConfig.toObject(),
@@ -89,7 +95,10 @@ export class DataSourceStorage {
 
   async clearAll(): Promise<void> {
     try {
-      await chrome.storage.local.remove([STORAGE_KEYS.CHAT_CONFIG, STORAGE_KEYS.FORM_FILLER_CONFIG]);
+      await chrome.storage.local.remove([
+        STORAGE_KEYS.CHAT_CONFIG,
+        STORAGE_KEYS.FORM_FILLER_CONFIG,
+      ]);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('[DataSourceStorage] Error clearing configurations:', error);

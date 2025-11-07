@@ -187,7 +187,9 @@ export class DataSourceUIController {
   private handleApplyConfiguration(): void {
     const typeRadios = document.querySelectorAll<HTMLInputElement>('input[name="dataSourceType"]');
     const selectedType = Array.from(typeRadios).find(r => r.checked)?.value || 'markdown';
-    const selected = document.querySelectorAll<HTMLInputElement>('#dataSourceList input[type="checkbox"]:checked');
+    const selected = document.querySelectorAll<HTMLInputElement>(
+      '#dataSourceList input[type="checkbox"]:checked'
+    );
     const selectedItemIds = Array.from(selected).map(cb => cb.value);
     this.eventEmitter.emit('applyConfiguration', {
       type: selectedType,
@@ -196,12 +198,11 @@ export class DataSourceUIController {
     });
   }
 
-  populateModal(
-    config: DataSourceConfig,
-    availableDataSources: AvailableDataSource[]
-  ): void {
+  populateModal(config: DataSourceConfig, availableDataSources: AvailableDataSource[]): void {
     try {
-      const typeRadios = document.querySelectorAll<HTMLInputElement>('input[name="dataSourceType"]');
+      const typeRadios = document.querySelectorAll<HTMLInputElement>(
+        'input[name="dataSourceType"]'
+      );
       typeRadios.forEach(r => {
         r.checked = r.value === (config.type as string);
       });
@@ -238,7 +239,8 @@ export class DataSourceUIController {
       const chatConfigBtn = document.getElementById('openDataSourceModalBtn');
       if (chatConfigBtn) {
         const buttonText = chatConfigBtn.querySelector('.btn__text');
-        if (buttonText) buttonText.textContent = config.isValid() ? 'Reconfigure Sources' : 'Configure Sources';
+        if (buttonText)
+          buttonText.textContent = config.isValid() ? 'Reconfigure Sources' : 'Configure Sources';
       }
       // eslint-disable-next-line no-console
       console.log('[DataSourceUIController] Chat UI updated:', {
@@ -255,15 +257,9 @@ export class DataSourceUIController {
 
   updateFormFillerUI(config: DataSourceConfig, availableDataSources: AvailableDataSource[]): void {
     try {
-      const formFillerSummaryElement = document.getElementById(
-        'formFillerDataSourceSummary'
-      );
-      const formFillerSummaryText = document.getElementById(
-        'formFillerDataSourceSummaryText'
-      );
-      const formFillerConfigButton = document.getElementById(
-        'openFormFillerDataSourceModalBtn'
-      );
+      const formFillerSummaryElement = document.getElementById('formFillerDataSourceSummary');
+      const formFillerSummaryText = document.getElementById('formFillerDataSourceSummaryText');
+      const formFillerConfigButton = document.getElementById('openFormFillerDataSourceModalBtn');
       const validSelected = config.selectedItems.filter(selectedItem => {
         const selectedId = typeof selectedItem === 'object' ? selectedItem.id : selectedItem;
         return availableDataSources.some(source => source.id === selectedId);

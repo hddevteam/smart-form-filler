@@ -84,8 +84,6 @@ export default [
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      // Temporarily disable Prettier errors for migrated popup modules
-      'prettier/prettier': 'off',
     },
   },
 

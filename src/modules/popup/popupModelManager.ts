@@ -44,13 +44,22 @@ export class PopupModelManager {
   groupModelsByType(models: any[]): { cloud: any[]; ollama: any[] } {
     const grouped = { cloud: [] as any[], ollama: [] as any[] };
     for (const model of models) {
-      if (model.source === 'ollama' || model.id?.includes('ollama') || model.name?.toLowerCase().includes('ollama')) grouped.ollama.push(model);
+      if (
+        model.source === 'ollama' ||
+        model.id?.includes('ollama') ||
+        model.name?.toLowerCase().includes('ollama')
+      )
+        grouped.ollama.push(model);
       else grouped.cloud.push(model);
     }
     return grouped;
   }
 
-  populateModelSelect(selectElement: HTMLSelectElement, grouped: { cloud: any[]; ollama: any[] }, allModels: any[]): void {
+  populateModelSelect(
+    selectElement: HTMLSelectElement,
+    grouped: { cloud: any[]; ollama: any[] },
+    allModels: any[]
+  ): void {
     selectElement.innerHTML = '';
     if (grouped.cloud.length > 0) {
       const cloudGroup = document.createElement('optgroup');
@@ -103,7 +112,8 @@ export class PopupModelManager {
 
   handleNoModelsAvailable(): void {
     if (this.popupManager.elements.globalModelSelect) {
-      this.popupManager.elements.globalModelSelect.innerHTML = '<option value="">No models available</option>';
+      this.popupManager.elements.globalModelSelect.innerHTML =
+        '<option value="">No models available</option>';
       this.popupManager.elements.globalModelSelect.disabled = true;
     }
     this.popupManager.uiController?.setModelDependentButtonsEnabled(false);
@@ -113,13 +123,18 @@ export class PopupModelManager {
 
   handleModelLoadError(error: any): void {
     if (this.popupManager.elements.globalModelSelect) {
-      this.popupManager.elements.globalModelSelect.innerHTML = '<option value="">Service unavailable</option>';
+      this.popupManager.elements.globalModelSelect.innerHTML =
+        '<option value="">Service unavailable</option>';
       this.popupManager.elements.globalModelSelect.disabled = true;
     }
     this.popupManager.uiController?.setModelDependentButtonsEnabled(false);
     this.popupManager.uiController?.setSystemButtonsEnabled(true);
     this.popupManager.updateAuthenticationStatus?.();
-    this.popupManager.resultsHandler?.showError('Failed to load AI models: ' + error.message + '. You can still use Settings and Refresh buttons.');
+    this.popupManager.resultsHandler?.showError(
+      'Failed to load AI models: ' +
+        error.message +
+        '. You can still use Settings and Refresh buttons.'
+    );
   }
 
   async refreshModels(): Promise<void> {
@@ -133,7 +148,10 @@ export class PopupModelManager {
         await (this.popupManager.apiClient as any).refreshOllamaModels();
       } catch (err: any) {
         // eslint-disable-next-line no-console
-        console.warn('Failed to refresh Ollama models (this is normal if Ollama is not running):', err.message);
+        console.warn(
+          'Failed to refresh Ollama models (this is normal if Ollama is not running):',
+          err.message
+        );
       }
       await this.loadModels();
       this.showRefreshSuccess();

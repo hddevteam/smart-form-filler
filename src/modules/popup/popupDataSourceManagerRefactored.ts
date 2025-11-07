@@ -14,7 +14,10 @@ export interface UIControllerLike {
   updateFormFillerUI(config: DataSourceConfig, availableDataSources: AvailableDataSource[]): void;
   openModalForContext(context: ModalContext): void;
   closeModal(): void;
-  updateDataSourceList(availableDataSources: AvailableDataSource[], currentConfig: DataSourceConfig): void;
+  updateDataSourceList(
+    availableDataSources: AvailableDataSource[],
+    currentConfig: DataSourceConfig
+  ): void;
 }
 
 /**
@@ -30,7 +33,11 @@ export class PopupDataSourceManagerRefactored {
   readonly syncManager: DataSourceSyncManager;
   private uiController?: UIControllerLike;
 
-  constructor(elements: PopupElements, moduleManager: PopupManagerLike, uiController?: UIControllerLike) {
+  constructor(
+    elements: PopupElements,
+    moduleManager: PopupManagerLike,
+    uiController?: UIControllerLike
+  ) {
     this.elements = elements;
     this.moduleManager = moduleManager;
 
@@ -63,9 +70,18 @@ export class PopupDataSourceManagerRefactored {
   private setupEventListeners(): void {
     // UI events
     this.eventEmitter.on(DataSourceEventEmitter.EVENTS.MODAL_OPENED, this.handleModalOpened);
-    this.eventEmitter.on('applyConfiguration', this.handleApplyConfiguration as (d: unknown) => void);
-    this.eventEmitter.on('dataSourceSelectionChanged', this.handleDataSourceSelectionChanged as (d: unknown) => void);
-    this.eventEmitter.on('dataSourceTypeChanged', this.handleDataSourceTypeChanged as (d: unknown) => void);
+    this.eventEmitter.on(
+      'applyConfiguration',
+      this.handleApplyConfiguration as (d: unknown) => void
+    );
+    this.eventEmitter.on(
+      'dataSourceSelectionChanged',
+      this.handleDataSourceSelectionChanged as (d: unknown) => void
+    );
+    this.eventEmitter.on(
+      'dataSourceTypeChanged',
+      this.handleDataSourceTypeChanged as (d: unknown) => void
+    );
 
     // Config change events -> update UIs and bubble DOM events
     this.eventEmitter.on(DataSourceEventEmitter.EVENTS.CHAT_CONFIG_CHANGED, (data: any) => {
@@ -74,7 +90,10 @@ export class PopupDataSourceManagerRefactored {
     });
 
     this.eventEmitter.on(DataSourceEventEmitter.EVENTS.FORM_FILLER_CONFIG_CHANGED, (data: any) => {
-      this.uiController?.updateFormFillerUI(data.config, this.syncManager.getAvailableDataSources());
+      this.uiController?.updateFormFillerUI(
+        data.config,
+        this.syncManager.getAvailableDataSources()
+      );
       document.dispatchEvent(new CustomEvent('formFillerConfigChanged', { detail: data }));
     });
 
@@ -112,7 +131,10 @@ export class PopupDataSourceManagerRefactored {
         context: ModalContext;
       };
 
-      const newConfig = new DataSourceConfig(type, (selectedItemIds || []).map(id => ({ id })));
+      const newConfig = new DataSourceConfig(
+        type,
+        (selectedItemIds || []).map(id => ({ id }))
+      );
       newConfig.isConfigured = (selectedItemIds || []).length > 0;
 
       if (context === 'formFiller') await this.syncManager.updateFormFillerConfig(newConfig);
@@ -186,7 +208,10 @@ export class PopupDataSourceManagerRefactored {
       setTimeout(() => this.updateAllUI(), 100);
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error updating form filler configuration:', error);
+      console.error(
+        '[PopupDataSourceManagerRefactored] Error updating form filler configuration:',
+        error
+      );
     }
   }
 
@@ -213,7 +238,10 @@ export class PopupDataSourceManagerRefactored {
       return selected;
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error getting form filler selected sources:', err);
+      console.error(
+        '[PopupDataSourceManagerRefactored] Error getting form filler selected sources:',
+        err
+      );
       return [];
     }
   }
@@ -279,7 +307,10 @@ export class PopupDataSourceManagerRefactored {
       console.log('[PopupDataSourceManagerRefactored] Configuration change notification sent');
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('[PopupDataSourceManagerRefactored] Error notifying configuration change:', error);
+      console.error(
+        '[PopupDataSourceManagerRefactored] Error notifying configuration change:',
+        error
+      );
     }
   }
 }

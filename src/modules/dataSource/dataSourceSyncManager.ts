@@ -53,9 +53,15 @@ export class DataSourceSyncManager {
     extractionHistory.forEach((item, index) => {
       if (!item.dataSources) return;
 
-      const hasMarkdown = !!item.dataSources.markdown?.content;
-      const hasCleanedHtml = !!item.dataSources.cleaned?.content;
-      const hasRawContent = !!item.dataSources.raw?.content;
+      const hasMarkdown =
+        typeof item.dataSources.markdown?.content === 'string' &&
+        item.dataSources.markdown.content.length > 0;
+      const hasCleanedHtml =
+        typeof item.dataSources.cleaned?.content === 'string' &&
+        item.dataSources.cleaned.content.length > 0;
+      const hasRawContent =
+        typeof item.dataSources.raw?.content === 'string' &&
+        item.dataSources.raw.content.length > 0;
 
       if (hasMarkdown || hasCleanedHtml || hasRawContent) {
         const source: AvailableDataSource = {
@@ -64,17 +70,19 @@ export class DataSourceSyncManager {
           url: item.url || 'Unknown URL',
           type: 'main',
           markdown:
-            (hasMarkdown ? item.dataSources.markdown!.content : '') ||
-            (hasCleanedHtml ? item.dataSources.cleaned!.content : '') ||
-            (hasRawContent ? item.dataSources.raw!.content : ''),
+            (hasMarkdown ? (item.dataSources.markdown?.content ?? '') : '') ||
+            (hasCleanedHtml ? (item.dataSources.cleaned?.content ?? '') : '') ||
+            (hasRawContent ? (item.dataSources.raw?.content ?? '') : ''),
           cleaned:
-            (hasCleanedHtml ? item.dataSources.cleaned!.content : '') ||
-            (hasRawContent ? item.dataSources.raw!.content : ''),
+            (hasCleanedHtml ? (item.dataSources.cleaned?.content ?? '') : '') ||
+            (hasRawContent ? (item.dataSources.raw?.content ?? '') : ''),
           raw:
-            (hasRawContent ? item.dataSources.raw!.content : '') ||
-            (hasCleanedHtml ? item.dataSources.cleaned!.content : ''),
-          timestamp: item.timestamp,
+            (hasRawContent ? (item.dataSources.raw?.content ?? '') : '') ||
+            (hasCleanedHtml ? (item.dataSources.cleaned?.content ?? '') : ''),
         };
+        if (typeof item.timestamp === 'number') {
+          source.timestamp = item.timestamp;
+        }
         this.availableDataSources.push(source);
       }
     });
