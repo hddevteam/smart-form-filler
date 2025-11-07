@@ -1,5 +1,6 @@
 import { DataSourceConfig } from './dataSourceConfig';
 import { DataSourceEventEmitter } from './dataSourceEventEmitter';
+import { Logger } from '@/utils/logger';
 import type {
   AvailableDataSource,
   CombinedDataSources,
@@ -31,22 +32,19 @@ export class DataSourceSyncManager {
       const configs = await this.storage.loadConfigurations();
       this.chatConfig = configs.chatConfig;
       this.formFillerConfig = configs.formFillerConfig;
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceSyncManager] Initialized with configurations:', {
+      Logger.forScope('DataSourceSyncManager').info('Initialized with configurations:', {
         chatConfigured: this.chatConfig.isValid(),
         formFillerConfigured: this.formFillerConfig.isValid(),
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceSyncManager] Error during initialization:', error);
+      Logger.forScope('DataSourceSyncManager').error('Error during initialization:', error);
     }
   }
 
   updateAvailableDataSources(extractionHistory?: ExtractionHistoryItem[]): void {
     this.availableDataSources = [];
     if (!extractionHistory || !Array.isArray(extractionHistory)) {
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceSyncManager] No extraction history available');
+      Logger.forScope('DataSourceSyncManager').debug('No extraction history available');
       return;
     }
 
@@ -87,9 +85,8 @@ export class DataSourceSyncManager {
       }
     });
 
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DataSourceSyncManager] Updated available data sources: ${this.availableDataSources.length} sources`
+    Logger.forScope('DataSourceSyncManager').info(
+      `Updated available data sources: ${this.availableDataSources.length} sources`
     );
     this.eventEmitter.emit(DataSourceEventEmitter.EVENTS.DATA_SOURCES_UPDATED, {
       sources: this.availableDataSources,
@@ -100,8 +97,7 @@ export class DataSourceSyncManager {
     try {
       this.chatConfig.updateFrom(config);
       await this.storage.saveChatConfig(this.chatConfig);
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceSyncManager] Chat configuration updated:', {
+      Logger.forScope('DataSourceSyncManager').info('Chat configuration updated:', {
         type: this.chatConfig.type,
         itemCount: this.chatConfig.getCount(),
         isValid: this.chatConfig.isValid(),
@@ -114,8 +110,7 @@ export class DataSourceSyncManager {
         context: 'chat',
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceSyncManager] Error updating chat config:', error);
+      Logger.forScope('DataSourceSyncManager').error('Error updating chat config:', error);
       throw error;
     }
   }
@@ -124,8 +119,7 @@ export class DataSourceSyncManager {
     try {
       this.formFillerConfig.updateFrom(config);
       await this.storage.saveFormFillerConfig(this.formFillerConfig);
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceSyncManager] Form filler configuration updated:', {
+      Logger.forScope('DataSourceSyncManager').info('Form filler configuration updated:', {
         type: this.formFillerConfig.type,
         itemCount: this.formFillerConfig.getCount(),
         isValid: this.formFillerConfig.isValid(),
@@ -138,8 +132,7 @@ export class DataSourceSyncManager {
         context: 'formFiller',
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceSyncManager] Error updating form filler config:', error);
+      Logger.forScope('DataSourceSyncManager').error('Error updating form filler config:', error);
       throw error;
     }
   }
@@ -147,15 +140,13 @@ export class DataSourceSyncManager {
   async syncConfigurationToBoth(config: DataSourceConfig): Promise<void> {
     try {
       await Promise.all([this.updateChatConfig(config), this.updateFormFillerConfig(config)]);
-      // eslint-disable-next-line no-console
-      console.log('[DataSourceSyncManager] Configuration synced to both tabs');
+      Logger.forScope('DataSourceSyncManager').info('Configuration synced to both tabs');
       this.eventEmitter.emit(DataSourceEventEmitter.EVENTS.CONFIGURATION_APPLIED, {
         config,
         synced: true,
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceSyncManager] Error syncing configuration:', error);
+      Logger.forScope('DataSourceSyncManager').error('Error syncing configuration:', error);
       throw error;
     }
   }

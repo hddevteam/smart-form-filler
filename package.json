@@ -25,7 +25,7 @@
     "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write",
-      "vitest related --run --silent"
+      "vitest related --run --silent=true"
     ],
     "*.{json,md}": [
       "prettier --write"

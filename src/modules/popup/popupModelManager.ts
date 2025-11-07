@@ -1,4 +1,5 @@
 import type { PopupManagerLike } from '@/types/popup';
+import { Logger } from '@/utils/logger';
 
 export class PopupModelManager {
   private popupManager: PopupManagerLike;
@@ -161,8 +162,7 @@ export class PopupModelManager {
       try {
         await this.popupManager.apiClient?.refreshOllamaModels?.();
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn(
+        Logger.forScope('PopupModelManager').warn(
           'Failed to refresh Ollama models (this is normal if Ollama is not running):',
           (err as { message?: string }).message
         );
