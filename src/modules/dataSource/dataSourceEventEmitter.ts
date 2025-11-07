@@ -1,8 +1,10 @@
 /**
  * Data Source Event Emitter
  */
+import { Logger } from '@/utils/logger';
 export class DataSourceEventEmitter {
   private listeners: Map<string, Array<(data: unknown) => void>> = new Map();
+  private logger = Logger.forScope('DataSourceEventEmitter');
 
   static get EVENTS() {
     return {
@@ -38,8 +40,7 @@ export class DataSourceEventEmitter {
         try {
           fn(data);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error(`[DataSourceEventEmitter] Error in listener for ${eventType}:`, err);
+          this.logger.error(`Error in listener for ${eventType}:`, err);
         }
       }
     }
@@ -51,8 +52,7 @@ export class DataSourceEventEmitter {
       const event = new CustomEvent(eventType, { detail: data, bubbles: true });
       document.dispatchEvent(event);
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(`[DataSourceEventEmitter] Error dispatching DOM event for ${eventType}:`, err);
+      this.logger.error(`Error dispatching DOM event for ${eventType}:`, err);
     }
   }
 

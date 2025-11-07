@@ -1,5 +1,8 @@
 import { DataSourceConfig } from './dataSourceConfig';
 import type { DataSourceConfigObject } from '@/types/dataSource';
+import { Logger } from '@/utils/logger';
+
+const logger = Logger.forScope('DataSourceStorage');
 
 const STORAGE_KEYS = {
   CHAT_CONFIG: 'dataSourceConfig',
@@ -14,8 +17,7 @@ export class DataSourceStorage {
         result[STORAGE_KEYS.CHAT_CONFIG] as Partial<DataSourceConfigObject>
       );
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error loading chat config:', error);
+      logger.error('Error loading chat config:', error);
       return new DataSourceConfig();
     }
   }
@@ -27,8 +29,7 @@ export class DataSourceStorage {
         result[STORAGE_KEYS.FORM_FILLER_CONFIG] as Partial<DataSourceConfigObject>
       );
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error loading form filler config:', error);
+      logger.error('Error loading form filler config:', error);
       return new DataSourceConfig();
     }
   }
@@ -51,8 +52,7 @@ export class DataSourceStorage {
         ),
       };
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error loading configurations:', error);
+      logger.error('Error loading configurations:', error);
       return { chatConfig: new DataSourceConfig(), formFillerConfig: new DataSourceConfig() };
     }
   }
@@ -61,8 +61,7 @@ export class DataSourceStorage {
     try {
       await chrome.storage.local.set({ [STORAGE_KEYS.CHAT_CONFIG]: config.toObject() });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error saving chat config:', error);
+      logger.error('Error saving chat config:', error);
       throw error;
     }
   }
@@ -71,8 +70,7 @@ export class DataSourceStorage {
     try {
       await chrome.storage.local.set({ [STORAGE_KEYS.FORM_FILLER_CONFIG]: config.toObject() });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error saving form filler config:', error);
+      logger.error('Error saving form filler config:', error);
       throw error;
     }
   }
@@ -87,8 +85,7 @@ export class DataSourceStorage {
         [STORAGE_KEYS.FORM_FILLER_CONFIG]: formFillerConfig.toObject(),
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error saving configurations:', error);
+      logger.error('Error saving configurations:', error);
       throw error;
     }
   }
@@ -100,8 +97,7 @@ export class DataSourceStorage {
         STORAGE_KEYS.FORM_FILLER_CONFIG,
       ]);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[DataSourceStorage] Error clearing configurations:', error);
+      logger.error('Error clearing configurations:', error);
       throw error;
     }
   }

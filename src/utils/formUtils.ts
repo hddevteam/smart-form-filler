@@ -1,4 +1,7 @@
 import type { Form, FormField, FormSummary } from '@/types/forms';
+import { Logger } from '@/utils/logger';
+
+const logger = Logger.forScope('FormUtils');
 
 /**
  * Escape HTML to prevent XSS
@@ -175,8 +178,7 @@ export function cleanHtml(html: string | undefined | null): string {
 
     return tempDiv.innerHTML;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn('Failed to clean HTML, returning original:', error);
+    logger.warn('Failed to clean HTML, returning original:', error);
     return html ?? '';
   }
 }
