@@ -1410,6 +1410,14 @@ CHECKPOINT: CP-M9-4"
 | Milestone | Status         | Completion Date |
 | --------- | -------------- | --------------- |
 | M0        | 🔲 Not Started | -               |
+
+## 📊 Progress Tracking
+
+### Overall Progress
+
+| Milestone | Status         | Completion Date |
+| --------- | -------------- | --------------- |
+| M0        | 🔲 Not Started | -               |
 | M1        | 🔲 Not Started | -               |
 | M2        | 🔲 Not Started | -               |
 | M3        | 🔲 Not Started | -               |
@@ -1419,13 +1427,6 @@ CHECKPOINT: CP-M9-4"
 | M7        | 🔲 Not Started | -               |
 | M8        | 🔲 Not Started | -               |
 | M9        | 🔲 Not Started | -               |
-
-**Legend:**
-
-- 🔲 Not Started
-- 🟡 In Progress
-- ✅ Completed
-- ❌ Blocked
 
 ### Test Coverage Progress
 
