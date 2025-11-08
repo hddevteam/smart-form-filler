@@ -1,4 +1,5 @@
 import { Logger } from '@/utils/logger';
+import { getAvailableModels } from '@/config/modelRegistry';
 
 export interface ModelSelectorDeps {
   loadModels: () => Promise<
@@ -11,9 +12,17 @@ export class ModelSelector {
   private deps: ModelSelectorDeps;
   private logger = Logger.forScope('ModelSelector');
 
-  constructor(container: HTMLElement, deps: ModelSelectorDeps) {
+  constructor(container: HTMLElement, deps?: ModelSelectorDeps) {
     this.container = container;
-    this.deps = deps;
+    this.deps = deps ?? {
+      loadModels: (): Promise<
+        Array<{ id: string; name?: string; description?: string; source?: string }>
+      > => {
+        const models = getAvailableModels();
+        const list = models.map(m => ({ id: m.name, name: m.name, source: m.provider }));
+        return Promise.resolve(list);
+      },
+    };
   }
 
   async render(): Promise<void> {
