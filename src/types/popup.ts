@@ -1,5 +1,5 @@
 export interface PopupElements {
-  settingsBtn?: HTMLElement | null;
+  settingsBtn?: HTMLButtonElement | null;
   settingsModal?: HTMLElement | null;
   settingsModalClose?: HTMLElement | null;
   backendUrlInput?: HTMLInputElement | null;
@@ -7,6 +7,40 @@ export interface PopupElements {
   connectionStatus?: HTMLElement | null;
   saveSettingsBtn?: HTMLElement | null;
   settingsCancelBtn?: HTMLElement | null;
+  loginBtn?: HTMLElement | null;
+  authIndicator?: HTMLElement | null;
+  authText?: HTMLElement | null;
+  languageSelect?: HTMLSelectElement | null;
+  copyBtn?: HTMLButtonElement | null;
+  extractDataBtn?: HTMLButtonElement | null;
+  mainChatBtn?: HTMLButtonElement | null;
+  loadingState?: HTMLElement | null;
+  loadingDetails?: HTMLElement | null;
+  resultsSection?: HTMLElement | null;
+  errorState?: HTMLElement | null;
+  errorMessage?: HTMLElement | null;
+  outputText?: HTMLElement | null;
+  resultsMeta?: HTMLElement | null;
+  mainTabs?: HTMLElement[] | null;
+  resultsTabs?: HTMLElement[] | null;
+  markdownText?: HTMLElement | null;
+  htmlText?: HTMLElement | null;
+  cleanedHtmlText?: HTMLElement | null;
+  metadataData?: HTMLElement | null;
+  markdownTab?: HTMLElement | null;
+  htmlTab?: HTMLElement | null;
+  cleanedHtmlTab?: HTMLElement | null;
+  currentResultsDetail?: HTMLElement | null;
+  historyContainer?: HTMLElement | null;
+  markdownPanel?: HTMLElement | null;
+  htmlPanel?: HTMLElement | null;
+  cleanedHtmlPanel?: HTMLElement | null;
+  metadataPanel?: HTMLElement | null;
+  cancelLoadingBtn?: HTMLButtonElement | null;
+  clearAllBtn?: HTMLButtonElement | null;
+  backToHistoryBtn?: HTMLButtonElement | null;
+  chatBtn?: HTMLButtonElement | null;
+  retryBtn?: HTMLButtonElement | null;
   // Model related
   globalModelSelect?: HTMLSelectElement | null;
   globalRefreshModelsBtn?: HTMLButtonElement | null;
@@ -60,4 +94,22 @@ export interface PopupManagerLike {
     onDataSourceChanged: (config: unknown) => void;
   };
   updateAuthenticationStatus?: () => void;
+}
+
+// Handlers used by UIController.bindEvents
+export interface UIEventHandlers {
+  // Tab switching
+  switchMainTab?: (tab: string) => void;
+  switchTab?: (tab: string) => void;
+  // Actions
+  extractData?: () => void;
+  login?: () => void;
+  copy?: () => void;
+  chat?: () => void;
+  retry?: () => void;
+  clearAll?: () => void;
+  backToHistory?: () => void;
+  cancelLoading?: () => void;
+  // Global model select change propagation
+  updateChatSendButtonState?: () => void;
 }
