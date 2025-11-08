@@ -1,8 +1,68 @@
-# Milestone Planning - Smart Form Filler TypeScript Migration
+# Milestones (Concise) — Smart Form Filler TS Migration
 
-> **Purpose:** Detailed breakdown of migration milestones with checkpoints, deliverables, and acceptance criteria
+Purpose: Single, up-to-date plan mirroring actual progress. English only. MV3 frontend, TDD-first.
 
-## 📋 Overview
+Legend: 🔲 Not Started · 🟡 In Progress · ✅ Done
+
+## Snapshot (2025-11-08)
+
+- Overall Coverage: ~85%
+- Tooling: pnpm 8, Node 20, Vite 7, TS 5.9 strict, Vitest 4, ESLint 9, Prettier 3
+
+## High-level Timeline
+
+M0→M1→M2→M3→M4→M5→M6→M7→M8→M9 (43d total)
+
+## Current Status
+
+- M0 Setup: ✅ Completed (2025-11-07)
+- M1 Types: 🟡 In Progress
+- M2 Config: 🟡 In Progress
+- M3 AI Service Layer: 🟡 In Progress
+- M4 Data Processing: 🔲
+- M5 UI Layer: 🟡 In Progress
+- M6 Content Scripts: 🟡 In Progress
+- M7 Background Script: 🔲
+- M8 Integration Testing: 🔲
+- M9 Optimization & Release: 🔲
+
+## What's Done (sync with repo)
+
+Details removed (completed work summarized in commit history and PRs).
+
+## Next Focus
+
+- M7: Message router abstraction + handlers + tests (≥80%).
+- M3: Extend adapters (DeepSeek) + reasoning/tool params; tests (≥85%).
+- M5: Connection Test refinement vs background proxy; UI tests ≥70%.
+- M8: Playwright setup for config/form flows.
+
+## Acceptance Targets
+
+- Strict TS, no any (exceptions documented).
+- Core services ≥90%; adapters ≥85%.
+- UI ≥70%; Content ≥75%; Overall ≥80%.
+
+## Checkpoints (condensed)
+
+- M2 Config: CP-M2-1 StorageManager — 🟡; CP-M2-2 ApiConfigManager — 🟡; CP-M2-3 ModelRegistry — ✅; CP-M2-4 Validation — 🔲; CP-M2-5 Integration — 🔲
+- M3 AI: CP-M3-1 BaseAdapter — ✅; CP-M3-2 Adapters/Factory — ✅ baseline; CP-M3-3 AIService + retries + background — ✅; CP-M3-4 AIServiceFactory — 🔲; CP-M3-5 API proxy util — 🟡; CP-M3-6 Adapter integration tests — 🔲
+- M5 UI: CP-M5-2 ConfigurationUI — ✅; CP-M5-3 ModelSelector — ✅; CP-M5-4 ConnectionTest — ✅ initial; CP-M5-5 Popup init — ✅; CP-M5-6 UI integration tests — 🟡; CP-M5-7 Data source sub-layer — ✅
+- M6 Content: CP-M6-1 Detector — ✅; CP-M6-2 Filler — ✅; CP-M6-3 Extractor — ✅; CP-M6-4 Content main — ✅; CP-M6-5 Playwright — 🔲
+- M7 Background: CP-M7-1 Proxy queue/limit/cache — 🔲; CP-M7-2 MessageRouter — 🔲; CP-M7-3 Background main — 🔲; CP-M7-4 Integration — 🔲
+- M8 Integration: Playwright setup + flows + perf + cross-browser — 🔲
+- M9 Release: Perf, docs, security, packaging — 🔲
+
+## Commit Tags
+
+Use Conventional Commits with milestone/checkpoint tags, e.g.:
+
+- MILESTONE: M3 - AI Service Layer
+- CHECKPOINT: CP-M3-3
+
+---
+
+## Archived Detailed Plan
 
 ### Project Timeline
 
@@ -95,16 +155,7 @@ Setup     Types    Config      AI Services   Data     UI Layer    Content  BG   
 
 **Deliverable:** GitHub Actions workflows
 
-### Acceptance Criteria (Completed)
-
-- `pnpm dev` starts development server
-- `pnpm build` creates production bundle
-- `pnpm test` runs test suite
-- `pnpm lint` checks code quality
-- Pre-commit hooks work
-- CI pipeline passes
-
-<!-- Commit templates omitted for completed milestone to reduce noise -->
+<!-- Completed acceptance criteria details removed to keep concise -->
 
 ---
 
@@ -874,40 +925,7 @@ document.addEventListener('DOMContentLoaded', initPopup);
 
 #### CP-M5-6: UI Integration Tests
 
-#### CP-M5-7: Data Source Management (Popup) Migration (TDD)
-
-- [x] Characterize legacy `PopupDataSourceManagerRefactored.js` behavior
-- [x] Migrate manager to TypeScript (`popupDataSourceManagerRefactored.ts`) with event parity
-- [x] Extend popup types (`PopupElements`, `PopupManagerLike`) for data source context
-- [x] Port `DataSourceUIController` to TypeScript with DOM + event emitting unchanged
-- [x] Integrate manager + UI controller in `src/popup/index.ts`
-- [x] Add unit tests for manager (init, apply configuration, selected sources, state flags)
-- [x] Add unit tests for UI controller (modal open/close, applyConfiguration emit, list rendering, UI state updates)
-- [x] Ensure all tests green (30/30)
-
-**Deliverable:** Fully migrated popup data source coordination layer (manager + UI controller) with ≥90% logic parity and new TypeScript tests.
-
-**Acceptance Criteria:**
-
-- Manager emits legacy DOM CustomEvents (`dataSourceManagerReady`, `dataSourcesUpdated`, `formFillerConfigChanged`, `configurationApplied`)
-- UI controller updates chat and form filler status elements correctly
-- All new modules satisfy strict TypeScript without `any` (except intentional test casts)
-- Added tests pass consistently and do not introduce flakiness
-
-**Commit Template:**
-
-```bash
-git commit -m "feat(ui): migrate popup data source manager and UI controller to TypeScript
-
-- Port PopupDataSourceManagerRefactored to TS
-- Port DataSourceUIController to TS
-- Extend popup types for data source elements & handlers
-- Add unit tests (manager + UI controller)
-- Integrate into popup entry point
-
-MILESTONE: M5 - UI Layer
-CHECKPOINT: CP-M5-7"
-```
+#### CP-M5-7: Data Source sub-layer — ✅ (details removed)
 
 - [ ] Test complete configuration workflow
 - [ ] Test error handling
@@ -1452,154 +1470,7 @@ CHECKPOINT: CP-M9-4"
 
 ## Progress Tracking
 
-### Overall Progress
-
-| Milestone                                     | Status         | Completion Date |
-| --------------------------------------------- | -------------- | --------------- |
-| M0                                            | ✅ Completed   | 2025-11-07      |
-| M1                                            | 🟡 In Progress | 2025-11-07      |
-| M2                                            | 🟡 In Progress | 2025-11-07      |
-| M3                                            | 🔲 Not Started | -               |
-| M4                                            | 🔲 Not Started | -               |
-| M5                                            | 🟡 In Progress | 2025-11-08      |
-| M5 Data Source Sub-layer                      | ✅ Completed   | 2025-11-07      |
-| M5 Popup Core (Settings/Manager/UIController) | ✅ Completed   | 2025-11-08      |
-| M5 Results Handler                            | ✅ Completed   | 2025-11-08      |
-| M6                                            | 🟡 In Progress | 2025-11-08      |
-| M7                                            | 🔲 Not Started | -               |
-| M8                                            | 🔲 Not Started | -               |
-| M9                                            | 🔲 Not Started | -               |
-
-**Legend:**
-
-- 🔲 Not Started
-- 🟡 In Progress
-- ✅ Completed
-- ❌ Blocked
-
-### Test Coverage Progress
-
-| Module            | Target   | Current | Status |
-| ----------------- | -------- | ------- | ------ |
-| Utilities         | 100%     | -       | 🔲     |
-| Configuration     | ≥90%     | -       | 🔲     |
-| AI Services       | ≥85%     | -       | 🔲     |
-| Data Processing   | ≥85%     | -       | 🔲     |
-| UI Components     | ≥70%     | ~73%    | 🟡     |
-| Content Scripts   | ≥75%     | -       | 🔲     |
-| Background Script | ≥80%     | -       | 🔲     |
-| **Overall**       | **≥80%** | ~85%    | ✅     |
-
-## 📊 Progress Tracking
-
-### Overall Progress
-
-# Milestones (Compressed) - Smart Form Filler TS Migration
-
-Purpose: concise plan with goals, duration, dependencies, and current progress.
-
-## 📊 Progress Tracking
-
-### Overall Progress
-
-| Milestone       | Status         | Completion Date |
-| --------------- | -------------- | --------------- | --- |
-| M0              | 🔲 Not Started | -               |
-| M1              | 🔲 Not Started | -               |
-| M2              | 🔲 Not Started | -               |
-| M3              | 🔲 Not Started | -               |
-| M4              | 🔲 Not Started | -               |
-| M5              | 🔲 Not Started | -               |
-| M6              | 🔲 Not Started | -               |
-| M7              | 🔲 Not Started | -               |
-| M8              | 🔲 Not Started | -               |
-| M9              | 🔲 Not Started | -               |
-| Configuration   | ≥90%           | -               | 🔲  |
-| Data Processing | ≥85%           | -               | 🔲  |
-
-| M0 | CP-M0-4 | Testing framework | ✅ | 2025-11-07 | Vitest + chrome mocks working |
-| M0 | CP-M0-6 | CI/CD pipeline | ✅ | 2025-11-07 | Workflows created & validated |
-| M2 | CP-M2-1 | Storage manager | 🔲 | - | TDD approach |
-| M2 | CP-M2-3 | Model registry | 🔲 | - | - |
-| M3 | CP-M3-4 | Azure service | 🔲 | - | - |
-| M3 | CP-M3-6 | Service factory | 🔲 | - | - |
-| M5 | CP-M5-2 | Config UI component | ✅ | 2025-11-07 | Implemented ConfigurationUI with DI to ApiConfigManager; added "Recent" list; unit tests added |
-| M5 | CP-M5-4 | Connection test | ✅ | 2025-11-07 | Implemented ConnectionTest; wired to /api/extension/health; unit tests added |
-| M6 | CP-M6-2 | Form filler | ✅ | 2025-11-08 | Ported to TypeScript (`src/content/formFiller.ts`) with unit tests (1 case) |
-| M6 | CP-M6-4 | Content script main | ✅ | 2025-11-08 | Wired popup buttons to content actions; integrated TS FormDetector/FormFiller in `src/extension/content.ts` |
-| M8 | CP-M8-2 | Config workflow tests | 🔲 | - | - |
-| M8 | CP-M8-4 | Performance tests | 🔲 | - | - |
-
-- Documents migration from `backend/services/gptService` to frontend TypeScript
-- `.github/copilot-instructions.md`: Emphasized pure frontend architecture, reference backend implementation for migration
-- Removed backend startup instructions (npm start, backend server)
-- Added `host_permissions` for direct API access:
-  - `https://*.openai.azure.com/*` (Azure OpenAI)
-  - `http://localhost:11434/*` (Ollama)
-
-**Architectural Decision**:
-
-- **Pattern**: Pure frontend MV3 Chrome Extension
-- **AI Service**: Background script directly calls AI provider APIs (no separate backend server)
-- **Migration**: Reference existing `backend/services/gptService` implementation, migrate to `src/background/services/ai/` in TypeScript
-- **HTTP Client**: Replace axios (backend) with fetch (frontend)
-- **Configuration**: User-configured via extension popup, stored in chrome.storage.local (replaces process.env)
-
-**Test Status**: 100/100 tests passing (21 test files)
-
-#### Session 2: Documentation Streamlining & CI/CD Modernization
-
-**Documentation Cleanup**:
-
-1. ✅ Streamlined `.github/AI_SERVICE_MIGRATION.md`
-   - Reduced from 880 lines to 200 lines (77% reduction)
-   - Kept essential file mapping and migration steps
-   - Removed redundant code examples and explanations
-
-2. ✅ Deleted obsolete documentation files:
-   - `DIRECTORY_STRUCTURE.md` (duplicated in copilot-instructions.md)
-   - `PROJECT_BOARD.md` (outdated tracking method)
-   - `VERSION_ROADMAP.md` (superseded by MILESTONES.md)
-   - `repository-seo.md` (obsolete GitHub metadata)
-
-3. ✅ Git commit: "docs: streamline migration guide and remove obsolete docs"
-
-**GitHub Actions Modernization**:
-
-1. ✅ Consolidated CI workflows
-   - Merged `ci.yml`, `build.yml`, `test.yml` into single efficient `ci.yml`
-   - Three jobs: `lint-and-typecheck`, `test`, `build`
-   - Build job depends on lint and test passing (quality gates)
-
-2. ✅ Migrated from npm to pnpm
-   - Removed backend references (`npm run install:all`)
-   - Removed Node version matrix (standardized on Node 20)
-   - Used `--frozen-lockfile` for reproducible builds
-   - Removed Codecov upload (kept coverage generation)
-
-3. ✅ Modernized `release.yml`
-   - Migrated from npm to pnpm
-   - Packages `dist/` folder as extension zip
-   - Uses `softprops/action-gh-release@v1` (modern action)
-   - Updated release notes for pure frontend architecture
-
-4. ✅ Deleted duplicate workflows
-   - Removed `build.yml` and `test.yml` (functionality merged into `ci.yml`)
-
-5. ✅ Git commit: "ci: consolidate workflows and migrate to pnpm" (CP-M7-1)
-
-**CI/CD Architecture**:
-
-- **Workflow Structure**: lint → typecheck → test(coverage) → build → upload artifacts
-- **Package Manager**: pnpm 8 with frozen lockfile
-- **Node Version**: 20 (single version for consistency)
-- **Test Coverage**: Generated locally (no external upload)
-- **Release Process**: Automated on version tags with comprehensive release notes
-
-**Next Steps**:
-
-- Task 4: Clean backend dependencies from existing frontend code (remove setBackendUrl, testConnection methods)
-- Begin M3 AI Service Layer migration following `.github/AI_SERVICE_MIGRATION.md`
+Completed progress tracking details removed to keep milestones concise.
 
 ---
 
@@ -1677,33 +1548,4 @@ Purpose: concise plan with goals, duration, dependencies, and current progress.
 
 ## Date: 2025-11-08
 
-### Completed Today
-
-- ✅ CP-M2-4-A: Migrate Popup UIController to TypeScript with typed event handlers (lint/tests/build green)
-- ✅ CP-M2-4-B: Migrate ResultsHandler to TypeScript with unit tests (5 cases; integrated logger; strict types)
-- ✅ UI Components overall tests now at 73%+; overall test count 100/100 green
-- ✅ Build artifacts verified for MV3 TS popup with Vite base './'
-- ✅ CP-M6-1: Implement TypeScript FormDetector with unit tests (2)
-- ✅ CP-M6-2: Implement TypeScript FormFiller with unit tests (1)
-- ✅ CP-M6-3: Implement TypeScript DataExtractor + unit tests (6); add content handler `extractContentWithIframes`
-- ✅ CP-M6-4: Wire popup buttons to content actions (detect/analyze/fill) via `ExtensionClient`; expose TS implementations in content
-
-### In Progress
-
-- 🟡 Continue TypeScript migration for remaining popup submodules (e.g., minor utilities) with no UI changes
-- 🟡 Prepare next: content scripts TS migration plan and tests
-- 🟡 CP-M6-4: Content script main wiring and integration validation (no UI changes)
-
-### Blockers
-
-- None (pnpm PATH issue resolved)
-
-### Coverage Stats
-
-- Unit tests: 100 passed (100 total)
-- Coverage: to be reported via `pnpm test:coverage` in the next update
-
-### Next Steps
-
-- Start planning M6 (Content Scripts) TS migration with TDD (FormDetector/FormFiller)
-- Keep lint/tests/build green; no UI changes without manual confirmation
+Completed daily log details removed to keep milestones concise.
