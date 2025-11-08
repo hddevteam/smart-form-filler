@@ -46,6 +46,9 @@ export default [
         setInterval: 'readonly',
         clearInterval: 'readonly',
         URL: 'readonly',
+        fetch: 'readonly',
+        Blob: 'readonly',
+        File: 'readonly',
       },
     },
     plugins: {
