@@ -7,6 +7,10 @@ export interface ExtensionClientLike {
   testConnection(): Promise<ConnectionResult>;
   getAvailableModels(): Promise<ModelItem[]>;
   refreshOllamaModels(): Promise<void>;
+  // Content script actions
+  detectForms(): Promise<unknown>;
+  analyzeContent(): Promise<unknown>;
+  fillForms(mappings: unknown): Promise<unknown>;
 }
 
 // Simple client that calls background/page via chrome.runtime messages
@@ -51,6 +55,40 @@ export class ExtensionClient implements ExtensionClientLike {
         chrome.runtime.sendMessage({ action: 'refreshOllamaModels' }, () => resolve());
       } catch {
         resolve();
+      }
+    });
+  }
+
+  async detectForms(): Promise<unknown> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage({ action: 'detectForms' }, (resp: unknown) => resolve(resp));
+      } catch {
+        resolve({ success: false, error: 'runtime error' });
+      }
+    });
+  }
+
+  async analyzeContent(): Promise<unknown> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage({ action: 'extractContentWithIframes' }, (resp: unknown) =>
+          resolve(resp)
+        );
+      } catch {
+        resolve({ success: false, error: 'runtime error' });
+      }
+    });
+  }
+
+  async fillForms(mappings: unknown): Promise<unknown> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage({ action: 'fillForms', mappings }, (resp: unknown) =>
+          resolve(resp)
+        );
+      } catch {
+        resolve({ success: false, error: 'runtime error' });
       }
     });
   }

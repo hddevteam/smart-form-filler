@@ -110,6 +110,10 @@ export interface UIEventHandlers {
   clearAll?: () => void;
   backToHistory?: () => void;
   cancelLoading?: () => void;
+  // Content script actions
+  detectForms?: () => void;
+  analyzeContent?: () => void;
+  fillForms?: () => void;
   // Global model select change propagation
   updateChatSendButtonState?: () => void;
 }

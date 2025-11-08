@@ -7,7 +7,7 @@ import ModelSelector from '@/popup/components/ModelSelector';
 import ConnectionTest from '@/popup/components/ConnectionTest';
 import { ApiConfigManager } from '@/config/apiConfigManager';
 import { fetchModels, healthCheck } from '@/popup/apis/backend';
-import type { PopupElements, PopupManagerLike } from '@/types/popup';
+import type { PopupElements, PopupManagerLike, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
 
 const logger = Logger.forScope('Popup');
@@ -83,6 +83,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       test.render();
     }
+    // Bind content actions via ExtensionClient if buttons exist
+    const handlers: UIEventHandlers = {
+      detectForms: () => {
+        void moduleManager.apiClient?.detectForms();
+      },
+      analyzeContent: () => {
+        void moduleManager.apiClient?.analyzeContent();
+      },
+      fillForms: () => {
+        // In minimal wiring, send empty mappings; future: use collected mappings
+        void moduleManager.apiClient?.fillForms({});
+      },
+    };
+    // If a separate UIController exists for general buttons, it would call bindEvents(handlers)
+    // Here we trigger bindings for content buttons directly
+    const detectBtn = document.getElementById('detectFormsBtn');
+    const analyzeBtn = document.getElementById('analyzeContentBtn');
+    const fillBtn = document.getElementById('fillFormsBtn');
+    detectBtn?.addEventListener('click', () => handlers.detectForms?.());
+    analyzeBtn?.addEventListener('click', () => handlers.analyzeContent?.());
+    fillBtn?.addEventListener('click', () => handlers.fillForms?.());
   });
 });
 

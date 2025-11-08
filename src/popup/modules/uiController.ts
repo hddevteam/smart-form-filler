@@ -36,6 +36,14 @@ export class UIController {
     this.safeBindEvent(this.elements.backToHistoryBtn, 'click', () => handlers.backToHistory?.());
     this.safeBindEvent(this.elements.cancelLoadingBtn, 'click', () => handlers.cancelLoading?.());
 
+    // Content actions
+    const detectBtn = document.getElementById('detectFormsBtn') as HTMLButtonElement | null;
+    const analyzeBtn = document.getElementById('analyzeContentBtn') as HTMLButtonElement | null;
+    const fillBtn = document.getElementById('fillFormsBtn') as HTMLButtonElement | null;
+    this.safeBindEvent(detectBtn, 'click', () => handlers.detectForms?.());
+    this.safeBindEvent(analyzeBtn, 'click', () => handlers.analyzeContent?.());
+    this.safeBindEvent(fillBtn, 'click', () => handlers.fillForms?.());
+
     if (this.elements.resultsTabs?.length) {
       this.elements.resultsTabs.forEach(tab => {
         this.safeBindEvent(tab, 'click', () => {
