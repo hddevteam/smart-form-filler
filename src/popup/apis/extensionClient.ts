@@ -1,0 +1,58 @@
+import type { ModelItem } from '@/popup/apis/backend';
+
+export type ConnectionResult = { success: boolean; error?: string };
+
+export interface ExtensionClientLike {
+  setBackendUrl(url: string): void;
+  testConnection(): Promise<ConnectionResult>;
+  getAvailableModels(): Promise<ModelItem[]>;
+  refreshOllamaModels(): Promise<void>;
+}
+
+// Simple client that calls background/page via chrome.runtime messages
+export class ExtensionClient implements ExtensionClientLike {
+  private backendUrl: string | null = null;
+
+  setBackendUrl(url: string): void {
+    this.backendUrl = url;
+  }
+
+  async testConnection(): Promise<ConnectionResult> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage(
+          { action: 'testBackendConnection', baseUrl: this.backendUrl },
+          (resp: unknown) => {
+            const data = (resp as ConnectionResult) || { success: false, error: 'no response' };
+            resolve(data);
+          }
+        );
+      } catch {
+        resolve({ success: false, error: 'runtime error' });
+      }
+    });
+  }
+  async getAvailableModels(): Promise<ModelItem[]> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage({ action: 'getAvailableModels' }, (resp: unknown) => {
+          const data = Array.isArray(resp) ? (resp as ModelItem[]) : [];
+          resolve(data);
+        });
+      } catch {
+        resolve([]);
+      }
+    });
+  }
+
+  async refreshOllamaModels(): Promise<void> {
+    return new Promise(resolve => {
+      try {
+        chrome.runtime.sendMessage({ action: 'refreshOllamaModels' }, () => resolve());
+      } catch {
+        resolve();
+      }
+    });
+  }
+}
+export default ExtensionClient;

@@ -1,3 +1,4 @@
+import { ExtensionClient } from '@/popup/apis/extensionClient';
 // Popup entry point
 import PopupDataSourceManagerRefactored from '@/modules/popup/popupDataSourceManagerRefactored';
 import DataSourceUIController from '@/modules/popup/dataSourceUIController';
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logger.error('Error:', msg);
       },
     },
+    apiClient: new ExtensionClient(),
   };
 
   // Initialize manager first, then create UI controller with the manager's event emitter
