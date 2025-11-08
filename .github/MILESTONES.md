@@ -1591,7 +1591,7 @@ CHECKPOINT: CP-M9-4"
 
 ### Date: 2025-11-08
 
-#### Architecture Clarification & Documentation Update
+#### Session 1: Architecture Clarification & Documentation Update
 
 **Issue Identified**: Documentation described backend-based architecture but project requirement is pure frontend MV3 extension with direct API provider access.
 
@@ -1626,6 +1626,55 @@ CHECKPOINT: CP-M9-4"
 - **Configuration**: User-configured via extension popup, stored in chrome.storage.local (replaces process.env)
 
 **Test Status**: 100/100 tests passing (21 test files)
+
+#### Session 2: Documentation Streamlining & CI/CD Modernization
+
+**Documentation Cleanup**:
+
+1. ✅ Streamlined `.github/AI_SERVICE_MIGRATION.md`
+   - Reduced from 880 lines to 200 lines (77% reduction)
+   - Kept essential file mapping and migration steps
+   - Removed redundant code examples and explanations
+
+2. ✅ Deleted obsolete documentation files:
+   - `DIRECTORY_STRUCTURE.md` (duplicated in copilot-instructions.md)
+   - `PROJECT_BOARD.md` (outdated tracking method)
+   - `VERSION_ROADMAP.md` (superseded by MILESTONES.md)
+   - `repository-seo.md` (obsolete GitHub metadata)
+
+3. ✅ Git commit: "docs: streamline migration guide and remove obsolete docs"
+
+**GitHub Actions Modernization**:
+
+1. ✅ Consolidated CI workflows
+   - Merged `ci.yml`, `build.yml`, `test.yml` into single efficient `ci.yml`
+   - Three jobs: `lint-and-typecheck`, `test`, `build`
+   - Build job depends on lint and test passing (quality gates)
+
+2. ✅ Migrated from npm to pnpm
+   - Removed backend references (`npm run install:all`)
+   - Removed Node version matrix (standardized on Node 20)
+   - Used `--frozen-lockfile` for reproducible builds
+   - Removed Codecov upload (kept coverage generation)
+
+3. ✅ Modernized `release.yml`
+   - Migrated from npm to pnpm
+   - Packages `dist/` folder as extension zip
+   - Uses `softprops/action-gh-release@v1` (modern action)
+   - Updated release notes for pure frontend architecture
+
+4. ✅ Deleted duplicate workflows
+   - Removed `build.yml` and `test.yml` (functionality merged into `ci.yml`)
+
+5. ✅ Git commit: "ci: consolidate workflows and migrate to pnpm" (CP-M7-1)
+
+**CI/CD Architecture**:
+
+- **Workflow Structure**: lint → typecheck → test(coverage) → build → upload artifacts
+- **Package Manager**: pnpm 8 with frozen lockfile
+- **Node Version**: 20 (single version for consistency)
+- **Test Coverage**: Generated locally (no external upload)
+- **Release Process**: Automated on version tags with comprehensive release notes
 
 **Next Steps**:
 
