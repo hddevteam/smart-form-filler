@@ -170,7 +170,7 @@ export class ExtensionClient implements ExtensionClientLike {
   ): Promise<import('@/types/ai').ChatResponse> {
     return new Promise(resolve => {
       try {
-        chrome.runtime.sendMessage({ type: 'AI_REQUEST', options }, (resp: unknown) => {
+        chrome.runtime.sendMessage({ action: 'AI_REQUEST', options }, (resp: unknown) => {
           const payload =
             (resp as { success?: boolean; data?: import('@/types/ai').ChatResponse }) ?? {};
           if (payload && typeof payload === 'object' && 'success' in payload) {

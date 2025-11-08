@@ -23,8 +23,8 @@ describe('ExtensionClient.sendAIRequest', () => {
       optionsOrCb?: unknown,
       maybeCb?: unknown
     ) => {
-      // Expect AI_REQUEST typed message
-      expect((msg as { type?: string }).type).toBe('AI_REQUEST');
+      // Expect AI_REQUEST action message
+      expect((msg as { action?: string }).action).toBe('AI_REQUEST');
       const cb = (typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb) as
         | ((resp: unknown) => void)
         | undefined;
@@ -49,7 +49,7 @@ describe('ExtensionClient.sendAIRequest', () => {
       optionsOrCb?: unknown,
       maybeCb?: unknown
     ) => {
-      expect((msg as { type?: string }).type).toBe('AI_REQUEST');
+      expect((msg as { action?: string }).action).toBe('AI_REQUEST');
       const cb = (typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb) as
         | ((resp: unknown) => void)
         | undefined;
