@@ -1,10 +1,9 @@
+// Popup type definitions
+
 export interface PopupElements {
   settingsBtn?: HTMLButtonElement | null;
   settingsModal?: HTMLElement | null;
   settingsModalClose?: HTMLElement | null;
-  backendUrlInput?: HTMLInputElement | null;
-  testConnectionBtn?: HTMLElement | null;
-  connectionStatus?: HTMLElement | null;
   saveSettingsBtn?: HTMLElement | null;
   settingsCancelBtn?: HTMLElement | null;
   loginBtn?: HTMLElement | null;
@@ -49,16 +48,25 @@ export interface PopupElements {
   dataSourceModalClose?: HTMLElement | null;
   dataSourceApplyBtn?: HTMLButtonElement | null;
   dataSourceCancelBtn?: HTMLButtonElement | null;
+  // Deprecated: backend-related UI (kept during migration)
+  backendUrlInput?: HTMLInputElement | null;
+  testConnectionBtn?: HTMLElement | null;
+  connectionStatus?: HTMLElement | null;
 }
 
 export interface ApiClientLike {
-  setBackendUrl(url: string): void;
-  testConnection(): Promise<{ success: boolean; error?: string }>;
   // Optional: model API used by PopupModelManager
   getAvailableModels?(): Promise<
     Array<{ id: string; name?: string; description?: string; source?: string }>
   >;
   refreshOllamaModels?: () => Promise<void>;
+  // Content script actions
+  detectForms?: () => Promise<unknown>;
+  analyzeContent?: () => Promise<unknown>;
+  fillForms?: (mappings: unknown) => Promise<unknown>;
+  // Deprecated: backend-specific methods (kept during migration)
+  setBackendUrl?(url: string): void;
+  testConnection?(): Promise<{ success: boolean; error?: string }>;
 }
 
 export interface ModelManagerLike {

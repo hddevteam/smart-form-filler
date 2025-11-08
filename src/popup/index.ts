@@ -73,14 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bind content actions via ExtensionClient if buttons exist
     const handlers: UIEventHandlers = {
       detectForms: () => {
-        void moduleManager.apiClient?.detectForms();
+        void moduleManager.apiClient?.detectForms?.();
       },
       analyzeContent: () => {
-        void moduleManager.apiClient?.analyzeContent();
+        void moduleManager.apiClient?.analyzeContent?.();
       },
       fillForms: () => {
         // In minimal wiring, send empty mappings; future: use collected mappings
-        void moduleManager.apiClient?.fillForms({});
+        void moduleManager.apiClient?.fillForms?.({});
       },
     };
     // If a separate UIController exists for general buttons, it would call bindEvents(handlers)

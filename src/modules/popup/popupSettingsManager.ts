@@ -56,7 +56,7 @@ export class PopupSettingsManager {
 
   applyBackendUrl(): void {
     const client: ApiClientLike | undefined = this.popupManager.apiClient;
-    if (client && this.settings.backendUrl) {
+    if (client && this.settings.backendUrl && typeof client.setBackendUrl === 'function') {
       client.setBackendUrl(this.settings.backendUrl);
     } else {
       this.logger.warn('Cannot apply backend URL', {
@@ -136,8 +136,15 @@ export class PopupSettingsManager {
         return;
       }
       const tempClient = new (ctor as new () => ApiClientLike)();
-      tempClient.setBackendUrl(testUrl);
-      const response = await tempClient.testConnection();
+      if (typeof tempClient.setBackendUrl === 'function') {
+        tempClient.setBackendUrl(testUrl);
+      }
+      const response = (await (typeof tempClient.testConnection === 'function'
+        ? tempClient.testConnection()
+        : Promise.resolve({ success: false, error: 'not supported' }))) as {
+        success: boolean;
+        error?: string;
+      };
       if (response.success) {
         this.showConnectionStatus('✅ Connection successful', 'success');
       } else {

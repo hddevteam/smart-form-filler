@@ -35,9 +35,11 @@ describe('FormDetector (TS)', () => {
     const form = document.getElementById('form') as HTMLFormElement;
     const detector = new FormDetector();
     const fields = detector.extractFields(form);
-    const names = fields.map(f => f.name).sort();
+    const names = fields.map((f: { name: string }) => f.name).sort();
     expect(names).toEqual(['agree', 'bio', 'country', 'username']);
-    const types = Object.fromEntries(fields.map(f => [f.name, f.type]));
+    const types = Object.fromEntries(
+      fields.map((f: { name: string; type: string }) => [f.name, f.type])
+    );
     expect(types.username).toBe('text');
     expect(types.agree).toBe('checkbox');
     expect(types.country).toBe('select');

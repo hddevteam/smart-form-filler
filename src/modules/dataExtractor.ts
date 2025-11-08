@@ -88,7 +88,7 @@ export class DataExtractor {
     try {
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        function: () => {
+        func: () => {
           return {
             html: document.documentElement.outerHTML,
             title: document.title,
@@ -180,14 +180,16 @@ export class DataExtractor {
                 iframe.content.html.length > 0
               );
               const item: IframeContentItem = {
-                index: iframe.indexPath ?? index,
+                index: typeof iframe.indexPath === 'string' ? iframe.indexPath : index,
                 src: iframe.src || `iframe-${index}`,
                 content: hasContent ? (iframe.content?.html ?? '') : '',
                 metadata: {
-                  indexPath: iframe.indexPath,
+                  ...(iframe.indexPath !== undefined ? { indexPath: iframe.indexPath } : {}),
                   depth: iframe.depth ?? 0,
                   accessible: hasContent,
-                  originalAccessible: iframe.accessible,
+                  ...(iframe.accessible !== undefined
+                    ? { originalAccessible: iframe.accessible }
+                    : {}),
                   title: iframe.content?.title ?? '',
                   url: iframe.content?.url ?? '',
                   domain: iframe.content?.domain ?? '',

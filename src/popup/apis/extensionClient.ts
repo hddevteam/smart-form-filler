@@ -1,7 +1,5 @@
 import type { ModelItem } from '@/popup/apis/backend';
 
-export type ConnectionResult = { success: boolean; error?: string };
-
 export interface ExtensionClientLike {
   getAvailableModels(): Promise<ModelItem[]>;
   refreshOllamaModels(): Promise<void>;
@@ -17,7 +15,8 @@ export class ExtensionClient implements ExtensionClientLike {
     return new Promise(resolve => {
       try {
         chrome.runtime.sendMessage({ action: 'getAvailableModels' }, (resp: unknown) => {
-          const data = Array.isArray(resp) ? (resp as ModelItem[]) : [];
+          const payload = (resp as { success?: boolean; models?: ModelItem[] }) ?? {};
+          const data = Array.isArray(payload.models) ? payload.models : [];
           resolve(data);
         });
       } catch {

@@ -34,9 +34,11 @@ chrome.runtime.onStartup.addListener(() => {
 type BgMessage =
   | { action: 'extractPageContent' }
   | { action: 'checkAuth' }
-  | { action: 'getAvailableModels'; backendUrl: string }
-  | { action: 'refreshOllamaModels'; backendUrl: string }
-  | { action: 'testBackendConnection'; backendUrl: string };
+  | { action: 'getAvailableModels' }
+  | { action: 'refreshOllamaModels' }
+  | { action: 'detectForms' }
+  | { action: 'extractContentWithIframes' }
+  | { action: 'fillForms'; mappings: unknown };
 
 // Handle messages from side panel and content scripts
 chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse) => {
@@ -50,13 +52,22 @@ chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse)
       void handleAuthCheck(sendResponse);
       break;
     case 'getAvailableModels':
-      void handleGetAvailableModels(message.backendUrl, sendResponse);
+      void handleGetAvailableModels(sendResponse);
       break;
     case 'refreshOllamaModels':
-      void handleRefreshOllamaModels(message.backendUrl, sendResponse);
+      void handleRefreshOllamaModels(sendResponse);
       break;
-    case 'testBackendConnection':
-      void handleTestBackendConnection(message.backendUrl, sendResponse);
+    case 'detectForms':
+      void forwardToActiveTab({ action: 'detectForms' }, sendResponse);
+      break;
+    case 'extractContentWithIframes':
+      void forwardToActiveTab({ action: 'extractContentWithIframes' }, sendResponse);
+      break;
+    case 'fillForms':
+      void forwardToActiveTab(
+        { action: 'fillForms', mappings: (message as { mappings: unknown }).mappings },
+        sendResponse
+      );
       break;
     default:
       logger.warn('Unknown message action:', (message as { action: string })?.action);
@@ -103,32 +114,16 @@ function handleAuthCheck(
   }
 }
 
-async function handleGetAvailableModels(
-  backendUrl: string,
+function handleGetAvailableModels(
   sendResponse: (response: {
     success: boolean;
     models?: Array<{ id: string; name?: string; description?: string; source?: string }>;
     error?: string;
   }) => void
-): Promise<void> {
+): void {
   try {
-    const response = await fetch(`${backendUrl}/api/models/available`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = (await response.json()) as {
-      success?: boolean;
-      models?: Array<{ id: string; name?: string; description?: string; source?: string }>;
-    };
-    sendResponse({
-      success: true,
-      models: data.models ?? [],
-    });
+    // Pure frontend: return empty list here or read from storage/model registry later
+    sendResponse({ success: true, models: [] });
   } catch (error) {
     logger.error('Get available models error:', error);
     sendResponse({
@@ -138,22 +133,12 @@ async function handleGetAvailableModels(
   }
 }
 
-async function handleRefreshOllamaModels(
-  backendUrl: string,
+function handleRefreshOllamaModels(
   sendResponse: (response: { success: boolean; error?: string }) => void
-): Promise<void> {
+): void {
   try {
-    const response = await fetch(`${backendUrl}/api/models/refresh-ollama`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = (await response.json()) as { success?: boolean };
-    sendResponse({ success: data.success ?? true });
+    // Pure frontend: nothing to refresh, return success
+    sendResponse({ success: true });
   } catch (error) {
     logger.error('Refresh Ollama models error:', error);
     sendResponse({
@@ -163,27 +148,28 @@ async function handleRefreshOllamaModels(
   }
 }
 
-async function handleTestBackendConnection(
-  backendUrl: string,
-  sendResponse: (response: { success: boolean; error?: string }) => void
+async function forwardToActiveTab(
+  payload: { action: string; mappings?: unknown },
+  sendResponse: (resp: unknown) => void
 ): Promise<void> {
   try {
-    const response = await fetch(`${backendUrl}/health`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) {
+      sendResponse({ success: false, error: 'No active tab found' });
+      return;
     }
-
-    sendResponse({ success: true });
-  } catch (error) {
-    logger.error('Test backend connection error:', error);
-    sendResponse({
-      success: false,
-      error: (error as Error).message,
+    chrome.tabs.sendMessage(tab.id, payload, (resp: unknown) => {
+      const lastError = chrome.runtime.lastError;
+      if (lastError) {
+        logger.error('Failed to forward message to content script:', lastError.message);
+        sendResponse({ success: false, error: lastError.message });
+        return;
+      }
+      sendResponse(resp);
     });
+  } catch (error) {
+    logger.error('Failed to forward message to content script:', error);
+    sendResponse({ success: false, error: (error as Error).message });
   }
 }
 
