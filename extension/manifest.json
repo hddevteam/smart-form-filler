@@ -11,6 +11,7 @@
     "http://localhost:11434/*",
     "https://*.azurewebsites.net/*",
     "https://*.openai.azure.com/*",
+    "https://*.ai.azure.com/*",
     "https://login.microsoftonline.com/*"
   ],
   "action": {

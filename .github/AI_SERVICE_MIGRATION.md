@@ -1,6 +1,6 @@
-# AI Service Migration Guide
+# AI Service Migration (Frontend Only)
 
-> **Quick Reference**: Migrate `backend/services/gptService/` to `src/background/services/ai/` (TypeScript)
+Quick reference for migrating `backend/services/gptService/` to `src/background/services/ai/` (TypeScript). This extension is pure frontend; use `fetch` and `chrome.storage.local`.
 
 ## File Mapping
 
@@ -18,7 +18,7 @@
 
 | What         | Backend (Node.js)  | Frontend (Browser)             |
 | ------------ | ------------------ | ------------------------------ |
-| **HTTP**     | `axios`            | `fetch` API                    |
+| **HTTP**     | `axios`            | `fetch` API (browser)          |
 | **Config**   | `process.env`      | `chrome.storage.local`         |
 | **Messages** | Express middleware | `chrome.runtime.onMessage`     |
 | **CORS**     | No restrictions    | `host_permissions` in manifest |
@@ -49,11 +49,11 @@ export class AdapterFactory {
 }
 ```
 
-**Migrate from backend**:
+Steps:
 
 - Copy adapter logic from `backend/services/gptService/modelAdapters/`
-- Convert to TypeScript with proper types
-- Keep same request/response processing logic
+- Convert to TypeScript with strict types
+- Preserve request/response processing
 
 ### 2. ModelConfig (modelConfig.ts)
 
@@ -78,10 +78,10 @@ export class ModelConfig {
 }
 ```
 
-**Migrate from backend**:
+Notes:
 
-- Copy `MODEL_FEATURES` object from `backend/services/gptService/config.js`
-- Replace `process.env` with `chrome.storage.local` reads
+- Copy `MODEL_FEATURES` from backend `config.js`
+- Replace `process.env` with `chrome.storage.local`
 - Keep `supportsFeature()` logic identical
 
 ### 3. AIService (aiService.ts)
@@ -153,12 +153,12 @@ export class AIService {
 }
 ```
 
-**Migrate from backend**:
+Guidance:
 
-- Copy `makeRequest()` flow from `backend/services/gptService/apiService.js`
-- Replace `axios` with `fetch` API
-- Keep all processing logic (messages, reasoning) identical
-- Preserve error handling patterns
+- Copy `makeRequest()` flow from backend
+- Use `fetch` (browser) instead of `axios`
+- Preserve message/reasoning processing
+- Keep error handling patterns
 
 ### 4. Background Integration
 
@@ -235,6 +235,6 @@ describe('AIService', () => {
 
 ---
 
-**Migration Timeline**: Part of M3 - AI Service Layer milestone (7 days)
+Timeline: M3 - AI Service Layer (7 days)
 
 **Last Updated**: 2025-11-08

@@ -2,8 +2,11 @@
 // Ported to TypeScript with minimal logic changes
 
 import { Logger } from '@/utils/logger';
+import { AIService } from '@/background/services/ai/aiService';
+import type { MakeRequestOptions } from '@/background/services/ai/aiService';
 
 const logger = Logger.forScope('Background');
+const aiService = new AIService();
 
 // Open side panel when extension icon is clicked
 chrome.action.onClicked.addListener(tab => {
@@ -38,7 +41,8 @@ type BgMessage =
   | { action: 'refreshOllamaModels' }
   | { action: 'detectForms' }
   | { action: 'extractContentWithIframes' }
-  | { action: 'fillForms'; mappings: unknown };
+  | { action: 'fillForms'; mappings: unknown }
+  | { action: 'AI_REQUEST'; options: MakeRequestOptions };
 
 // Handle messages from side panel and content scripts
 chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse) => {
@@ -69,6 +73,14 @@ chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse)
         sendResponse
       );
       break;
+    case 'AI_REQUEST': {
+      const { options } = message as { options: MakeRequestOptions };
+      aiService
+        .makeRequest(options)
+        .then(data => sendResponse({ success: true, data }))
+        .catch(error => sendResponse({ success: false, error: (error as Error).message }));
+      break;
+    }
     default:
       logger.warn('Unknown message action:', (message as { action: string })?.action);
   }

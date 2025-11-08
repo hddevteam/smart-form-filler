@@ -28,16 +28,6 @@ smart-form-filler/
 - Node.js (v18 or higher)
 - pnpm
 
-### Backend Setup
-
-```bash
-# Install dependencies
-npm run install:all
-
-# Start development server
-npm run dev
-```
-
 ### Extension Setup (Edge Load-Unpacked)
 
 1. Build MV3 bundle
@@ -59,17 +49,10 @@ pnpm dev         # Start development build with watch mode
 pnpm test:watch  # TDD mode - run tests continuously
 ```
 
-### Backend Reference (For Migration Only)
+### Migration Reference (Frontend Only)
 
-The `backend/` directory contains the **reference implementation** for AI services that should be migrated to frontend TypeScript:
-
-- `backend/services/gptService/apiService.js` → Migrate to `src/background/services/ai/aiService.ts`
-- `backend/services/gptService/config.js` → Migrate to `src/background/services/ai/modelConfig.ts`
-- `backend/services/gptService/modelAdapters/` → Migrate to `src/background/services/ai/adapters/`
-
-**See `.github/AI_SERVICE_MIGRATION.md` for detailed migration guide.**
-
-**⚠️ Important**: The backend is NOT used at runtime - it's kept as a reference for migrating functionality to the frontend.
+This extension is pure frontend (MV3). The `backend/` folder is kept only as migration reference and is NOT used at runtime.
+See `.github/AI_SERVICE_MIGRATION.md` for details.
 
 ## ⚙️ Configuration
 
@@ -84,7 +67,7 @@ Configuration is done through the extension popup UI:
    - **API Key**: Your API key (for Azure OpenAI; not needed for Ollama)
    - **Model**: Model name
 
-API keys are encrypted and stored securely in `chrome.storage.local`.
+API keys are encrypted and stored securely in `chrome.storage.local`. No server required.
 
 ## 🧪 Testing
 
@@ -115,5 +98,3 @@ This project is licensed under the ISC License.
 ## 🔗 Related Links
 
 - [Chrome Extension Developer Guide](https://developer.chrome.com/docs/extensions/)
-- [Node.js Documentation](https://nodejs.org/docs/)
-- [Express.js Documentation](https://expressjs.com/)
