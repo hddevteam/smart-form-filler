@@ -4,6 +4,7 @@ import PopupDataSourceManagerRefactored from '@/modules/popup/popupDataSourceMan
 import DataSourceUIController from '@/modules/popup/dataSourceUIController';
 import ConfigurationUI from '@/popup/components/ConfigurationUI';
 import ModelSelector from '@/popup/components/ModelSelector';
+import AITestButton from '@/popup/components/AITestButton';
 import { ApiConfigManager } from '@/config/apiConfigManager';
 import type { PopupElements, PopupManagerLike, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
@@ -37,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh UI now that controller is ready
     mgr.updateAvailableDataSources();
     mgr.updateAllUI();
+    // Keep a reference to model selector for refreshes
+    let selectorRef: ModelSelector | null = null;
 
     // Render configuration UI if container exists
     const configContainer = document.getElementById('config-container');
@@ -53,6 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
           return list[0];
         },
         listConfigs: async () => cfgMgr.listConfigs(),
+        onProviderChange: async provider => {
+          if (provider === 'ollama') {
+            // Trigger background auto-discovery via model selector refresh flow
+            await moduleManager.apiClient?.refreshOllamaModels?.();
+            // Re-render selector to update UI with discovered models
+            setTimeout(() => {
+              void selectorRef?.render();
+            }, 300);
+          }
+        },
       });
       void configUI.render();
     }
@@ -67,6 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
         },
       });
       void selector.render();
+      selectorRef = selector;
+    }
+
+    // Render AI test button below configuration or in dedicated container
+    const aiTestContainer = document.getElementById('ai-test');
+    if (aiTestContainer) {
+      const testBtn = new AITestButton(aiTestContainer, {
+        client: new ExtensionClient(),
+        getOptions: () => {
+          const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+          const apiUrl = env?.VITE_GPT_4_1_NANO_API_URL ?? 'http://localhost:11434/api/generate';
+          return {
+            apiUrl,
+            model: 'gpt-4.1-nano',
+            messages: [{ role: 'user', content: 'Hello from popup!' }],
+          } as const;
+        },
+      });
+      testBtn.render();
     }
 
     // ConnectionTest removed for pure frontend; no backend URL required

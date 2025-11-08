@@ -568,28 +568,16 @@
             </div>
             <div class="modal__body">
                 <div class="settings-section">
-                    <h4 class="settings-section__title">Backend Configuration</h4>
+                    <h4 class="settings-section__title">AI Configuration</h4>
                     <div class="form-group">
-                        <label for="backendUrlInput" class="label">Backend URL:</label>
+                        <label for="backendUrlInput" class="label">AI Endpoint:</label>
                         <div class="input-group">
                             <input 
                                 type="text" 
                                 id="backendUrlInput" 
                                 class="input input--full" 
-                                placeholder="http://localhost:3001"
-                                value="http://localhost:3001"
+                                placeholder="https://your-endpoint"
                             >
-                            <button id="testConnectionBtn" class="btn btn--secondary" title="Test Connection">
-                                <span class="btn__icon">🔗</span>
-                                <span class="btn__text">Test</span>
-                            </button>
-                        </div>
-                        <div id="connectionStatus" class="connection-status hidden">
-                            <span class="connection-status__icon"></span>
-                            <span class="connection-status__text"></span>
-                        </div>
-                        <div class="help-text">
-                            Enter the URL of your Smart Form Filler backend server.
                         </div>
                     </div>
                 </div>

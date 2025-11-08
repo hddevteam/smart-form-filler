@@ -5,6 +5,7 @@ export interface ConfigurationUIDeps<Config = unknown> {
   loadConfig?: () => Promise<Config | undefined>;
   validateConfig?: (config: Config) => string[]; // return list of errors
   listConfigs?: () => Promise<Config[]>; // optional: used to prefill
+  onProviderChange?: (provider: ProviderType) => Promise<void> | void; // optional: react to provider changes
 }
 
 export type ProviderType = 'azure' | 'ollama';
@@ -74,6 +75,25 @@ export class ConfigurationUI<TConfig extends BasicApiConfig = BasicApiConfig> {
     form.addEventListener('submit', e => {
       e.preventDefault();
       void this.handleSubmit();
+    });
+
+    // Handle provider change: Ollama requires no save; auto-discover models
+    const providerEl = form.querySelector<HTMLSelectElement>('select[name="provider"]');
+    const saveBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    providerEl?.addEventListener('change', () => {
+      const provider = (providerEl.value as ProviderType) ?? 'azure';
+      if (provider === 'ollama') {
+        if (saveBtn) saveBtn.disabled = true;
+        this.setStatus('Local Ollama models are auto-discovered. No save required.', 'info');
+      } else {
+        if (saveBtn) saveBtn.disabled = false;
+        this.setStatus('Configure your cloud provider and save.', 'info');
+      }
+      try {
+        void this.deps.onProviderChange?.(provider);
+      } catch (err) {
+        this.logger.warn('onProviderChange handler failed', err);
+      }
     });
   }
 

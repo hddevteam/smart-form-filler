@@ -26,12 +26,23 @@ export class ModelSelector {
   }
 
   async render(): Promise<void> {
-    this.container.innerHTML = `<select class="input" aria-label="Model"></select>`;
+    this.container.innerHTML = `<select class="input" aria-label="Model"><option value="">Loading models...</option></select>`;
     const select = this.container.querySelector<HTMLSelectElement>('select');
     if (!select) return;
     try {
+      // eslint-disable-next-line no-console
+      console.debug('[ModelSelector] Loading models...');
       const models = await this.deps.loadModels();
+      // eslint-disable-next-line no-console
+      console.debug('[ModelSelector] Loaded models count:', models.length);
       this.populate(select, models);
+      // If no models discovered, show helpful empty state
+      if (!select.children.length) {
+        // eslint-disable-next-line no-console
+        console.warn('[ModelSelector] No models available');
+        select.innerHTML = '<option value="" disabled>No models available</option>';
+        select.disabled = true;
+      }
     } catch (error) {
       this.logger.error('Failed to load models', error);
       select.innerHTML = '<option value="">Service unavailable</option>';
@@ -49,6 +60,8 @@ export class ModelSelector {
     const localGroup = document.createElement('optgroup');
     localGroup.label = 'Local Models (Ollama)';
     for (const m of models) {
+      // eslint-disable-next-line no-console
+      console.debug('[ModelSelector] Adding model option:', m.id, m.source);
       const option = document.createElement('option');
       option.value = m.id;
       option.textContent = m.name ?? m.id;
@@ -65,7 +78,9 @@ export class ModelSelector {
       empty.disabled = true;
       selectElement.appendChild(empty);
     }
-    selectElement.disabled = !selectElement.children.length;
+    // Enable if we have at least one OPTION under any group
+    const optionCount = selectElement.querySelectorAll('option').length;
+    selectElement.disabled = optionCount === 0;
   }
 }
 

@@ -22,7 +22,7 @@ M0→M1→M2→M3→M4→M5→M6→M7→M8→M9 (43d total)
 - M4 Data Processing: 🔲
 - M5 UI Layer: 🟡 In Progress
 - M6 Content Scripts: 🟡 In Progress
-- M7 Background Script: 🔲
+- M7 Background Script: 🟡 In Progress
 - M8 Integration Testing: 🔲
 - M9 Optimization & Release: 🔲
 
@@ -32,10 +32,10 @@ Details removed (completed work summarized in commit history and PRs).
 
 ## Next Focus
 
-- M7: Message router abstraction + handlers + tests (≥80%).
-- M3: Extend adapters (DeepSeek) + reasoning/tool params; tests (≥85%).
-- M5: Connection Test refinement vs background proxy; UI tests ≥70%.
-- M8: Playwright setup for config/form flows.
+- M7: Wire popup/content to send AI_REQUEST; add integration tests.
+- M3: Implement AIServiceFactory; add DeepSeek adapter; reasoning/tool params; tests (≥85%).
+- M5: Connection Test refinement vs background routing; UI tests ≥70%.
+- M8: Playwright setup for configuration and form flows.
 
 ## Acceptance Targets
 
@@ -49,7 +49,7 @@ Details removed (completed work summarized in commit history and PRs).
 - M3 AI: CP-M3-1 BaseAdapter — ✅; CP-M3-2 Adapters/Factory — ✅ baseline; CP-M3-3 AIService + retries + background — ✅; CP-M3-4 AIServiceFactory — 🔲; CP-M3-5 API proxy util — 🟡; CP-M3-6 Adapter integration tests — 🔲
 - M5 UI: CP-M5-2 ConfigurationUI — ✅; CP-M5-3 ModelSelector — ✅; CP-M5-4 ConnectionTest — ✅ initial; CP-M5-5 Popup init — ✅; CP-M5-6 UI integration tests — 🟡; CP-M5-7 Data source sub-layer — ✅
 - M6 Content: CP-M6-1 Detector — ✅; CP-M6-2 Filler — ✅; CP-M6-3 Extractor — ✅; CP-M6-4 Content main — ✅; CP-M6-5 Playwright — 🔲
-- M7 Background: CP-M7-1 Proxy queue/limit/cache — 🔲; CP-M7-2 MessageRouter — 🔲; CP-M7-3 Background main — 🔲; CP-M7-4 Integration — 🔲
+- M7 Background: CP-M7-1 Proxy queue/limit/cache — Skipped; CP-M7-2 MessageRouter — 🟢 (created, wired, unit tests added); CP-M7-3 Background main — 🟡 (listener wired); CP-M7-4 Integration — 🔲
 - M8 Integration: Playwright setup + flows + perf + cross-browser — 🔲
 - M9 Release: Perf, docs, security, packaging — 🔲
 

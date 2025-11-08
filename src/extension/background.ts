@@ -3,6 +3,7 @@
 
 import { Logger } from '@/utils/logger';
 import { AIService } from '@/background/services/ai/aiService';
+import { getAvailableModelsAuto } from '@/extension/modelDiscovery';
 import type { MakeRequestOptions } from '@/background/services/ai/aiService';
 
 const logger = Logger.forScope('Background');
@@ -26,11 +27,14 @@ chrome.runtime.onInstalled.addListener(() => {
     autoSummaryEnabled: false,
     summaryLength: 'medium',
   });
+  // Warm up: ensure SW logs show activation
+  logger.debug('[Background] onInstalled: warming up');
 });
 
 // Handle extension startup
 chrome.runtime.onStartup.addListener(() => {
   logger.info('Extension started - side panel ready');
+  logger.debug('[Background] onStartup: ready');
 });
 
 // Message types
@@ -47,6 +51,8 @@ type BgMessage =
 // Handle messages from side panel and content scripts
 chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse) => {
   logger.debug('Background received message:', message);
+  // Ensure asynchronous response is allowed
+  let responded = false;
 
   switch (message.action) {
     case 'extractPageContent':
@@ -56,10 +62,22 @@ chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse)
       void handleAuthCheck(sendResponse);
       break;
     case 'getAvailableModels':
-      void handleGetAvailableModels(sendResponse);
+      logger.debug('[Background] getAvailableModels message received');
+      void handleGetAvailableModels(resp => {
+        if (!responded) {
+          responded = true;
+          sendResponse(resp);
+        }
+      });
       break;
     case 'refreshOllamaModels':
-      void handleRefreshOllamaModels(sendResponse);
+      logger.debug('[Background] refreshOllamaModels message received');
+      void handleRefreshOllamaModels(resp => {
+        if (!responded) {
+          responded = true;
+          sendResponse(resp);
+        }
+      });
       break;
     case 'detectForms':
       void forwardToActiveTab({ action: 'detectForms' }, sendResponse);
@@ -134,8 +152,13 @@ function handleGetAvailableModels(
   }) => void
 ): void {
   try {
-    // Pure frontend: return empty list here or read from storage/model registry later
-    sendResponse({ success: true, models: [] });
+    // Auto-discover local Ollama models (no need to save)
+    void getAvailableModelsAuto()
+      .then(models => sendResponse({ success: true, models }))
+      .catch(error => {
+        logger.warn('Auto model discovery failed:', (error as Error).message);
+        sendResponse({ success: true, models: [] });
+      });
   } catch (error) {
     logger.error('Get available models error:', error);
     sendResponse({
@@ -149,7 +172,7 @@ function handleRefreshOllamaModels(
   sendResponse: (response: { success: boolean; error?: string }) => void
 ): void {
   try {
-    // Pure frontend: nothing to refresh, return success
+    // No persistent cache; refresh = re-discover is handled by getAvailableModels call chain on UI.
     sendResponse({ success: true });
   } catch (error) {
     logger.error('Refresh Ollama models error:', error);
