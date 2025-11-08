@@ -38,31 +38,31 @@
 
 ### Core Technologies
 
-| Domain | Choice | Version | Rationale |
-|---------|------|------|------|
-| **Language** | TypeScript | 5.3+ | Strong type system, excellent tooling |
-| **Runtime** | Browser Extension | Manifest V3 | Chrome/Edge extension standard |
-| **Build Tool** | Vite | 5.x | Fast builds, native TS support |
-| **Package Manager** | pnpm | 8.x | Fast, space-efficient, monorepo-friendly |
+| Domain              | Choice            | Version     | Rationale                                |
+| ------------------- | ----------------- | ----------- | ---------------------------------------- |
+| **Language**        | TypeScript        | 5.3+        | Strong type system, excellent tooling    |
+| **Runtime**         | Browser Extension | Manifest V3 | Chrome/Edge extension standard           |
+| **Build Tool**      | Vite              | 5.x         | Fast builds, native TS support           |
+| **Package Manager** | pnpm              | 8.x         | Fast, space-efficient, monorepo-friendly |
 
 ### Testing Framework
 
-| Test Type | Framework | Version | Purpose |
-|---------|------|------|------|
-| **Unit Tests** | Vitest | 1.x | Fast, Vite native integration |
-| **E2E Tests** | Playwright | 1.40+ | Browser extension testing |
-| **Coverage** | c8/Istanbul | - | Code coverage statistics |
-| **Mock** | vitest/mock | - | Dependency mocking |
+| Test Type      | Framework   | Version | Purpose                       |
+| -------------- | ----------- | ------- | ----------------------------- |
+| **Unit Tests** | Vitest      | 1.x     | Fast, Vite native integration |
+| **E2E Tests**  | Playwright  | 1.40+   | Browser extension testing     |
+| **Coverage**   | c8/Istanbul | -       | Code coverage statistics      |
+| **Mock**       | vitest/mock | -       | Dependency mocking            |
 
 ### Code Quality Tools
 
-| Tool | Purpose | Config File |
-|------|------|---------|
-| **ESLint** | TypeScript code linting | `.eslintrc.cjs` |
-| **Prettier** | Code formatting | `.prettierrc` |
-| **Husky** | Git Hooks | `.husky/` |
-| **lint-staged** | Pre-commit checks | `package.json` |
-| **commitlint** | Commit message standards | `.commitlintrc.cjs` |
+| Tool            | Purpose                  | Config File         |
+| --------------- | ------------------------ | ------------------- |
+| **ESLint**      | TypeScript code linting  | `.eslintrc.cjs`     |
+| **Prettier**    | Code formatting          | `.prettierrc`       |
+| **Husky**       | Git Hooks                | `.husky/`           |
+| **lint-staged** | Pre-commit checks        | `package.json`      |
+| **commitlint**  | Commit message standards | `.commitlintrc.cjs` |
 
 ### Development Tools
 
@@ -107,47 +107,50 @@ smart-form-filler/
 │   └── TDD_GUIDE.md                 # TDD guide
 ├── src/                              # TypeScript source code
 │   ├── background/                   # Background Script
-│   │   ├── index.ts
-│   │   ├── apiProxy.ts              # API proxy (CORS handling)
+│   │   ├── index.ts                 # Message router
+│   │   ├── services/
+│   │   │   └── ai/                  # AI services (migrated from backend/services/gptService)
+│   │   │       ├── aiService.ts     # From backend apiService.js
+│   │   │       ├── modelConfig.ts   # From backend config.js
+│   │   │       └── adapters/        # From backend modelAdapters/
+│   │   │           ├── AdapterFactory.ts
+│   │   │           ├── BaseAdapter.ts
+│   │   │           ├── OllamaAdapter.ts
+│   │   │           ├── OSeriesAdapter.ts
+│   │   │           └── DeepSeekAdapter.ts
 │   │   └── __tests__/
 │   ├── content/                      # Content Scripts
 │   │   ├── index.ts
 │   │   ├── formDetector.ts
 │   │   ├── formFiller.ts
+│   │   ├── dataExtractor.ts
 │   │   └── __tests__/
 │   ├── popup/                        # Popup UI
 │   │   ├── index.ts
 │   │   ├── components/              # UI components
 │   │   └── __tests__/
 │   ├── config/                       # Configuration management
-│   │   ├── apiConfigManager.ts
-│   │   ├── modelRegistry.ts
-│   │   ├── storageManager.ts
-│   │   └── __tests__/
+│   │   ├── storageManager.ts        # chrome.storage.local wrapper
+│   │   └── modelRegistry.ts
 │   ├── services/                     # Core services
-│   │   ├── ai/                      # AI services
-│   │   │   ├── aiServiceFactory.ts
-│   │   │   ├── azureOpenAIService.ts
-│   │   │   ├── ollamaService.ts
-│   │   │   ├── adapters/
-│   │   │   │   ├── baseAdapter.ts
-│   │   │   │   ├── azureAdapter.ts
-│   │   │   │   └── ollamaAdapter.ts
-│   │   │   └── __tests__/
-│   │   └── processing/              # Data processing
-│   │       ├── htmlProcessor.ts
-│   │       ├── markdownConverter.ts
+│   │   └── processing/              # Data processing (migrated from backend controllers)
+│   │       ├── htmlProcessor.ts     # From backend dataExtractionController.js
+│   │       ├── markdownConverter.ts # From backend dataExtractionController.js
 │   │       └── __tests__/
 │   ├── types/                        # TypeScript type definitions
-│   │   ├── api.ts                   # API types
+│   │   ├── ai.ts                    # AI service types
 │   │   ├── config.ts                # Configuration types
 │   │   ├── models.ts                # Model types
 │   │   ├── chrome.d.ts              # Chrome extension type extensions
 │   │   └── global.d.ts              # Global types
 │   └── utils/                        # Utility functions
-│       ├── httpClient.ts
 │       ├── logger.ts
 │       └── __tests__/
+├── backend/                          # Reference implementation (DO NOT USE IN RUNTIME)
+│   └── services/gptService/         # Reference for migration to src/background/services/ai/
+│       ├── apiService.js            # Reference for aiService.ts
+│       ├── config.js                # Reference for modelConfig.ts
+│       └── modelAdapters/           # Reference for adapters/
 ├── tests/                            # Test files
 │   ├── unit/                        # Unit tests
 │   ├── integration/                 # Integration tests
@@ -218,10 +221,10 @@ Adopt **New TypeScript Project + TDD** method instead of directly converting exi
 
 #### Why Not Direct Conversion?
 
-| Method | Pros | Cons | Decision |
-|------|------|------|------|
-| File-by-file conversion | Gradual, low risk | Incomplete types, time-consuming | ❌ Not adopted |
-| Greenfield rewrite | Clean architecture, complete types | More work, possible feature gaps | ✅ **Adopted** |
+| Method                  | Pros                               | Cons                             | Decision       |
+| ----------------------- | ---------------------------------- | -------------------------------- | -------------- |
+| File-by-file conversion | Gradual, low risk                  | Incomplete types, time-consuming | ❌ Not adopted |
+| Greenfield rewrite      | Clean architecture, complete types | More work, possible feature gaps | ✅ **Adopted** |
 
 #### Migration Principles
 
@@ -251,18 +254,18 @@ Detailed planning in [MILESTONES.md](./MILESTONES.md)
 
 ### Overview
 
-| Milestone | Goal | Duration | Deliverables |
-|--------|------|------|--------|
-| **M0** | Project initialization | 2 days | Project scaffolding, config files |
-| **M1** | Core type system | 3 days | Complete type definitions, utilities |
-| **M2** | Configuration management | 5 days | API config, storage management |
-| **M3** | AI service layer | 7 days | Azure OpenAI, Ollama integration |
-| **M4** | Data processing layer | 4 days | HTML/Markdown processing |
-| **M5** | UI layer | 6 days | Popup, configuration interface |
-| **M6** | Content Scripts | 5 days | Form detection, filling |
-| **M7** | Background Script | 3 days | API proxy, message handling |
-| **M8** | Integration testing | 4 days | E2E tests, performance testing |
-| **M9** | Optimization & release | 4 days | Optimization, docs, packaging |
+| Milestone | Goal                     | Duration | Deliverables                                        |
+| --------- | ------------------------ | -------- | --------------------------------------------------- |
+| **M0**    | Project initialization   | 2 days   | Project scaffolding, config files                   |
+| **M1**    | Core type system         | 3 days   | Complete type definitions, utilities                |
+| **M2**    | Configuration management | 5 days   | API config, storage management                      |
+| **M3**    | AI service layer         | 7 days   | Migrate backend/services/gptService to frontend TS  |
+| **M4**    | Data processing layer    | 4 days   | HTML/Markdown processing (from backend controllers) |
+| **M5**    | UI layer                 | 6 days   | Popup, configuration interface                      |
+| **M6**    | Content Scripts          | 5 days   | Form detection, filling, data extraction            |
+| **M7**    | Background Script        | 3 days   | Message routing (no API proxy - direct calls in M3) |
+| **M8**    | Integration testing      | 4 days   | E2E tests, performance testing                      |
+| **M9**    | Optimization & release   | 4 days   | Optimization, docs, packaging                       |
 
 **Total Duration:** Approximately 43 days (6-7 weeks)
 
@@ -293,6 +296,7 @@ pnpm test:coverage
 #### M0: Project Initialization
 
 **Acceptance Criteria:**
+
 - [ ] TypeScript compiles without errors
 - [ ] Vite build successful
 - [ ] Vitest runs properly
@@ -300,6 +304,7 @@ pnpm test:coverage
 - [ ] Git Hooks working
 
 **Verification Commands:**
+
 ```bash
 pnpm build
 pnpm test
@@ -310,12 +315,14 @@ git commit -m "test: verify hooks"
 #### M1: Core Type System
 
 **Acceptance Criteria:**
+
 - [ ] All core types defined (`types/*.ts`)
 - [ ] Types exported correctly, no circular dependencies
 - [ ] Utility functions 100% test coverage
 - [ ] Complete JSDoc documentation
 
 **Test Points:**
+
 ```typescript
 // types/api.ts should include
 export interface AzureOpenAIConfig { ... }
@@ -355,33 +362,33 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Type check
         run: pnpm type-check
-      
+
       - name: Lint
         run: pnpm lint
-      
+
       - name: Unit tests
         run: pnpm test:coverage
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -400,27 +407,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-      
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build extension
         run: pnpm build
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -446,18 +453,18 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-| Type | Description | Example |
-|------|------|------|
-| `feat` | New feature | `feat(config): add Azure OpenAI config manager` |
-| `fix` | Bug fix | `fix(ai): handle timeout error properly` |
-| `test` | Add tests | `test(storage): add encryption tests` |
-| `refactor` | Refactoring | `refactor(adapter): simplify error handling` |
-| `docs` | Documentation | `docs(readme): update installation guide` |
-| `style` | Code formatting | `style: format with prettier` |
-| `perf` | Performance | `perf(html): optimize large document parsing` |
-| `build` | Build system | `build: update vite config` |
-| `ci` | CI config | `ci: add test workflow` |
-| `chore` | Other | `chore: update dependencies` |
+| Type       | Description     | Example                                         |
+| ---------- | --------------- | ----------------------------------------------- |
+| `feat`     | New feature     | `feat(config): add Azure OpenAI config manager` |
+| `fix`      | Bug fix         | `fix(ai): handle timeout error properly`        |
+| `test`     | Add tests       | `test(storage): add encryption tests`           |
+| `refactor` | Refactoring     | `refactor(adapter): simplify error handling`    |
+| `docs`     | Documentation   | `docs(readme): update installation guide`       |
+| `style`    | Code formatting | `style: format with prettier`                   |
+| `perf`     | Performance     | `perf(html): optimize large document parsing`   |
+| `build`    | Build system    | `build: update vite config`                     |
+| `ci`       | CI config       | `ci: add test workflow`                         |
+| `chore`    | Other           | `chore: update dependencies`                    |
 
 ### Commit Examples
 
@@ -487,36 +494,40 @@ Coverage: 95%"
 
 ## 📊 Test Coverage Targets
 
-| Module | Target Coverage | Priority |
-|------|-----------|--------|
-| **Type Definitions** | N/A | - |
-| **Utility Functions** | 100% | High |
-| **Configuration Management** | ≥ 90% | High |
-| **AI Services** | ≥ 85% | High |
-| **Data Processing** | ≥ 85% | Medium |
-| **UI Components** | ≥ 70% | Medium |
-| **Content Scripts** | ≥ 75% | Medium |
-| **Background Script** | ≥ 80% | High |
-| **Overall** | ≥ 80% | - |
+| Module                       | Target Coverage | Priority |
+| ---------------------------- | --------------- | -------- |
+| **Type Definitions**         | N/A             | -        |
+| **Utility Functions**        | 100%            | High     |
+| **Configuration Management** | ≥ 90%           | High     |
+| **AI Services**              | ≥ 85%           | High     |
+| **Data Processing**          | ≥ 85%           | Medium   |
+| **UI Components**            | ≥ 70%           | Medium   |
+| **Content Scripts**          | ≥ 75%           | Medium   |
+| **Background Script**        | ≥ 80%           | High     |
+| **Overall**                  | ≥ 80%           | -        |
 
 ---
 
 ## 📚 Reference Resources
 
 ### TypeScript
+
 - [TypeScript Official Docs](https://www.typescriptlang.org/docs/)
 - [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/)
 
 ### Testing
+
 - [Vitest Documentation](https://vitest.dev/)
 - [Playwright Documentation](https://playwright.dev/)
 - [TDD Guide](https://testdriven.io/)
 
 ### Chrome Extensions
+
 - [Chrome Extension Official Docs](https://developer.chrome.com/docs/extensions/)
 - [@types/chrome](https://www.npmjs.com/package/@types/chrome)
 
 ### Code Quality
+
 - [ESLint TypeScript](https://typescript-eslint.io/)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 

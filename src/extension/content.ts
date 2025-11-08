@@ -2,6 +2,8 @@
 // Ported to TypeScript with minimal logic changes
 
 import { Logger } from '@/utils/logger';
+import FormDetector from '@/content/formDetector';
+import FormFiller from '@/content/formFiller';
 
 const logger = Logger.forScope('ContentScript');
 
@@ -15,6 +17,9 @@ declare global {
 
 class BasicContentExtractor {
   constructor() {
+    // Expose TS implementations to window for action handlers
+    window.FormDetector = FormDetector as unknown as NonNullable<typeof window.FormDetector>;
+    window.FormFiller = FormFiller as unknown as NonNullable<typeof window.FormFiller>;
     this.setupMessageListener();
   }
 
@@ -35,6 +40,22 @@ class BasicContentExtractor {
         try {
           const content = this.extractPageContent();
           sendResponse({ success: true, content });
+        } catch (error) {
+          sendResponse({ success: false, error: (error as Error).message });
+        }
+      } else if (req.action === 'extractContentWithIframes') {
+        try {
+          // Return ONLY the main page content. Iframes will be processed elsewhere.
+          const mainPage = {
+            html: document.documentElement.outerHTML,
+            title: document.title,
+            url: window.location.href,
+          };
+          const data = {
+            mainPage,
+            iframes: [] as unknown[],
+          };
+          sendResponse({ success: true, data });
         } catch (error) {
           sendResponse({ success: false, error: (error as Error).message });
         }

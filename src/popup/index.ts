@@ -4,9 +4,7 @@ import PopupDataSourceManagerRefactored from '@/modules/popup/popupDataSourceMan
 import DataSourceUIController from '@/modules/popup/dataSourceUIController';
 import ConfigurationUI from '@/popup/components/ConfigurationUI';
 import ModelSelector from '@/popup/components/ModelSelector';
-import ConnectionTest from '@/popup/components/ConnectionTest';
 import { ApiConfigManager } from '@/config/apiConfigManager';
-import { fetchModels, healthCheck } from '@/popup/apis/backend';
 import type { PopupElements, PopupManagerLike, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
 
@@ -59,15 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
       void configUI.render();
     }
 
-    // Render model selector if container exists
+    // Render model selector if container exists (pure frontend; no backend fetch)
     const modelContainer = document.getElementById('model-selector');
     if (modelContainer) {
       const selector = new ModelSelector(modelContainer, {
         loadModels: async () => {
-          const backendUrlInput = document.querySelector<HTMLInputElement>('#backend-url');
-          const base = backendUrlInput?.value?.trim();
-          const data = await fetchModels(base);
-          if (data.length > 0) return data;
           const models = await moduleManager.apiClient?.getAvailableModels?.();
           return models ?? [];
         },
@@ -75,14 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       void selector.render();
     }
 
-    // Render connection test if container exists
-    const connTestContainer = document.getElementById('connection-test');
-    if (connTestContainer) {
-      const test = new ConnectionTest(connTestContainer, {
-        validate: async endpoint => healthCheck(endpoint),
-      });
-      test.render();
-    }
+    // ConnectionTest removed for pure frontend; no backend URL required
     // Bind content actions via ExtensionClient if buttons exist
     const handlers: UIEventHandlers = {
       detectForms: () => {

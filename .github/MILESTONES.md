@@ -387,112 +387,171 @@ CHECKPOINT: CP-M2-5"
 
 **Duration:** 7 days  
 **Dependencies:** M1, M2  
-**Goal:** Implement AI provider adapters and service layer
+**Goal:** Migrate backend/services/gptService to frontend TypeScript in background script
+
+**Migration Reference**: See `.github/AI_SERVICE_MIGRATION.md` for detailed migration guide
+
+**Key Backend Files to Migrate**:
+
+- `backend/services/gptService/apiService.js` → `src/background/services/ai/aiService.ts`
+- `backend/services/gptService/config.js` → `src/background/services/ai/modelConfig.ts`
+- `backend/services/gptService/modelAdapters/` → `src/background/services/ai/adapters/`
 
 ### Checkpoints
 
-#### CP-M3-1: Base Adapter Interface
+#### CP-M3-1: Base Adapter Migration
 
-**Type Definition:**
+**Reference**: Migrate from `backend/services/gptService/modelAdapters/BaseAdapter.js`
+
+**TypeScript Definition:**
 
 ```typescript
-export interface IAIService {
-  chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResponse>;
-  validateConnection(): Promise<boolean>;
-}
+// src/background/services/ai/adapters/BaseAdapter.ts
+// Migrated from backend/services/gptService/modelAdapters/BaseAdapter.js
+export abstract class BaseAdapter {
+  protected config: ModelConfig;
 
-export abstract class BaseAdapter implements IAIService {
-  constructor(protected config: ApiConfig) {}
-  abstract chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResponse>;
-  abstract validateConnection(): Promise<boolean>;
+  constructor(config: ModelConfig) {
+    this.config = config;
+  }
+
+  // From backend: getHeaders(apiKey)
+  getHeaders(apiKey: string | null): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey) {
+      headers['api-key'] = apiKey;
+    }
+    return headers;
+  }
+
+  // From backend: processRequestBody(prompt, params)
+  processRequestBody(
+    messages: ChatMessage[],
+    params: Record<string, unknown>
+  ): Record<string, unknown> {
+    return {
+      messages,
+      ...params,
+    };
+  }
+
+  // Optional: processResponse for provider-specific formats
+  processResponse?(data: unknown): ChatResponse;
 }
 ```
 
 **Tasks:**
 
-- [ ] Define `IAIService` interface
-- [ ] Implement `BaseAdapter` abstract class
-- [ ] Add common error handling
-- [ ] Add retry logic with exponential backoff
-- [ ] Write tests for base adapter
+- [ ] Migrate BaseAdapter from backend
+- [ ] Convert to TypeScript with proper types
+- [ ] Add retry logic with exponential backoff (if not in backend)
+- [ ] Write tests matching backend behavior
 
-**Deliverable:** `src/services/ai/adapters/baseAdapter.ts`, tests
+**Deliverable:** `src/background/services/ai/adapters/BaseAdapter.ts`, tests
 
-#### CP-M3-2: Azure OpenAI Adapter (TDD)
+#### CP-M3-2: Adapter Factory & Provider Adapters
 
-**Test First:**
+**Reference**: Migrate from `backend/services/gptService/modelAdapters/`
 
-```typescript
-describe('AzureOpenAIAdapter', () => {
-  it('should send chat request successfully', async () => {
-    const adapter = new AzureOpenAIAdapter(azureConfig);
-    const response = await adapter.chat([{ role: 'user', content: 'Hello' }]);
-    expect(response.content).toBeDefined();
-  });
-
-  it('should handle API errors gracefully', async () => {
-    mockFetch.mockRejectedValue(new Error('Network error'));
-    await expect(adapter.chat(messages)).rejects.toThrow();
-  });
-
-  it('should retry on 429 status', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ status: 429 })
-      .mockResolvedValueOnce({ status: 200, json: async () => mockResponse });
-
-    const response = await adapter.chat(messages);
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-  });
-});
-```
-
-**Implementation:**
-
-- [ ] Write test cases
-- [ ] Implement Azure OpenAI adapter
-- [ ] Add authentication header handling
-- [ ] Add response parsing
-- [ ] Handle streaming (if needed)
-- [ ] Add error handling
-
-**Deliverable:** `src/services/ai/adapters/azureAdapter.ts`, tests (≥85% coverage)
-
-#### CP-M3-3: Ollama Adapter (TDD)
-
-**Test First:**
+**AdapterFactory Migration:**
 
 ```typescript
-describe('OllamaAdapter', () => {
-  it('should send chat request to Ollama', async () => {
-    const adapter = new OllamaAdapter(ollamaConfig);
-    const response = await adapter.chat([{ role: 'user', content: 'Hello' }]);
-    expect(response.content).toBeDefined();
-  });
+// src/background/services/ai/adapters/AdapterFactory.ts
+// From backend/services/gptService/modelAdapters/AdapterFactory.js
+export class AdapterFactory {
+  static getAdapter(model: string, config: ModelConfig): BaseAdapter {
+    // Ollama models
+    if (model.startsWith('ollama:')) {
+      return new OllamaAdapter(config);
+    }
 
-  it('should handle Ollama-specific errors', async () => {
-    mockFetch.mockResolvedValue({
-      status: 404,
-      json: async () => ({ error: 'Model not found' }),
-    });
-    await expect(adapter.chat(messages)).rejects.toThrow('Model not found');
-  });
+    // O-series models
+    if (['o1', 'o1-mini', 'o3', 'o3-mini', 'o4-mini'].includes(model)) {
+      return new OSeriesAdapter(config);
+    }
 
-  it('should validate Ollama connection', async () => {
-    const isValid = await adapter.validateConnection();
-    expect(isValid).toBe(true);
-  });
-});
+    // DeepSeek R1
+    if (model === 'deepseek-r1') {
+      return new DeepSeekAdapter(config);
+    }
+
+    // Default: Azure OpenAI / standard OpenAI compatible
+    return new BaseAdapter(config);
+  }
+}
 ```
 
-**Implementation:**
+**Tasks:**
 
-- [ ] Write test cases
-- [ ] Implement Ollama adapter
-- [ ] Add Ollama API format handling
-- [ ] Add connection validation
-- [ ] Handle local server errors
+- [ ] Migrate AdapterFactory from backend
+- [ ] Migrate OllamaAdapter (handles Ollama-specific format)
+- [ ] Migrate OSeriesAdapter (handles max_completion_tokens)
+- [ ] Migrate DeepSeekAdapter (handles DeepSeek-specific params)
+- [ ] Write tests for each adapter matching backend behavior
 
-**Deliverable:** `src/services/ai/adapters/ollamaAdapter.ts`, tests (≥85% coverage)
+**Deliverable:** All adapters in `src/background/services/ai/adapters/`, tests (≥90% coverage)
+
+#### CP-M3-3: Core AI Service Migration
+
+**Reference**: Migrate from `backend/services/gptService/apiService.js`
+
+**AIService Implementation:**
+
+```typescript
+// src/background/services/ai/aiService.ts
+// Migrated from backend/services/gptService/apiService.js
+export class AIService {
+  private config: ModelConfig;
+
+  constructor(config: ModelConfig) {
+    this.config = config;
+  }
+
+  // From backend: makeRequest()
+  async makeRequest(options: {
+    apiKey: string;
+    apiUrl: string;
+    model: string;
+    messages: ChatMessage[];
+    params: Record<string, unknown>;
+    includeFunctionCalls?: boolean;
+    customTools?: unknown[];
+    reasoningEffort?: 'low' | 'medium' | 'high';
+    reasoningSummary?: 'auto' | 'concise' | 'detailed';
+    isOllama?: boolean;
+  }): Promise<ChatResponse> {
+    // 1. Get adapter from factory
+    // 2. Process messages for model compatibility (system → developer for o-series)
+    // 3. Add reasoning parameters if supported
+    // 4. Build request body with adapter
+    // 5. Add tools if function calling enabled
+    // 6. Make fetch() request (replaces axios from backend)
+    // 7. Process response with adapter
+    // 8. Process reasoning summary (<think> blocks)
+  }
+
+  // From backend: processMessagesForModel()
+  private processMessagesForModel(messages: ChatMessage[], model: string): ChatMessage[];
+
+  // From backend: filterMessagesByModel()
+  private filterMessagesByModel(messages: ChatMessage[], model: string): ChatMessage[];
+
+  // From backend: processReasoningSummary()
+  private processReasoningSummary(response: ChatResponse): ChatResponse;
+}
+```
+
+**Tasks:**
+
+- [ ] Migrate makeRequest() core logic
+- [ ] Migrate message processing (system → developer for o-series)
+- [ ] Migrate reasoning summary processing
+- [ ] Replace axios with fetch
+- [ ] Write comprehensive tests matching backend behavior
+
+**Deliverable:** `src/background/services/ai/aiService.ts`, tests (≥90% coverage)
 
 #### CP-M3-4: AI Service Factory
 
@@ -1471,60 +1530,109 @@ CHECKPOINT: CP-M9-4"
 
 ### Detailed Checkpoint Progress
 
-| Milestone | Checkpoint | Description                      | Status | Date       | Notes                                                                                                   |
-| --------- | ---------- | -------------------------------- | ------ | ---------- | ------------------------------------------------------------------------------------------------------- |
-| M0        | CP-M0-1    | Project scaffolding              | ✅     | 2025-11-07 | Initialized repo, folders, gitignore                                                                    |
-| M0        | CP-M0-2    | TypeScript config                | ✅     | 2025-11-07 | Strict mode tsconfig + node config                                                                      |
-| M0        | CP-M0-3    | Build tool setup                 | ✅     | 2025-11-07 | Vite build (dev/prod) verified                                                                          |
-| M0        | CP-M0-4    | Testing framework                | ✅     | 2025-11-07 | Vitest + chrome mocks working                                                                           |
-| M0        | CP-M0-5    | Code quality tools               | ✅     | 2025-11-07 | ESLint, Prettier, Husky, commitlint                                                                     |
-| M0        | CP-M0-6    | CI/CD pipeline                   | ✅     | 2025-11-07 | Workflows created & validated                                                                           |
-| M1        | CP-M1-1    | API types                        | 🔲     | -          | -                                                                                                       |
-| M1        | CP-M1-2    | Config types                     | 🔲     | -          | -                                                                                                       |
-| M1        | CP-M1-3    | Model types                      | 🔲     | -          | -                                                                                                       |
-| M1        | CP-M1-4    | Chrome types                     | 🔲     | -          | -                                                                                                       |
-| M1        | CP-M1-5    | Utility functions                | 🔲     | -          | 100% coverage required                                                                                  |
-| M2        | CP-M2-1    | Storage manager                  | 🔲     | -          | TDD approach                                                                                            |
-| M2        | CP-M2-2    | API config manager               | 🔲     | -          | TDD approach                                                                                            |
-| M2        | CP-M2-3    | Model registry                   | 🔲     | -          | -                                                                                                       |
-| M2        | CP-M2-4    | Config validation                | 🔲     | -          | -                                                                                                       |
-| M2        | CP-M2-5    | Integration tests                | 🔲     | -          | ≥90% coverage                                                                                           |
-| M3        | CP-M3-1    | Base adapter                     | 🔲     | -          | Abstract class                                                                                          |
-| M3        | CP-M3-2    | Azure adapter                    | 🔲     | -          | TDD approach                                                                                            |
-| M3        | CP-M3-3    | Ollama adapter                   | 🔲     | -          | TDD approach                                                                                            |
-| M3        | CP-M3-4    | Azure service                    | 🔲     | -          | -                                                                                                       |
-| M3        | CP-M3-5    | Ollama service                   | 🔲     | -          | -                                                                                                       |
-| M3        | CP-M3-6    | Service factory                  | 🔲     | -          | -                                                                                                       |
-| M3        | CP-M3-7    | CORS proxy                       | 🔲     | -          | Background script                                                                                       |
-| M4        | CP-M4-1    | HTML processor                   | 🔲     | -          | TDD approach                                                                                            |
-| M4        | CP-M4-2    | Markdown converter               | 🔲     | -          | TDD approach                                                                                            |
-| M4        | CP-M4-3    | Data sanitization                | 🔲     | -          | Security focus                                                                                          |
-| M4        | CP-M4-4    | Integration tests                | 🔲     | -          | -                                                                                                       |
-| M5        | CP-M5-1    | Popup HTML structure             | 🔲     | -          | -                                                                                                       |
-| M5        | CP-M5-2    | Config UI component              | ✅     | 2025-11-07 | Implemented ConfigurationUI with DI to ApiConfigManager; added "Recent" list; unit tests added          |
-| M5        | CP-M5-3    | Model selector                   | ✅     | 2025-11-07 | Implemented ModelSelector with cloud/local grouping; wired to backend models with fallback; tests added |
-| M5        | CP-M5-4    | Connection test                  | ✅     | 2025-11-07 | Implemented ConnectionTest; wired to /api/extension/health; unit tests added                            |
-| M5        | CP-M5-5    | Popup controller                 | 🔲     | -          | -                                                                                                       |
-| M5        | CP-M5-6    | UI integration tests             | 🔲     | -          | Pending after core components                                                                           |
-| M5        | CP-M5-7    | Data source management migration | ✅     | 2025-11-07 | Manager + UI controller + tests (30/30 pass)                                                            |
-| M6        | CP-M6-1    | Form detector                    | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formDetector.ts`) with unit tests (2 cases)                          |
-| M6        | CP-M6-2    | Form filler                      | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formFiller.ts`) with unit tests (1 case)                             |
-| M6        | CP-M6-3    | Data extraction                  | ✅     | 2025-11-08 | Added `src/modules/dataExtractor.ts` + unit tests (6 cases); content `extractContentWithIframes` wired  |
-| M6        | CP-M6-4    | Content script main              | 🟡     | 2025-11-08 | Integrated TS FormDetector/FormFiller in `src/extension/content.ts`; message handlers updated           |
-| M6        | CP-M6-5    | E2E tests                        | 🔲     | -          | Playwright                                                                                              |
-| M7        | CP-M7-1    | API proxy                        | 🔲     | -          | Enhanced from M3                                                                                        |
-| M7        | CP-M7-2    | Message router                   | 🔲     | -          | -                                                                                                       |
-| M7        | CP-M7-3    | Background main                  | 🔲     | -          | -                                                                                                       |
-| M7        | CP-M7-4    | Integration tests                | 🔲     | -          | -                                                                                                       |
-| M8        | CP-M8-1    | E2E test setup                   | 🔲     | -          | Playwright config                                                                                       |
-| M8        | CP-M8-2    | Config workflow tests            | 🔲     | -          | -                                                                                                       |
-| M8        | CP-M8-3    | Form filling tests               | 🔲     | -          | -                                                                                                       |
-| M8        | CP-M8-4    | Performance tests                | 🔲     | -          | -                                                                                                       |
-| M8        | CP-M8-5    | Cross-browser tests              | 🔲     | -          | Chrome + Edge                                                                                           |
-| M9        | CP-M9-1    | Performance optimization         | 🔲     | -          | -                                                                                                       |
-| M9        | CP-M9-2    | Documentation                    | 🔲     | -          | Complete                                                                                                |
-| M9        | CP-M9-3    | Security audit                   | 🔲     | -          | -                                                                                                       |
-| M9        | CP-M9-4    | Release prep                     | 🔲     | -          | Packaging                                                                                               |
+| Milestone | Checkpoint | Description                      | Status | Date       | Notes                                                                                                       |
+| --------- | ---------- | -------------------------------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| M0        | CP-M0-1    | Project scaffolding              | ✅     | 2025-11-07 | Initialized repo, folders, gitignore                                                                        |
+| M0        | CP-M0-2    | TypeScript config                | ✅     | 2025-11-07 | Strict mode tsconfig + node config                                                                          |
+| M0        | CP-M0-3    | Build tool setup                 | ✅     | 2025-11-07 | Vite build (dev/prod) verified                                                                              |
+| M0        | CP-M0-4    | Testing framework                | ✅     | 2025-11-07 | Vitest + chrome mocks working                                                                               |
+| M0        | CP-M0-5    | Code quality tools               | ✅     | 2025-11-07 | ESLint, Prettier, Husky, commitlint                                                                         |
+| M0        | CP-M0-6    | CI/CD pipeline                   | ✅     | 2025-11-07 | Workflows created & validated                                                                               |
+| M1        | CP-M1-1    | API types                        | 🔲     | -          | -                                                                                                           |
+| M1        | CP-M1-2    | Config types                     | 🔲     | -          | -                                                                                                           |
+| M1        | CP-M1-3    | Model types                      | 🔲     | -          | -                                                                                                           |
+| M1        | CP-M1-4    | Chrome types                     | 🔲     | -          | -                                                                                                           |
+| M1        | CP-M1-5    | Utility functions                | 🔲     | -          | 100% coverage required                                                                                      |
+| M2        | CP-M2-1    | Storage manager                  | 🔲     | -          | TDD approach                                                                                                |
+| M2        | CP-M2-2    | API config manager               | 🔲     | -          | TDD approach                                                                                                |
+| M2        | CP-M2-3    | Model registry                   | 🔲     | -          | -                                                                                                           |
+| M2        | CP-M2-4    | Config validation                | 🔲     | -          | -                                                                                                           |
+| M2        | CP-M2-5    | Integration tests                | 🔲     | -          | ≥90% coverage                                                                                               |
+| M3        | CP-M3-1    | Base adapter                     | 🔲     | -          | Abstract class                                                                                              |
+| M3        | CP-M3-2    | Azure adapter                    | 🔲     | -          | TDD approach                                                                                                |
+| M3        | CP-M3-3    | Ollama adapter                   | 🔲     | -          | TDD approach                                                                                                |
+| M3        | CP-M3-4    | Azure service                    | 🔲     | -          | -                                                                                                           |
+| M3        | CP-M3-5    | Ollama service                   | 🔲     | -          | -                                                                                                           |
+| M3        | CP-M3-6    | Service factory                  | 🔲     | -          | -                                                                                                           |
+| M3        | CP-M3-7    | CORS proxy                       | 🔲     | -          | Background script                                                                                           |
+| M4        | CP-M4-1    | HTML processor                   | 🔲     | -          | TDD approach                                                                                                |
+| M4        | CP-M4-2    | Markdown converter               | 🔲     | -          | TDD approach                                                                                                |
+| M4        | CP-M4-3    | Data sanitization                | 🔲     | -          | Security focus                                                                                              |
+| M4        | CP-M4-4    | Integration tests                | 🔲     | -          | -                                                                                                           |
+| M5        | CP-M5-1    | Popup HTML structure             | 🔲     | -          | -                                                                                                           |
+| M5        | CP-M5-2    | Config UI component              | ✅     | 2025-11-07 | Implemented ConfigurationUI with DI to ApiConfigManager; added "Recent" list; unit tests added              |
+| M5        | CP-M5-3    | Model selector                   | ✅     | 2025-11-07 | Implemented ModelSelector with cloud/local grouping; wired to backend models with fallback; tests added     |
+| M5        | CP-M5-4    | Connection test                  | ✅     | 2025-11-07 | Implemented ConnectionTest; wired to /api/extension/health; unit tests added                                |
+| M5        | CP-M5-5    | Popup controller                 | 🔲     | -          | -                                                                                                           |
+| M5        | CP-M5-6    | UI integration tests             | 🔲     | -          | Pending after core components                                                                               |
+| M5        | CP-M5-7    | Data source management migration | ✅     | 2025-11-07 | Manager + UI controller + tests (30/30 pass)                                                                |
+| M6        | CP-M6-1    | Form detector                    | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formDetector.ts`) with unit tests (2 cases)                              |
+| M6        | CP-M6-2    | Form filler                      | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formFiller.ts`) with unit tests (1 case)                                 |
+| M6        | CP-M6-3    | Data extraction                  | ✅     | 2025-11-08 | Added `src/modules/dataExtractor.ts` + unit tests (6 cases); content `extractContentWithIframes` wired      |
+| M6        | CP-M6-4    | Content script main              | ✅     | 2025-11-08 | Wired popup buttons to content actions; integrated TS FormDetector/FormFiller in `src/extension/content.ts` |
+| M6        | CP-M6-5    | E2E tests                        | 🔲     | -          | Playwright                                                                                                  |
+| M7        | CP-M7-1    | API proxy                        | 🔲     | -          | Enhanced from M3                                                                                            |
+| M7        | CP-M7-2    | Message router                   | 🔲     | -          | -                                                                                                           |
+| M7        | CP-M7-3    | Background main                  | 🔲     | -          | -                                                                                                           |
+| M7        | CP-M7-4    | Integration tests                | 🔲     | -          | -                                                                                                           |
+| M8        | CP-M8-1    | E2E test setup                   | 🔲     | -          | Playwright config                                                                                           |
+| M8        | CP-M8-2    | Config workflow tests            | 🔲     | -          | -                                                                                                           |
+| M8        | CP-M8-3    | Form filling tests               | 🔲     | -          | -                                                                                                           |
+| M8        | CP-M8-4    | Performance tests                | 🔲     | -          | -                                                                                                           |
+| M8        | CP-M8-5    | Cross-browser tests              | 🔲     | -          | Chrome + Edge                                                                                               |
+| M9        | CP-M9-1    | Performance optimization         | 🔲     | -          | -                                                                                                           |
+| M9        | CP-M9-2    | Documentation                    | 🔲     | -          | Complete                                                                                                    |
+| M9        | CP-M9-3    | Security audit                   | 🔲     | -          | -                                                                                                           |
+| M9        | CP-M9-4    | Release prep                     | 🔲     | -          | Packaging                                                                                                   |
+
+---
+
+## Daily Log
+
+### Date: 2025-11-08
+
+#### Architecture Clarification & Documentation Update
+
+**Issue Identified**: Documentation described backend-based architecture but project requirement is pure frontend MV3 extension with direct API provider access.
+
+**Actions Taken**:
+
+1. ✅ Created detailed AI service migration guide (`.github/AI_SERVICE_MIGRATION.md`)
+   - Documents migration from `backend/services/gptService` to frontend TypeScript
+   - Component-by-component migration instructions (apiService.js → aiService.ts, config.js → modelConfig.ts, adapters)
+   - TypeScript type definitions and testing strategies
+
+2. ✅ Updated core instruction documents:
+   - `.github/copilot-instructions.md`: Emphasized pure frontend architecture, reference backend implementation for migration
+   - `.github/TS_MIGRATION_PLAN.md`: Updated M3/M7 milestones to reflect backend migration approach
+   - Updated project structure to show backend as reference implementation only
+
+3. ✅ Updated `README.md`:
+   - Removed backend startup instructions (npm start, backend server)
+   - Added pure frontend configuration guide (Azure OpenAI, Ollama direct config in extension popup)
+   - Documented that backend/ is reference implementation for migration
+
+4. ✅ Updated `manifest.json`:
+   - Added `host_permissions` for direct API access:
+     - `https://*.openai.azure.com/*` (Azure OpenAI)
+     - `http://localhost:11434/*` (Ollama)
+
+**Architectural Decision**:
+
+- **Pattern**: Pure frontend MV3 Chrome Extension
+- **AI Service**: Background script directly calls AI provider APIs (no separate backend server)
+- **Migration**: Reference existing `backend/services/gptService` implementation, migrate to `src/background/services/ai/` in TypeScript
+- **HTTP Client**: Replace axios (backend) with fetch (frontend)
+- **Configuration**: User-configured via extension popup, stored in chrome.storage.local (replaces process.env)
+
+**Test Status**: 100/100 tests passing (21 test files)
+
+**Next Steps**:
+
+- Task 4: Clean backend dependencies from existing frontend code (remove setBackendUrl, testConnection methods)
+- Begin M3 AI Service Layer migration following `.github/AI_SERVICE_MIGRATION.md`
+
+---
 
 ### Daily Update Template
 
@@ -1609,6 +1717,7 @@ CHECKPOINT: CP-M9-4"
 - ✅ CP-M6-1: Implement TypeScript FormDetector with unit tests (2)
 - ✅ CP-M6-2: Implement TypeScript FormFiller with unit tests (1)
 - ✅ CP-M6-3: Implement TypeScript DataExtractor + unit tests (6); add content handler `extractContentWithIframes`
+- ✅ CP-M6-4: Wire popup buttons to content actions (detect/analyze/fill) via `ExtensionClient`; expose TS implementations in content
 
 ### In Progress
 

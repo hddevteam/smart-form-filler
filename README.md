@@ -52,32 +52,39 @@ npm run dev
 
 ## 🔧 Development
 
-### Backend Development
+### Extension Development
 
 ```bash
-cd backend
-npm run dev
+pnpm dev         # Start development build with watch mode
+pnpm test:watch  # TDD mode - run tests continuously
 ```
 
-The backend server will start on `http://localhost:3001`
+### Backend Reference (For Migration Only)
 
-### API Endpoints (Backend)
+The `backend/` directory contains the **reference implementation** for AI services that should be migrated to frontend TypeScript:
 
-- `GET /api/extension/health` - Health check
-- `GET /api/extension/models` - Available AI models
-- `POST /api/extension/extract-data-sources` - Extract page data
-- `POST /api/extension/chat-with-data` - Chat with extracted data
-- `POST /api/form-filler/analyze-form-relevance` - Analyze form relevance
-- `POST /api/form-filler/analyze-field-mapping` - Generate field mappings
+- `backend/services/gptService/apiService.js` → Migrate to `src/background/services/ai/aiService.ts`
+- `backend/services/gptService/config.js` → Migrate to `src/background/services/ai/modelConfig.ts`
+- `backend/services/gptService/modelAdapters/` → Migrate to `src/background/services/ai/adapters/`
+
+**See `.github/AI_SERVICE_MIGRATION.md` for detailed migration guide.**
+
+**⚠️ Important**: The backend is NOT used at runtime - it's kept as a reference for migrating functionality to the frontend.
 
 ## ⚙️ Configuration
 
-Copy `.env.example` to `.env` and configure your environment variables:
+Configuration is done through the extension popup UI:
 
-```bash
-cd backend
-cp .env.example .env
-```
+1. Click extension icon in browser toolbar
+2. Go to Configuration section
+3. Add AI provider configuration:
+   - **Name**: Give your configuration a name (e.g., "My Azure GPT-4o")
+   - **Provider**: Choose Azure OpenAI or Ollama
+   - **Endpoint**: API endpoint URL
+   - **API Key**: Your API key (for Azure OpenAI; not needed for Ollama)
+   - **Model**: Model name
+
+API keys are encrypted and stored securely in `chrome.storage.local`.
 
 ## 🧪 Testing
 
