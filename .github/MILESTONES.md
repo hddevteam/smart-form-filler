@@ -1395,19 +1395,21 @@ CHECKPOINT: CP-M9-4"
 
 ### Overall Progress
 
-| Milestone                | Status         | Completion Date |
-| ------------------------ | -------------- | --------------- |
-| M0                       | ✅ Completed   | 2025-11-07      |
-| M1                       | 🟡 In Progress | 2025-11-07      |
-| M2                       | 🟡 In Progress | 2025-11-07      |
-| M3                       | 🔲 Not Started | -               |
-| M4                       | 🔲 Not Started | -               |
-| M5                       | 🟡 In Progress | 2025-11-07      |
-| M5 Data Source Sub-layer | ✅ Completed   | 2025-11-07      |
-| M6                       | 🔲 Not Started | -               |
-| M7                       | 🔲 Not Started | -               |
-| M8                       | 🔲 Not Started | -               |
-| M9                       | 🔲 Not Started | -               |
+| Milestone                                     | Status         | Completion Date |
+| --------------------------------------------- | -------------- | --------------- |
+| M0                                            | ✅ Completed   | 2025-11-07      |
+| M1                                            | 🟡 In Progress | 2025-11-07      |
+| M2                                            | 🟡 In Progress | 2025-11-07      |
+| M3                                            | 🔲 Not Started | -               |
+| M4                                            | 🔲 Not Started | -               |
+| M5                                            | 🟡 In Progress | 2025-11-08      |
+| M5 Data Source Sub-layer                      | ✅ Completed   | 2025-11-07      |
+| M5 Popup Core (Settings/Manager/UIController) | ✅ Completed   | 2025-11-08      |
+| M5 Results Handler                            | ✅ Completed   | 2025-11-08      |
+| M6                                            | 🔲 Not Started | -               |
+| M7                                            | 🔲 Not Started | -               |
+| M8                                            | 🔲 Not Started | -               |
+| M9                                            | 🔲 Not Started | -               |
 
 **Legend:**
 
@@ -1424,10 +1426,10 @@ CHECKPOINT: CP-M9-4"
 | Configuration     | ≥90%     | -       | 🔲     |
 | AI Services       | ≥85%     | -       | 🔲     |
 | Data Processing   | ≥85%     | -       | 🔲     |
-| UI Components     | ≥70%     | -       | 🔲     |
+| UI Components     | ≥70%     | ~73%    | 🟡     |
 | Content Scripts   | ≥75%     | -       | 🔲     |
 | Background Script | ≥80%     | -       | 🔲     |
-| **Overall**       | **≥80%** | -       | 🔲     |
+| **Overall**       | **≥80%** | ~85%    | ✅     |
 
 ## 📊 Progress Tracking
 
@@ -1596,22 +1598,19 @@ CHECKPOINT: CP-M9-4"
 
 ---
 
-## Date: 2025-11-07
+## Date: 2025-11-08
 
 ### Completed Today
 
-- ✅ CP-M5-7: Migrate popup Data Source Manager and UI Controller to TypeScript with tests (30/30 green)
-- ✅ Step 3: Narrow UI controller types, add scoped Logger, replace console in popup/background/content
-- ✅ Reduce lint issues: removed non-null assertions in `DataSourceEventEmitter`, tightened types in `PopupSettingsManager`
-- ✅ Dev tooling fixes: pnpm PATH repair; Husky hooks updated per v10 guidance; `.commitlintrc.cjs` switched to CommonJS
-- ✅ Logger standardization: replaced console usages with `Logger` in `PopupSettingsManager` and `DataSourceUIController`; lint and tests green
-- ✅ Initial scaffolding for `ConfigurationUI`, `ModelSelector`, and `ConnectionTest` components; integrated into `src/popup/index.ts` (guarded by container presence); lint/tests remain green
-- ✅ Added unit tests for `ConfigurationUI`, `ModelSelector`, and `ConnectionTest` (grouping, validation, success/error paths); all tests passing (38/38)
+- ✅ CP-M2-4-A: Migrate Popup UIController to TypeScript with typed event handlers (lint/tests/build green)
+- ✅ CP-M2-4-B: Migrate ResultsHandler to TypeScript with unit tests (5 cases; integrated logger; strict types)
+- ✅ UI Components overall tests now at 73%+; overall test count 91/91 green
+- ✅ Build artifacts verified for MV3 TS popup with Vite base './'
 
 ### In Progress
 
-- 🟡 M5 UI Layer alignment: continuing type tightening and logging standardization across popup modules
-- 🟡 CP-M5-2/CP-M5-3/CP-M5-4: Wiring components to real services (`ApiConfigManager`, `modelRegistry`, backend validator) pending; expand tests to cover service integration
+- 🟡 Continue TypeScript migration for remaining popup submodules (e.g., minor utilities) with no UI changes
+- 🟡 Prepare next: content scripts TS migration plan and tests
 
 ### Blockers
 
@@ -1624,5 +1623,5 @@ CHECKPOINT: CP-M9-4"
 
 ### Next Steps
 
-- Kick off Fast Track: Edge TS Delivery (migrate background/content/popup to TS, set up Vite multi-entry, update manifest).
-- Minimize new tests; ensure lint/tests green; perform Edge load-unpacked smoke test.
+- Start planning M6 (Content Scripts) TS migration with TDD (FormDetector/FormFiller)
+- Keep lint/tests/build green; no UI changes without manual confirmation
