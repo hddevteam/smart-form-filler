@@ -1406,7 +1406,7 @@ CHECKPOINT: CP-M9-4"
 | M5 Data Source Sub-layer                      | ✅ Completed   | 2025-11-07      |
 | M5 Popup Core (Settings/Manager/UIController) | ✅ Completed   | 2025-11-08      |
 | M5 Results Handler                            | ✅ Completed   | 2025-11-08      |
-| M6                                            | 🔲 Not Started | -               |
+| M6                                            | 🟡 In Progress | 2025-11-08      |
 | M7                                            | 🔲 Not Started | -               |
 | M8                                            | 🔲 Not Started | -               |
 | M9                                            | 🔲 Not Started | -               |
@@ -1507,10 +1507,10 @@ CHECKPOINT: CP-M9-4"
 | M5        | CP-M5-5    | Popup controller                 | 🔲     | -          | -                                                                                                       |
 | M5        | CP-M5-6    | UI integration tests             | 🔲     | -          | Pending after core components                                                                           |
 | M5        | CP-M5-7    | Data source management migration | ✅     | 2025-11-07 | Manager + UI controller + tests (30/30 pass)                                                            |
-| M6        | CP-M6-1    | Form detector                    | 🔲     | -          | TDD approach                                                                                            |
-| M6        | CP-M6-2    | Form filler                      | 🔲     | -          | TDD approach                                                                                            |
-| M6        | CP-M6-3    | Data extraction                  | 🔲     | -          | -                                                                                                       |
-| M6        | CP-M6-4    | Content script main              | 🔲     | -          | -                                                                                                       |
+| M6        | CP-M6-1    | Form detector                    | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formDetector.ts`) with unit tests (2 cases)                          |
+| M6        | CP-M6-2    | Form filler                      | ✅     | 2025-11-08 | Ported to TypeScript (`src/content/formFiller.ts`) with unit tests (1 case)                             |
+| M6        | CP-M6-3    | Data extraction                  | ✅     | 2025-11-08 | Added `src/modules/dataExtractor.ts` + unit tests (6 cases); content `extractContentWithIframes` wired  |
+| M6        | CP-M6-4    | Content script main              | 🟡     | 2025-11-08 | Integrated TS FormDetector/FormFiller in `src/extension/content.ts`; message handlers updated           |
 | M6        | CP-M6-5    | E2E tests                        | 🔲     | -          | Playwright                                                                                              |
 | M7        | CP-M7-1    | API proxy                        | 🔲     | -          | Enhanced from M3                                                                                        |
 | M7        | CP-M7-2    | Message router                   | 🔲     | -          | -                                                                                                       |
@@ -1593,7 +1593,7 @@ CHECKPOINT: CP-M9-4"
 
 ---
 
-**Last Updated:** November 7, 2025  
+**Last Updated:** November 8, 2025  
 **Document Version:** 2.0.0
 
 ---
@@ -1604,13 +1604,17 @@ CHECKPOINT: CP-M9-4"
 
 - ✅ CP-M2-4-A: Migrate Popup UIController to TypeScript with typed event handlers (lint/tests/build green)
 - ✅ CP-M2-4-B: Migrate ResultsHandler to TypeScript with unit tests (5 cases; integrated logger; strict types)
-- ✅ UI Components overall tests now at 73%+; overall test count 91/91 green
+- ✅ UI Components overall tests now at 73%+; overall test count 100/100 green
 - ✅ Build artifacts verified for MV3 TS popup with Vite base './'
+- ✅ CP-M6-1: Implement TypeScript FormDetector with unit tests (2)
+- ✅ CP-M6-2: Implement TypeScript FormFiller with unit tests (1)
+- ✅ CP-M6-3: Implement TypeScript DataExtractor + unit tests (6); add content handler `extractContentWithIframes`
 
 ### In Progress
 
 - 🟡 Continue TypeScript migration for remaining popup submodules (e.g., minor utilities) with no UI changes
 - 🟡 Prepare next: content scripts TS migration plan and tests
+- 🟡 CP-M6-4: Content script main wiring and integration validation (no UI changes)
 
 ### Blockers
 
@@ -1618,7 +1622,7 @@ CHECKPOINT: CP-M9-4"
 
 ### Coverage Stats
 
-- Unit tests: 30 passed (30 total)
+- Unit tests: 100 passed (100 total)
 - Coverage: to be reported via `pnpm test:coverage` in the next update
 
 ### Next Steps
