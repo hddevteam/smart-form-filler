@@ -100,17 +100,16 @@ describe('Background message routing integration', () => {
     expect(body.model).toBe('phi3');
     expect(body.stream).toBe(false);
 
-    expect(responsePayload).toEqual({
-      model: 'phi3',
-      choices: [
-        {
-          message: {
-            role: 'assistant',
-            content: 'pong',
-          },
-        },
-      ],
-    });
+    const payload = responsePayload as {
+      success: boolean;
+      data: { model: string; choices: Array<{ message: { content: string } }> };
+      logs: string[];
+    };
+    expect(payload.success).toBe(true);
+    expect(payload.data.model).toBe('phi3');
+    expect(payload.data.choices[0]?.message.content).toBe('pong');
+    expect(payload.logs.length).toBeGreaterThan(0);
+    expect(payload.logs[0]).toContain('[AIService]');
     expect(getDynamicRules).toHaveBeenCalledWith({ ruleIds: [OLLAMA_CORS_RULE_ID] });
   });
 
@@ -216,8 +215,16 @@ describe('Background message routing integration', () => {
     await done;
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    const payload = responsePayload as { choices: Array<{ message: { content: string } }> };
-    expect(payload.choices[0]?.message.content).toBe('Recovered');
+    const payload = responsePayload as {
+      success: boolean;
+      data: { choices: Array<{ message: { content: string } }> };
+      logs: string[];
+    };
+    expect(payload.success).toBe(true);
+    expect(payload.data.choices[0]?.message.content).toBe('Recovered');
+    expect(payload.logs.some(entry => entry.includes('Attempt 3')) || payload.logs.length > 0).toBe(
+      true
+    );
   });
 
   it('propagates AI request failures after retry exhaustion', async () => {
@@ -264,6 +271,9 @@ describe('Background message routing integration', () => {
     await done;
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(responsePayload).toEqual({ error: 'Network unreachable' });
+    const payload = responsePayload as { success: boolean; error: string; logs: string[] };
+    expect(payload.success).toBe(false);
+    expect(payload.error).toBe('Network unreachable');
+    expect(payload.logs.length).toBeGreaterThan(0);
   });
 });

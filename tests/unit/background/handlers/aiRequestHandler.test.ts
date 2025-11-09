@@ -21,14 +21,23 @@ describe('registerAIRequestHandler', () => {
       model: 'test',
       messages: [{ role: 'user', content: 'hi' }],
     } as any;
-    const resp = await router.handle({ type: 'AI_REQUEST', options }, {
+    const resp = (await router.handle({ type: 'AI_REQUEST', options }, {
       id: 's',
-    } as chrome.runtime.MessageSender);
+    } as chrome.runtime.MessageSender)) as {
+      success: boolean;
+      data: unknown;
+      logs: string[];
+    };
 
-    expect(resp).toEqual({
+    expect(resp.success).toBe(true);
+    expect(resp.data).toEqual({
       model: 'x',
       choices: [{ message: { role: 'assistant', content: 'ok' } }],
     });
-    expect(fake.makeRequest as any).toHaveBeenCalledWith(options);
+    expect(Array.isArray(resp.logs)).toBe(true);
+
+    const callArg = (fake.makeRequest as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(callArg).toMatchObject(options);
+    expect(typeof callArg.onLog).toBe('function');
   });
 });

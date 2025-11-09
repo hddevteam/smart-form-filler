@@ -7,116 +7,45 @@ _Last updated: 2025-11-09_
 - Overall coverage: ~85%
 - Tooling: pnpm 8 · Node 20 · Vite 7 · TS 5.9 (strict) · Vitest 4 · ESLint 9 · Prettier 3
 
-## Status Overview
+## Milestone Status
 
-| Milestone                 | State | Notes                                                    |
-| ------------------------- | ----- | -------------------------------------------------------- |
-| M0 Setup                  | ✅    | Completed 2025-11-07                                     |
-| M1 Types                  | 🟡    | Core types in place, utility refinements ongoing         |
-| M2 Config                 | 🟡    | Storage + registry ready, validation next                |
-| M3 AI Service Layer       | 🟡    | CP-M3-3 complete (AIService retries, Ollama CORS bypass) |
-| M4 Data Processing        | 🔲    | Pending after AI service stabilization                   |
-| M5 UI Layer               | 🟡    | Popup foundation done, integration tests in progress     |
-| M6 Content Scripts        | 🟡    | Detector/Filler/Extractor migrated; Playwright pending   |
-| M7 Background Script      | 🟡    | Message router wired; integration tests outstanding      |
-| M8 Integration Testing    | 🔲    | To start after UI + background hardening                 |
-| M9 Optimization & Release | 🔲    | Scheduled post-integration                               |
+| Milestone                 | State | Notes                                                      |
+| ------------------------- | ----- | ---------------------------------------------------------- |
+| M0 Setup                  | ✅    | Completed 2025-11-07                                       |
+| M1 Types                  | 🟡    | Core typings stable; incremental refinements ongoing       |
+| M2 Config                 | 🟡    | Storage + registry ready; validation layer pending         |
+| M3 AI Service Layer       | 🟡    | Retries & Ollama bypass shipped; factory/DeepSeek deferred |
+| M4 Data Processing        | 🔲    | Scheduled post AI-service stabilization                    |
+| M5 UI Layer               | 🟡    | Popup coverage climbing toward ≥70% target                 |
+| M6 Content Scripts        | 🟡    | Detector/Filler migrated; advanced Playwright flows next   |
+| M7 Background Script      | 🟡    | Message routing live; need richer telemetry                |
+| M8 Integration Testing    | 🟡    | Playwright smoke, config, and AI flows in Chromium/Edge    |
+| M9 Optimization & Release | 🔲    | Pending integration readiness                              |
 
 ## Recent Progress
 
-- Completed CP-M3-3: AIService now ensures Ollama dynamic rule registration, logs rule state, and passes new unit coverage.
-- Popup AI test panel updated with fixed-height scrollable logs and copy-to-clipboard control.
-- Added `AzureResponsesAdapter` plus Ollama CORS bypass utilities with dedicated tests (`ollamaCorsBypass.test.ts`).
-- Completed CP-M7-4: Added background message routing integration tests (`tests/integration/background/aiRequestRouting.integration.test.ts`) covering AI_REQUEST flow and dynamic rules inspection.
-- Enhanced popup `ConnectionTest` diagnostics (latency/status/hints) and expanded integration tests; UI wiring unchanged.
-- Added popup `AITestButton` integration coverage for success/error states (clipboard + log assertions) to push UI toward the ≥70% target.
-- Extended background integration tests to cover AIService retry success/failure pathways and error propagation.
-- Introduced Playwright form-filling E2E against a simple fixture, validating content script handling across Chromium and Edge.
-- Added ConfigurationUI provider-toggle guidance and validation failure coverage; introduced ExtensionClient fallback/error tests.
-- Added Playwright detect → analyze → AI response flow with mocked successes/failures (Chromium + Edge).
-
-## Next Steps
-
-1. **M3 (AI Service Layer)** – Still deferred; resume AIServiceFactory/DeepSeek once UI + background polish completes.
-2. **M5 (UI Layer)** – Verify data source UI interactions (history select/copy) and measure coverage ≥70%.
-3. **M7 (Background Script)** – Capture runtime error telemetry in message handlers and surface structured logs to popup.
-4. **M8 (Integration Testing)** – Extend Playwright to real-world form fixtures and multi-step AI handoff scenarios.
-
-## Acceptance Targets (unchanged)
-
-- Strict TypeScript (no `any` without justification).
-- Coverage goals: Core services ≥90%, adapters ≥85%, UI ≥70%, content ≥75%, overall ≥80%.
-
-## References
-
-- Detailed migration breakdown: `.github/TS_MIGRATION_PLAN.md`
-- TDD workflow guidance: `.github/TDD_GUIDE.md`# Milestones (Concise) — Smart Form Filler TS Migration
-
-Purpose: Single, up-to-date plan mirroring actual progress. English only. MV3 frontend, TDD-first.
-
-Legend: 🔲 Not Started · 🟡 In Progress · ✅ Done
-
-## Snapshot (2025-11-08)
-
-- Overall Coverage: ~85%
-- Tooling: pnpm 8, Node 20, Vite 7, TS 5.9 strict, Vitest 4, ESLint 9, Prettier 3
-
-## High-level Timeline
-
-M0→M1→M2→M3→M4→M5→M6→M7→M8→M9 (43d total)
-
-## Current Status
-
-- M0 Setup: ✅ Completed (2025-11-07)
-- M1 Types: 🟡 In Progress
-- M2 Config: 🟡 In Progress
-- M3 AI Service Layer: 🟡 In Progress
-- M4 Data Processing: 🔲
-- M5 UI Layer: 🟡 In Progress
-- M6 Content Scripts: 🟡 In Progress
-- M7 Background Script: 🟡 In Progress
-- M8 Integration Testing: 🔲
-- M9 Optimization & Release: 🔲
-
-## What's Done (sync with repo)
-
-Details removed (completed work summarized in commit history and PRs).
+- Hardened popup integration: ConfigurationUI provider guidance & validation, AITestButton diagnostics.
+- Added ExtensionClient unit tests for runtime fallbacks and AI error propagation.
+- Extended background integration suite for retry success/failure paths.
+- Delivered Playwright form-fill and detect→analyze→AI flows (Chromium & Edge).
+- AI_REQUEST handler now returns structured `{ success, data, logs }` payloads, capturing AIService telemetry for popup diagnostics.
 
 ## Next Focus
 
-- M7: Wire popup/content to send AI_REQUEST; add integration tests.
-- M3: Implement AIServiceFactory; add DeepSeek adapter; reasoning/tool params; tests (≥85%).
-- M5: Connection Test refinement vs background routing; UI tests ≥70%.
-- M8: Playwright setup for configuration and form flows.
+1. **M5 UI** – Exercise data source history actions (select/copy) to confirm ≥70% popup coverage.
+2. **M7 Background** – Thread structured logs into popup surfaces (Connection/AITest) and expand negative-path coverage (`chrome.runtime.lastError`).
+3. **M8 Integration** – Run Playwright against richer real-world form fixtures and multi-step AI handoffs.
+
+## Checkpoints In Flight
+
+- **CP-M5-6** (UI integration tests) – push remaining data-source interactions.
+- **CP-M7-4** (background integration) – add negative-path logging + telemetry assertions.
+- **CP-M8-4** (multi-step flows) – expand E2E to real form scenarios.
 
 ## Acceptance Targets
 
-- Strict TS, no any (exceptions documented).
-- Core services ≥90%; adapters ≥85%.
-- UI ≥70%; Content ≥75%; Overall ≥80%.
-
-## Checkpoints (condensed)
-
-- M2 Config: CP-M2-1 StorageManager — 🟡; CP-M2-2 ApiConfigManager — 🟡; CP-M2-3 ModelRegistry — ✅; CP-M2-4 Validation — 🔲; CP-M2-5 Integration — 🔲
-- M3 AI: CP-M3-1 BaseAdapter — ✅; CP-M3-2 Adapters/Factory — ✅ baseline; CP-M3-3 AIService + retries + background — ✅; CP-M3-4 AIServiceFactory — 🔲; CP-M3-5 API proxy util — 🟡; CP-M3-6 Adapter integration tests — 🔲
-- M5 UI: CP-M5-2 ConfigurationUI — ✅; CP-M5-3 ModelSelector — ✅; CP-M5-4 ConnectionTest — ✅ initial; CP-M5-5 Popup init — ✅; CP-M5-6 UI integration tests — 🟡; CP-M5-7 Data source sub-layer — ✅
-- M6 Content: CP-M6-1 Detector — ✅; CP-M6-2 Filler — ✅; CP-M6-3 Extractor — ✅; CP-M6-4 Content main — ✅; CP-M6-5 Playwright — 🔲
-- M7 Background: CP-M7-1 Proxy queue/limit/cache — Skipped; CP-M7-2 MessageRouter — 🟢 (created, wired, unit tests added); CP-M7-3 Background main — 🟡 (listener wired); CP-M7-4 Integration — 🔲
-- M8 Integration: Playwright setup + flows + perf + cross-browser — 🔲
-- M9 Release: Perf, docs, security, packaging — 🔲
-
-## Commit Tags
-
-Use Conventional Commits with milestone/checkpoint tags, e.g.:
-
-- MILESTONE: M3 - AI Service Layer
-- CHECKPOINT: CP-M3-3
-
----
-
-## Archived Detailed Plan
-
-### Project Timeline
+- Strict TypeScript (no unchecked `any`).
+- Coverage: core services ≥90%, adapters ≥85%, UI ≥70%, content ≥75%, overall ≥80%.
 
 ```
 M0 ━━━━━> M1 ━━━━━> M2 ━━━━━━━━> M3 ━━━━━━━━━━> M4 ━━━━━> M5 ━━━━━━━━> M6 ━━━━━> M7 ━━━━> M8 ━━━━━> M9
