@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import ModelSelector from '@/popup/components/ModelSelector';
 import ConfigurationUI from '@/popup/components/ConfigurationUI';
 import ConnectionTest from '@/popup/components/ConnectionTest';
+import AITestButton from '@/popup/components/AITestButton';
 
 describe('UI Integration (popup components)', () => {
   it('ModelSelector falls back to apiClient when backend fails and populates groups', async () => {
@@ -224,5 +225,114 @@ describe('UI Integration (popup components)', () => {
     expect(statusEl.textContent).toContain('HTTP 502');
     expect(detailsEl.hidden).toBe(false);
     expect(detailsEl.textContent).toContain('Hint: Allow extension through proxy');
+  });
+
+  it('AITestButton renders success logs and supports clipboard copy', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const sendAIRequest = vi.fn().mockResolvedValue({
+      response: {
+        model: 'gpt-4o',
+        choices: [
+          {
+            message: {
+              role: 'assistant',
+              content: 'Hello from assistant response content',
+            },
+          },
+        ],
+      },
+      logs: ['[Background] attempt 1', '[Background] completed'],
+    });
+
+    const getOptions = vi.fn(() => ({
+      apiUrl: 'http://localhost:11434/api/chat',
+      model: 'ollama:test',
+      messages: [{ role: 'user', content: 'ping' }],
+    }));
+
+    const originalClipboard = navigator.clipboard;
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const btn = new AITestButton(container, {
+      client: {
+        sendAIRequest,
+      } as unknown as import('@/popup/apis/extensionClient').ExtensionClientLike,
+      getOptions,
+    });
+
+    btn.render();
+
+    const trigger = container.querySelector<HTMLButtonElement>('#ai-test-btn');
+    const statusEl = container.querySelector<HTMLElement>('.ai-test-status');
+    const logEl = container.querySelector<HTMLPreElement>('.ai-test-log');
+    const copyBtn = container.querySelector<HTMLButtonElement>('.ai-test-copy-btn');
+    expect(trigger && statusEl && logEl && copyBtn).toBeTruthy();
+    if (!trigger || !statusEl || !logEl || !copyBtn)
+      throw new Error('AI Test button wiring missing');
+
+    trigger.click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(sendAIRequest).toHaveBeenCalledTimes(1);
+    expect(getOptions).toHaveBeenCalled();
+    expect(statusEl.textContent).toContain('✅');
+    expect(statusEl.textContent).toContain('Hello from assistant response content'.slice(0, 10));
+    expect(logEl.textContent).toContain('Selected Model: ollama:test');
+    expect(logEl.textContent).toContain('[Background] completed');
+
+    copyBtn.click();
+    await Promise.resolve();
+    expect(writeText).toHaveBeenCalled();
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: originalClipboard,
+    });
+  });
+
+  it('AITestButton surfaces errors and background logs on failure', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const error = new Error('Gateway timeout') as Error & { logs?: string[] };
+    error.logs = ['Attempt 1 failed (504)', 'Attempt 2 failed (504)'];
+    const sendAIRequest = vi.fn().mockRejectedValue(error);
+
+    const btn = new AITestButton(container, {
+      client: {
+        sendAIRequest,
+      } as unknown as import('@/popup/apis/extensionClient').ExtensionClientLike,
+      getOptions: () => ({
+        apiUrl: 'https://example.openai.azure.com/openai/deployments/test',
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: 'hello' }],
+      }),
+    });
+
+    btn.render();
+
+    const trigger = container.querySelector<HTMLButtonElement>('#ai-test-btn');
+    const statusEl = container.querySelector<HTMLElement>('.ai-test-status');
+    const logEl = container.querySelector<HTMLPreElement>('.ai-test-log');
+    expect(trigger && statusEl && logEl).toBeTruthy();
+    if (!trigger || !statusEl || !logEl) throw new Error('AI Test button wiring missing');
+
+    trigger.click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(sendAIRequest).toHaveBeenCalledTimes(1);
+    expect(statusEl.textContent).toContain('❌ Gateway timeout');
+    expect(logEl.textContent).toContain('Attempt 1 failed (504)');
+    expect(logEl.textContent).toContain('Attempt 2 failed (504)');
   });
 });

@@ -29,13 +29,16 @@ _Last updated: 2025-11-09_
 - Added `AzureResponsesAdapter` plus Ollama CORS bypass utilities with dedicated tests (`ollamaCorsBypass.test.ts`).
 - Completed CP-M7-4: Added background message routing integration tests (`tests/integration/background/aiRequestRouting.integration.test.ts`) covering AI_REQUEST flow and dynamic rules inspection.
 - Enhanced popup `ConnectionTest` diagnostics (latency/status/hints) and expanded integration tests; UI wiring unchanged.
+- Added popup `AITestButton` integration coverage for success/error states (clipboard + log assertions) to push UI toward the ≥70% target.
+- Extended background integration tests to cover AIService retry success/failure pathways and error propagation.
+- Introduced Playwright form-filling E2E against a simple fixture, validating content script handling across Chromium and Edge.
 
 ## Next Steps
 
-1. **M3 (AI Service Layer)** – Deferred while continuing with existing adapters; revisit after UI and background stability improves.
-2. **M5 (UI Layer)** – Finish popup integration tests (≥70% coverage) and refine connection diagnostics.
-3. **M7 (Background Script)** – Extend integration coverage for message routing + AI requests, validating dynamic rule setup end-to-end.
-4. **M8 (Integration Testing)** – Initialize Playwright E2E tests for config and form flows (`tests/e2e/`), target Chromium first.
+1. **M3 (AI Service Layer)** – Still deferred; resume AIServiceFactory/DeepSeek once UI + background polish completes.
+2. **M5 (UI Layer)** – Close remaining popup coverage gaps (data source interactions, edge copy states) to lock in ≥70% target.
+3. **M7 (Background Script)** – Add negative-path logging assertions (e.g., chrome.runtime.lastError) and monitor retry telemetry.
+4. **M8 (Integration Testing)** – Expand Playwright flows to cover detect/analyze responses feeding background AI mock results.
 
 ## Acceptance Targets (unchanged)
 

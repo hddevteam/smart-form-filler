@@ -150,4 +150,120 @@ describe('Background message routing integration', () => {
     expect(responsePayload).toEqual({ error: 'No handler for message type: UNKNOWN' });
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('retries AI requests on transient failures before succeeding', async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        json: vi.fn().mockResolvedValue({}),
+        text: vi.fn().mockResolvedValue('bad gateway'),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 504,
+        json: vi.fn().mockResolvedValue({}),
+        text: vi.fn().mockResolvedValue('gateway timeout'),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          model: 'phi3',
+          message: { role: 'assistant', content: 'Recovered' },
+        }),
+        text: vi.fn().mockResolvedValue(''),
+      });
+
+    await import('@/background/index');
+    await flushPromises();
+
+    const addListenerMock = chrome.runtime.onMessage.addListener as unknown as {
+      mock: { calls: unknown[][] };
+    };
+    const [listenerArgs] = addListenerMock.mock.calls;
+    if (!listenerArgs?.[0]) {
+      throw new Error('background listener not registered');
+    }
+    const listener = listenerArgs[0] as Parameters<typeof chrome.runtime.onMessage.addListener>[0];
+
+    let responsePayload: unknown;
+    const sendResponse = vi.fn((payload: unknown) => {
+      responsePayload = payload;
+    });
+    const done = new Promise<void>(resolve => {
+      sendResponse.mockImplementation((payload: unknown) => {
+        responsePayload = payload;
+        resolve();
+      });
+    });
+
+    const listenerReturn = listener(
+      {
+        type: 'AI_REQUEST',
+        options: {
+          apiUrl: 'http://localhost:11434/api/chat',
+          model: 'ollama:phi3',
+          messages: [{ role: 'user', content: 'ping' }],
+        },
+      },
+      { id: 'popup-script' } as chrome.runtime.MessageSender,
+      sendResponse
+    );
+
+    expect(listenerReturn).toBe(true);
+
+    await done;
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const payload = responsePayload as { choices: Array<{ message: { content: string } }> };
+    expect(payload.choices[0]?.message.content).toBe('Recovered');
+  });
+
+  it('propagates AI request failures after retry exhaustion', async () => {
+    fetchMock.mockRejectedValue(new Error('Network unreachable'));
+
+    await import('@/background/index');
+    await flushPromises();
+
+    const addListenerMock = chrome.runtime.onMessage.addListener as unknown as {
+      mock: { calls: unknown[][] };
+    };
+    const [listenerArgs] = addListenerMock.mock.calls;
+    if (!listenerArgs?.[0]) {
+      throw new Error('background listener not registered');
+    }
+    const listener = listenerArgs[0] as Parameters<typeof chrome.runtime.onMessage.addListener>[0];
+
+    let responsePayload: unknown;
+    const sendResponse = vi.fn((payload: unknown) => {
+      responsePayload = payload;
+    });
+    const done = new Promise<void>(resolve => {
+      sendResponse.mockImplementation((payload: unknown) => {
+        responsePayload = payload;
+        resolve();
+      });
+    });
+
+    const listenerReturn = listener(
+      {
+        type: 'AI_REQUEST',
+        options: {
+          apiUrl: 'http://localhost:11434/api/chat',
+          model: 'ollama:phi3',
+          messages: [{ role: 'user', content: 'ping' }],
+        },
+      },
+      { id: 'popup-script' } as chrome.runtime.MessageSender,
+      sendResponse
+    );
+
+    expect(listenerReturn).toBe(true);
+
+    await done;
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(responsePayload).toEqual({ error: 'Network unreachable' });
+  });
 });
