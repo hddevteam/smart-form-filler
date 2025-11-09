@@ -22,10 +22,24 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
+    "src/**/*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write",
       "vitest related --run --silent=true"
+    ],
+    "tests/unit/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "vitest related --run --silent=true"
+    ],
+    "tests/integration/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "vitest related --run --silent=true"
+    ],
+    "tests/e2e/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
     ],
     "*.{json,md}": [
       "prettier --write"
@@ -55,7 +69,6 @@
     "@types/node": "^24.10.0",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
-    "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.7",
     "@vitest/ui": "^4.0.7",
     "eslint": "^9.39.1",

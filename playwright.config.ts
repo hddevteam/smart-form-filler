@@ -1,5 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const projects = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'] },
+  },
+];
+
+if (process.env.PLAYWRIGHT_EDGE === '1') {
+  projects.push({
+    name: 'msedge',
+    use: { ...devices['Desktop Edge'], channel: 'msedge' },
+  });
+}
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -13,24 +27,12 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-  ],
+  projects,
 
   webServer: {
-    command: 'npx pnpm dev',
-    url: 'http://localhost:5173',
+    command: 'npx vite --host 127.0.0.1 --port 5173 --strictPort',
+    url: 'http://127.0.0.1:5173/popup.html',
+    timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
   },
 });
