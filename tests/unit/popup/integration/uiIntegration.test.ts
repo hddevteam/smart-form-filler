@@ -159,4 +159,70 @@ describe('UI Integration (popup components)', () => {
     await Promise.resolve();
     expect(statusEl.textContent).toContain('Connection failed: bad gateway');
   });
+
+  it('ConnectionTest toggles progress state and surfaces diagnostics metadata', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const validate = vi
+      .fn<
+        [string],
+        Promise<{
+          success: boolean;
+          error?: string;
+          latencyMs?: number;
+          statusCode?: number;
+          hint?: string;
+        }>
+      >()
+      .mockResolvedValueOnce({ success: true, latencyMs: 78 })
+      .mockResolvedValueOnce({
+        success: false,
+        error: 'TLS handshake failed',
+        statusCode: 502,
+        hint: 'Allow extension through proxy',
+      });
+
+    const ct = new ConnectionTest(container, { validate });
+    ct.render();
+
+    const inputEl = container.querySelector('input');
+    const btnEl = container.querySelector('button');
+    const statusEl = container.querySelector('.connection-status');
+    const detailsEl = container.querySelector('.connection-status__details');
+    expect(inputEl && btnEl && statusEl && detailsEl).toBeTruthy();
+    if (!inputEl || !btnEl || !statusEl || !detailsEl)
+      throw new Error('connection test wiring invalid');
+
+    inputEl.value = 'http://service/ok';
+    btnEl.click();
+    expect(btnEl.disabled).toBe(true);
+    expect(statusEl.dataset.state).toBe('testing');
+    expect(statusEl.textContent).toContain('Testing connection');
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(btnEl.disabled).toBe(false);
+    expect(statusEl.dataset.state).toBe('success');
+    expect(statusEl.textContent).toContain('Connection successful');
+    expect(statusEl.textContent).toContain('78 ms');
+    expect(detailsEl.hidden).toBe(false);
+    expect(detailsEl.textContent).toContain('Latency: 78 ms');
+
+    inputEl.value = 'http://service/fail';
+    btnEl.click();
+    expect(btnEl.disabled).toBe(true);
+    expect(statusEl.dataset.state).toBe('testing');
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(btnEl.disabled).toBe(false);
+    expect(statusEl.dataset.state).toBe('error');
+    expect(statusEl.textContent).toContain('TLS handshake failed');
+    expect(statusEl.textContent).toContain('HTTP 502');
+    expect(detailsEl.hidden).toBe(false);
+    expect(detailsEl.textContent).toContain('Hint: Allow extension through proxy');
+  });
 });

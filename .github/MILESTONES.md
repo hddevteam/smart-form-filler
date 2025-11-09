@@ -1,4 +1,49 @@
-# Milestones (Concise) — Smart Form Filler TS Migration
+# Milestones — Smart Form Filler TS Migration
+
+_Last updated: 2025-11-09_
+
+## Snapshot
+
+- Overall coverage: ~85%
+- Tooling: pnpm 8 · Node 20 · Vite 7 · TS 5.9 (strict) · Vitest 4 · ESLint 9 · Prettier 3
+
+## Status Overview
+
+| Milestone                 | State | Notes                                                    |
+| ------------------------- | ----- | -------------------------------------------------------- |
+| M0 Setup                  | ✅    | Completed 2025-11-07                                     |
+| M1 Types                  | 🟡    | Core types in place, utility refinements ongoing         |
+| M2 Config                 | 🟡    | Storage + registry ready, validation next                |
+| M3 AI Service Layer       | 🟡    | CP-M3-3 complete (AIService retries, Ollama CORS bypass) |
+| M4 Data Processing        | 🔲    | Pending after AI service stabilization                   |
+| M5 UI Layer               | 🟡    | Popup foundation done, integration tests in progress     |
+| M6 Content Scripts        | 🟡    | Detector/Filler/Extractor migrated; Playwright pending   |
+| M7 Background Script      | 🟡    | Message router wired; integration tests outstanding      |
+| M8 Integration Testing    | 🔲    | To start after UI + background hardening                 |
+| M9 Optimization & Release | 🔲    | Scheduled post-integration                               |
+
+## Recent Progress
+
+- Completed CP-M3-3: AIService now ensures Ollama dynamic rule registration, logs rule state, and passes new unit coverage.
+- Popup AI test panel updated with fixed-height scrollable logs and copy-to-clipboard control.
+- Added `AzureResponsesAdapter` plus Ollama CORS bypass utilities with dedicated tests (`ollamaCorsBypass.test.ts`).
+
+## Next Steps
+
+1. **M3 (AI Service Layer)** – Deferred while continuing with existing adapters; revisit after UI and background stability improves.
+2. **M5 (UI Layer)** – Finish popup integration tests (≥70% coverage) and refine connection diagnostics.
+3. **M7 (Background Script)** – Extend integration coverage for message routing + AI requests, validating dynamic rule setup end-to-end.
+4. **M8 (Integration Testing)** – Kick off Playwright runs once above items stabilize.
+
+## Acceptance Targets (unchanged)
+
+- Strict TypeScript (no `any` without justification).
+- Coverage goals: Core services ≥90%, adapters ≥85%, UI ≥70%, content ≥75%, overall ≥80%.
+
+## References
+
+- Detailed migration breakdown: `.github/TS_MIGRATION_PLAN.md`
+- TDD workflow guidance: `.github/TDD_GUIDE.md`# Milestones (Concise) — Smart Form Filler TS Migration
 
 Purpose: Single, up-to-date plan mirroring actual progress. English only. MV3 frontend, TDD-first.
 
