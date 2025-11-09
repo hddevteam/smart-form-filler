@@ -16,7 +16,7 @@ _Last updated: 2025-11-09_
 | M2 Config                 | 🟡    | Storage + registry ready; validation layer pending         |
 | M3 AI Service Layer       | 🟡    | Retries & Ollama bypass shipped; factory/DeepSeek deferred |
 | M4 Data Processing        | 🔲    | Scheduled post AI-service stabilization                    |
-| M5 UI Layer               | 🟡    | Popup coverage climbing toward ≥70% target                 |
+| M5 UI Layer               | ✅    | Popup workflow migrated to TS; diagnostics pending polish  |
 | M6 Content Scripts        | 🟡    | Detector/Filler migrated; advanced Playwright flows next   |
 | M7 Background Script      | 🟡    | Message routing live; need richer telemetry                |
 | M8 Integration Testing    | 🟡    | Playwright smoke, config, and AI flows in Chromium/Edge    |
@@ -29,12 +29,13 @@ _Last updated: 2025-11-09_
 - Extended background integration suite for retry success/failure paths.
 - Delivered Playwright form-fill and detect→analyze→AI flows (Chromium & Edge).
 - AI_REQUEST handler now returns structured `{ success, data, logs }` payloads, capturing AIService telemetry for popup diagnostics.
+- Migrated popup results handling/data-source selection to TypeScript modules with user feedback and tests.
 
 ## Next Focus
 
-1. **M5 UI** – Exercise data source history actions (select/copy) to confirm ≥70% popup coverage.
-2. **M7 Background** – Thread structured logs into popup surfaces (Connection/AITest) and expand negative-path coverage (`chrome.runtime.lastError`).
-3. **M8 Integration** – Run Playwright against richer real-world form fixtures and multi-step AI handoffs.
+- [ ] **M5 UI** – Add remaining data-source history interactions (copy/export) to reach ≥70% coverage.
+- [ ] **M7 Background** – Surface structured logs inside popup diagnostics (Connection/AITest) and cover `chrome.runtime.lastError` paths.
+- [ ] **M8 Integration** – Exercise richer real-world form fixtures and multi-step AI handoffs in Playwright (Chromium + Edge).
 
 ## Checkpoints In Flight
 
@@ -46,362 +47,7 @@ _Last updated: 2025-11-09_
 
 - Strict TypeScript (no unchecked `any`).
 - Coverage: core services ≥90%, adapters ≥85%, UI ≥70%, content ≥75%, overall ≥80%.
-
-```
-M0 ━━━━━> M1 ━━━━━> M2 ━━━━━━━━> M3 ━━━━━━━━━━> M4 ━━━━━> M5 ━━━━━━━━> M6 ━━━━━> M7 ━━━━> M8 ━━━━━> M9
-2d        3d       5d          7d            4d       6d          5d       3d      4d       4d
-
-Setup     Types    Config      AI Services   Data     UI Layer    Content  BG      Test     Release
-```
-
-**Total Duration:** 43 days (approximately 6-7 weeks)
-
-**Legend:** d = days, BG = Background Script
-
-| Milestone                          | Goal                     | Duration | Dependencies |
-| ---------------------------------- | ------------------------ | -------- | ------------ |
-| [M0](#m0-project-initialization)   | Project initialization   | 2 days   | None         |
-| [M1](#m1-core-type-system)         | Core type system         | 3 days   | M0           |
-| [M2](#m2-configuration-management) | Configuration management | 5 days   | M1           |
-| [M3](#m3-ai-service-layer)         | AI service layer         | 7 days   | M1, M2       |
-| [M4](#m4-data-processing-layer)    | Data processing layer    | 4 days   | M1           |
-| [M5](#m5-ui-layer)                 | UI layer                 | 6 days   | M2, M3       |
-| [M6](#m6-content-scripts)          | Content scripts          | 5 days   | M3, M4       |
-| [M7](#m7-background-script)        | Background script        | 3 days   | M3           |
-| [M8](#m8-integration-testing)      | Integration testing      | 4 days   | M5, M6, M7   |
-| [M9](#m9-optimization--release)    | Optimization & release   | 4 days   | M8           |
-
-<!-- Consolidated to avoid duplication -->
-
-## M0: Project Initialization
-
-**Duration:** 2 days  
-**Goal:** Set up complete TypeScript project infrastructure
-
-### Checkpoints
-
-#### CP-M0-1: Project Scaffolding
-
-- [ ] Initialize Git repository
-- [ ] Create project structure (`src/`, `tests/`, `public/`)
-- [ ] Initialize pnpm (`pnpm init`)
-- [ ] Create `.gitignore`
-
-**Deliverable:** Basic folder structure
-
-#### CP-M0-2: TypeScript Configuration
-
-- [ ] Install TypeScript and dependencies
-- [ ] Create `tsconfig.json` (strict mode)
-- [ ] Create `tsconfig.node.json`
-- [ ] Verify type checking works
-
-**Deliverable:** `tsconfig.json`, `tsconfig.node.json`
-
-#### CP-M0-3: Build Tool Setup
-
-- [ ] Install and configure Vite
-- [ ] Create `vite.config.ts`
-- [ ] Test development build
-- [ ] Test production build
-
-**Deliverable:** Working Vite build system
-
-#### CP-M0-4: Testing Framework
-
-- [ ] Install Vitest and dependencies
-- [ ] Create `vitest.config.ts`
-- [ ] Create test setup file (`tests/setup.ts`)
-- [ ] Mock Chrome API
-- [ ] Write sample test to verify setup
-
-**Deliverable:** `vitest.config.ts`, working test command
-
-#### CP-M0-5: Code Quality Tools
-
-- [ ] Install and configure ESLint
-- [ ] Install and configure Prettier
-- [ ] Setup Husky (Git hooks)
-- [ ] Configure lint-staged
-- [ ] Setup commitlint
-
-**Deliverable:** `.eslintrc.cjs`, `.prettierrc`, `.husky/`
-
-#### CP-M0-6: CI/CD Pipeline
-
-- [ ] Create `.github/workflows/test.yml`
-- [ ] Create `.github/workflows/build.yml`
-- [ ] Test GitHub Actions locally (act)
-- [ ] Verify CI passes
-
-**Deliverable:** GitHub Actions workflows
-
-<!-- Completed acceptance criteria details removed to keep concise -->
-
----
-
-## M1: Core Type System
-
-**Duration:** 3 days  
-**Dependencies:** M0  
-**Goal:** Define comprehensive TypeScript type system and utilities
-
-### Checkpoints
-
-#### CP-M1-1: API Types
-
-- [ ] Define `ApiConfig` interface
-- [ ] Define `ApiProvider` type
-- [ ] Define `ChatMessage` interface
-- [ ] Define `ChatOptions` interface
-- [ ] Define `ChatResponse` interface
-- [ ] Define API error types
-
-**Deliverable:** `src/types/api.ts`
-
-**Example:**
-
-```typescript
-export interface ApiConfig {
-  provider: 'azure' | 'ollama';
-  name: string;
-  apiKey?: string;
-  endpoint: string;
-  model: string;
-  timeout?: number;
-}
-
-export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-export interface ChatOptions {
-  temperature?: number;
-  maxTokens?: number;
-  stream?: boolean;
-}
-
-export interface ChatResponse {
-  content: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-}
-```
-
-#### CP-M1-2: Configuration Types
-
-- [ ] Define `StorageConfig` interface
-- [ ] Define `ModelConfig` interface
-- [ ] Define `ExtensionConfig` interface
-- [ ] Define configuration validation types
-
-**Deliverable:** `src/types/config.ts`
-
-#### CP-M1-3: Model Types
-
-- [ ] Define `ModelInfo` interface
-- [ ] Define `ModelCapability` type
-- [ ] Define `ModelRegistry` type
-- [ ] Define provider-specific model types
-
-**Deliverable:** `src/types/models.ts`
-
-#### CP-M1-4: Chrome Extension Types
-
-- [ ] Extend Chrome API types as needed
-- [ ] Define custom message types
-- [ ] Define storage schema types
-
-**Deliverable:** `src/types/chrome.d.ts`
-
-#### CP-M1-5: Utility Functions
-
-- [ ] Implement HTTP client
-- [ ] Implement logger utility
-- [ ] Implement crypto utilities (encrypt/decrypt)
-- [ ] Write tests for all utilities (100% coverage)
-
-**Deliverable:** `src/utils/`, utility tests
-
-**Example Test:**
-
-```typescript
-// src/utils/__tests__/logger.test.ts
-import { describe, it, expect, vi } from 'vitest';
-import { Logger } from '../logger';
-
-describe('Logger', () => {
-  it('should log with correct level', () => {
-    const spy = vi.spyOn(console, 'log');
-    Logger.info('test message');
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('[INFO]'));
-  });
-
-  it('should not log when level is disabled', () => {
-    Logger.setLevel('error');
-    const spy = vi.spyOn(console, 'log');
-    Logger.info('test');
-    expect(spy).not.toHaveBeenCalled();
-  });
-});
-```
-
-### Acceptance Criteria (In Progress)
-
-- All type files compile without errors
-- No use of `any` type (or documented exceptions)
-- Utility functions have ≥100% test coverage
-- All utilities have JSDoc comments
-- Types are exported from `src/types/index.ts`
-
-<!-- Commit template samples trimmed; use Conventional Commits with milestone tags -->
-
----
-
-## M2: Configuration Management
-
-**Duration:** 5 days  
-**Dependencies:** M1  
-**Goal:** Implement storage, API configuration, and model registry
-
-### Checkpoints
-
-#### CP-M2-1: Storage Manager (TDD)
-
-**Test First:**
-
-```typescript
-// src/config/__tests__/storageManager.test.ts
-describe('StorageManager', () => {
-  it('should save and retrieve data', async () => {
-    const storage = new StorageManager();
-    await storage.save('key', { value: 1 });
-    const data = await storage.get('key');
-    expect(data).toEqual({ value: 1 });
-  });
-
-  it('should handle Chrome storage errors', async () => {
-    vi.spyOn(chrome.storage.local, 'set').mockRejectedValue(new Error('Storage full'));
-    await expect(storage.save('key', {})).rejects.toThrow();
-  });
-});
-```
-
-**Implementation:**
-
-- [ ] Write tests (Red)
-- [ ] Implement `StorageManager` class (Green)
-- [ ] Add type safety with generics
-- [ ] Add error handling
-- [ ] Refactor
-
-**Deliverable:** `src/config/storageManager.ts`, tests (≥90% coverage)
-
-#### CP-M2-2: API Config Manager (TDD)
-
-**Test First:**
-
-```typescript
-describe('ApiConfigManager', () => {
-  it('should save Azure config', async () => {
-    const config: ApiConfig = {
-      provider: 'azure',
-      name: 'Test',
-      endpoint: 'https://test.com',
-      apiKey: 'sk-test',
-      model: 'gpt-4',
-    };
-    await manager.saveConfig(config);
-    const saved = await manager.getConfig('Test');
-    expect(saved).toEqual(config);
-  });
-
-  it('should encrypt API key before saving', async () => {
-    await manager.saveConfig(config);
-    const raw = await getRawStorageData();
-    expect(raw.apiKey).not.toBe(config.apiKey);
-  });
-
-  it('should validate config before saving', async () => {
-    const invalid = { provider: 'invalid' } as any;
-    await expect(manager.saveConfig(invalid)).rejects.toThrow('Invalid config');
-  });
-});
-```
-
-**Implementation:**
-
-- [ ] Write test cases (Red)
-- [ ] Implement `ApiConfigManager` (Green)
-- [ ] Add encryption for API keys
-- [ ] Add validation logic
-- [ ] Add CRUD operations
-- [ ] Refactor
-
-**Deliverable:** `src/config/apiConfigManager.ts`, tests (≥90% coverage)
-
-#### CP-M2-3: Model Registry
-
-**Implementation:**
-
-- [ ] Define model metadata (capabilities, context window, pricing)
-- [ ] Implement model lookup functions
-- [ ] Add provider-specific model lists
-- [ ] Write tests
-
-**Deliverable:** `src/config/modelRegistry.ts`, tests
-
-**Example:**
-
-```typescript
-export const MODEL_REGISTRY: Record<string, ModelInfo> = {
-  'gpt-4': {
-    provider: 'azure',
-    name: 'gpt-4',
-    contextWindow: 8192,
-    capabilities: ['chat', 'function-calling'],
-  },
-  llama2: {
-    provider: 'ollama',
-    name: 'llama2',
-    contextWindow: 4096,
-    capabilities: ['chat'],
-  },
-};
-```
-
-#### CP-M2-4: Configuration Validation
-
-- [ ] Implement config validators
-- [ ] Add schema validation (Zod/Yup)
-- [ ] Write comprehensive validation tests
-
-**Deliverable:** `src/config/validators.ts`, tests
-
-#### CP-M2-5: Integration Tests
-
-- [ ] Test StorageManager + ApiConfigManager integration
-- [ ] Test config persistence across sessions
-- [ ] Test concurrent config operations
-
-**Deliverable:** Integration test suite
-
-### Acceptance Criteria
-
-- [x] Can save/retrieve/delete API configurations
-- [x] API keys are encrypted in storage
-- [x] Config validation prevents invalid data
-- [x] Test coverage ≥90% for all modules
-- [x] No data loss during concurrent operations
-
-### Commit Template
-
-```bash
-git commit -m "feat(config): implement configuration management system
+  git commit -m "feat(config): implement configuration management system
 
 - Add StorageManager with generic type support
 - Add ApiConfigManager with encryption
@@ -411,14 +57,15 @@ git commit -m "feat(config): implement configuration management system
 
 MILESTONE: M2 - Configuration Management
 CHECKPOINT: CP-M2-5"
-```
+
+````
 
 ---
 
 ## M3: AI Service Layer
 
-**Duration:** 7 days  
-**Dependencies:** M1, M2  
+**Duration:** 7 days
+**Dependencies:** M1, M2
 **Goal:** Migrate backend/services/gptService to frontend TypeScript in background script
 
 **Migration Reference**: See `.github/AI_SERVICE_MIGRATION.md` for detailed migration guide
@@ -472,7 +119,7 @@ export abstract class BaseAdapter {
   // Optional: processResponse for provider-specific formats
   processResponse?(data: unknown): ChatResponse;
 }
-```
+````
 
 **Tasks:**
 
