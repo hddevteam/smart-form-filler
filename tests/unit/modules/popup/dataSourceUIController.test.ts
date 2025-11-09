@@ -16,11 +16,19 @@ function setupDOM() {
       <button id="dataSourceApplyBtn">Apply</button>
       <button id="dataSourceCancelBtn">Cancel</button>
     </div>
-    <div id="dataSourceSummaryText"></div>
-    <div id="chatDataSourceStatus"></div>
+    <button id="chatDataSourceBtn" class="simple-mode__data-source-btn">
+      <span id="chatDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+      <span id="chatDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+    </button>
+    <button id="simpleModeDataSourceBtn" class="simple-mode__data-source-btn">
+      <span id="simpleModeDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+      <span id="simpleModeDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+    </button>
+    <button id="advancedDataSourceBtn" class="simple-mode__data-source-btn">
+      <span id="advancedDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+      <span id="advancedDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+    </button>
     <button id="openDataSourceModalBtn"><span class="btn__text"></span></button>
-    <div id="formFillerDataSourceSummary" class="hidden"></div>
-    <div id="formFillerDataSourceSummaryText"></div>
     <button id="openFormFillerDataSourceModalBtn"><span class="btn__text"></span></button>
   `;
 }
@@ -130,11 +138,23 @@ describe('DataSourceUIController', () => {
 
     // Update chat and form filler status
     ui.updateChatUI(config);
-    const summaryTextEl = document.getElementById('dataSourceSummaryText') as HTMLElement;
-    expect(summaryTextEl.textContent).toContain('Selected: 1');
+    const chatText = document.getElementById('chatDataSourceText') as HTMLElement;
+    expect(chatText.textContent).toBe('1 selected • Markdown');
+    const chatBtn = document.getElementById('chatDataSourceBtn');
+    expect(chatBtn?.classList.contains('simple-mode__data-source-btn--configured')).toBe(true);
+    const chatIcon = document.getElementById('chatDataSourceIcon');
+    expect(chatIcon?.textContent).toBe('✅');
 
     ui.updateFormFillerUI(config, sources);
-    const ffSummary = document.getElementById('formFillerDataSourceSummary') as HTMLElement;
-    expect(ffSummary.classList.contains('hidden')).toBe(false);
+    const simpleText = document.getElementById('simpleModeDataSourceText');
+    expect(simpleText?.textContent).toBe('1 selected • Markdown');
+    const simpleIcon = document.getElementById('simpleModeDataSourceIcon');
+    expect(simpleIcon?.textContent).toBe('✅');
+    const simpleBtn = document.getElementById('simpleModeDataSourceBtn');
+    expect(simpleBtn?.classList.contains('simple-mode__data-source-btn--configured')).toBe(true);
+    const advancedText = document.getElementById('advancedDataSourceText');
+    expect(advancedText?.textContent).toBe('1 selected • Markdown');
+    const advancedIcon = document.getElementById('advancedDataSourceIcon');
+    expect(advancedIcon?.textContent).toBe('✅');
   });
 });

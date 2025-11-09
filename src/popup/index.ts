@@ -11,6 +11,8 @@ import ResultsHandler from '@/popup/modules/resultsHandler';
 import type { PopupElements, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
 import { PopupManager } from '@/popup/modules/popupManager';
+import { MainTabController } from '@/popup/modules/mainTabController';
+import { ModeToggle } from '@/popup/modules/modeToggle';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
@@ -52,13 +54,107 @@ document.addEventListener('DOMContentLoaded', () => {
     extractDataBtn: getElement('extractDataBtn'),
     connectionStatus: getElement('connectionStatus'),
     authText: getElement('authText'),
-    mainTabs: Array.from(document.querySelectorAll<HTMLElement>('.main-tab')),
+    mainTabs: Array.from(document.querySelectorAll<HTMLButtonElement>('.main-tab')),
+    extractionTab: getElement('extractionTab'),
+    chatTab: getElement('chatTab'),
+    formFillerTab: getElement('formFillerTab'),
+    selectedMode: getElement('selectedMode'),
+    simpleModeToggle: getElement('simpleModeToggle'),
+    advancedModeToggle: getElement('advancedModeToggle'),
+    formFillerSimpleMode: getElement('formFillerSimpleMode'),
+    formFillerAdvancedMode: getElement('formFillerAdvancedMode'),
+    formFillerContent: getElement('formFillerContent'),
+    simpleModeLanguageSelect: document.getElementById(
+      'simpleModeLanguageSelect'
+    ) as HTMLSelectElement | null,
+    advancedModeLanguageSelect: document.getElementById(
+      'languageSelect'
+    ) as HTMLSelectElement | null,
+    fillContentInput: document.getElementById('fillContentInput') as HTMLTextAreaElement | null,
   };
 
   const extensionClient = new ExtensionClient();
   const popupManager = new PopupManager();
   popupManager.elements = elements;
   popupManager.apiClient = extensionClient;
+
+  const mainTabButtons = (elements.mainTabs ?? []).filter(
+    (btn): btn is HTMLButtonElement => btn instanceof HTMLButtonElement
+  );
+  const mainTabController = new MainTabController({
+    tabButtons: mainTabButtons,
+    tabContents: {
+      extraction: elements.extractionTab ?? null,
+      chat: elements.chatTab ?? null,
+      formfiller: elements.formFillerTab ?? null,
+    },
+    statusLabel: elements.selectedMode ?? null,
+    onTabChanged: tab => {
+      if (tab === 'chat') {
+        document.dispatchEvent(new CustomEvent('popup:chat-tab-entered'));
+      } else if (tab === 'formfiller') {
+        document.dispatchEvent(new CustomEvent('popup:formfiller-tab-entered'));
+      }
+    },
+  });
+  mainTabController.init();
+  (popupManager as unknown as { mainTabController?: MainTabController }).mainTabController =
+    mainTabController;
+
+  const simpleModeAdapter = {
+    getContent: () => {
+      const input = document.getElementById('simpleModeContentInput') as HTMLTextAreaElement | null;
+      return input?.value ?? '';
+    },
+    setContent: (content: string) => {
+      const input = document.getElementById('simpleModeContentInput') as HTMLTextAreaElement | null;
+      if (!input) return;
+      input.value = content;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    },
+    getLanguage: () => elements.simpleModeLanguageSelect?.value ?? 'zh',
+    setLanguage: (language: string) => {
+      if (!elements.simpleModeLanguageSelect) return;
+      elements.simpleModeLanguageSelect.value = language;
+      elements.simpleModeLanguageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    },
+    hideAllStates: () => {
+      document.getElementById('simpleModeResults')?.classList.add('hidden');
+      document.getElementById('simpleModeError')?.classList.add('hidden');
+      document.getElementById('simpleModeFillSection')?.classList.add('hidden');
+      document.getElementById('simpleModeProgress')?.classList.add('hidden');
+    },
+    showProgress: () => {
+      document.getElementById('simpleModeProgress')?.classList.remove('hidden');
+    },
+    showError: (message: string) => {
+      const errorContainer = document.getElementById('simpleModeError');
+      const errorMessage = document.getElementById('simpleModeErrorMessage');
+      errorContainer?.classList.remove('hidden');
+      if (errorMessage) errorMessage.textContent = message;
+    },
+  };
+
+  const modeToggle = new ModeToggle({
+    simpleToggle: elements.simpleModeToggle ?? null,
+    advancedToggle: elements.advancedModeToggle ?? null,
+    simpleContainer: elements.formFillerSimpleMode ?? null,
+    advancedContainer: elements.formFillerAdvancedMode ?? null,
+    modeIndicator: elements.selectedMode ?? null,
+    simpleMode: simpleModeAdapter,
+    advancedMode: {
+      updateSectionVisibility: () => undefined,
+      reset: () => undefined,
+    },
+    advancedInput: elements.fillContentInput ?? null,
+    simpleLanguageSelect: elements.simpleModeLanguageSelect ?? null,
+    advancedLanguageSelect: elements.advancedModeLanguageSelect ?? null,
+    onModeChanged: mode => {
+      document.dispatchEvent(new CustomEvent('popup:form-mode-toggled', { detail: { mode } }));
+    },
+  });
+  modeToggle.init();
+  (popupManager as unknown as { modeToggle?: ModeToggle }).modeToggle = modeToggle;
 
   const updateHistoryState = (hasHistory: boolean) => {
     if (elements.copyBtn) elements.copyBtn.disabled = !hasHistory;
@@ -94,8 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.chatBtn?.addEventListener('click', () => {
-      const trigger = document.getElementById('chatTabTrigger');
-      if (trigger instanceof HTMLButtonElement) trigger.click();
+      mainTabController.switchTab('chat');
     });
 
     elements.copyBtn?.addEventListener('click', () => {

@@ -22,7 +22,7 @@ export interface PopupElements {
   errorMessage?: HTMLElement | null;
   outputText?: HTMLElement | null;
   resultsMeta?: HTMLElement | null;
-  mainTabs?: HTMLElement[] | null;
+  mainTabs?: HTMLButtonElement[] | null;
   resultsTabs?: HTMLElement[] | null;
   markdownText?: HTMLElement | null;
   htmlText?: HTMLElement | null;
@@ -50,6 +50,20 @@ export interface PopupElements {
   dataSourceModalClose?: HTMLElement | null;
   dataSourceApplyBtn?: HTMLButtonElement | null;
   dataSourceCancelBtn?: HTMLButtonElement | null;
+  // Main tab containers
+  extractionTab?: HTMLElement | null;
+  chatTab?: HTMLElement | null;
+  formFillerTab?: HTMLElement | null;
+  selectedMode?: HTMLElement | null;
+  // Form filler mode toggle
+  simpleModeToggle?: HTMLButtonElement | null;
+  advancedModeToggle?: HTMLButtonElement | null;
+  formFillerSimpleMode?: HTMLElement | null;
+  formFillerAdvancedMode?: HTMLElement | null;
+  formFillerContent?: HTMLElement | null;
+  simpleModeLanguageSelect?: HTMLSelectElement | null;
+  advancedModeLanguageSelect?: HTMLSelectElement | null;
+  fillContentInput?: HTMLTextAreaElement | HTMLInputElement | null;
   // Deprecated: backend-related UI (kept during migration)
   backendUrlInput?: HTMLInputElement | null;
   testConnectionBtn?: HTMLElement | null;

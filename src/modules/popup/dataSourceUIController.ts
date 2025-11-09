@@ -48,12 +48,21 @@ export class DataSourceUIController {
         });
       }
 
-      const formFillerDataSourceBtn = document.getElementById('openFormFillerDataSourceModalBtn');
-      if (formFillerDataSourceBtn) {
-        formFillerDataSourceBtn.addEventListener('click', () =>
-          this.openModalForContext('formFiller')
-        );
-      }
+      const chatDataSourceBtn = document.getElementById('chatDataSourceBtn');
+      chatDataSourceBtn?.addEventListener('click', () => this.openModalForContext('chat'));
+
+      const simpleModeDataSourceBtn = document.getElementById('simpleModeDataSourceBtn');
+      simpleModeDataSourceBtn?.addEventListener('click', () =>
+        this.openModalForContext('formFiller')
+      );
+
+      const advancedModeDataSourceBtn = document.getElementById('advancedDataSourceBtn');
+      advancedModeDataSourceBtn?.addEventListener('click', () =>
+        this.openModalForContext('formFiller')
+      );
+
+      const legacyFormBtn = document.getElementById('openFormFillerDataSourceModalBtn');
+      legacyFormBtn?.addEventListener('click', () => this.openModalForContext('formFiller'));
     } catch (error) {
       this.logger.error('Error setting up event listeners:', error);
     }
@@ -217,38 +226,25 @@ export class DataSourceUIController {
 
   updateChatUI(config: DataSourceConfig): void {
     try {
-      const dataSourceSummaryText = document.getElementById('dataSourceSummaryText');
-      if (dataSourceSummaryText) {
-        if (config.isValid()) {
-          const count = config.getCount();
-          const typeText = this.getTypeDisplayName(config.type as string);
-          dataSourceSummaryText.textContent = `Selected: ${count} source${count !== 1 ? 's' : ''}, ${typeText}`;
-        } else {
-          dataSourceSummaryText.textContent = 'Selected: 0 sources, No type selected';
-        }
-      }
-      const chatStatus = document.getElementById('chatDataSourceStatus');
-      if (chatStatus) {
-        if (config.isValid()) {
-          const count = config.getCount();
-          chatStatus.textContent = `${count} data source${count !== 1 ? 's' : ''} selected`;
-          chatStatus.className = 'data-source-status data-source-status--configured';
-        } else {
-          chatStatus.textContent = 'No data sources configured';
-          chatStatus.className = 'data-source-status';
-        }
-      }
-      const chatConfigBtn = document.getElementById('openDataSourceModalBtn');
-      if (chatConfigBtn) {
-        const buttonText = chatConfigBtn.querySelector('.btn__text');
-        if (buttonText)
-          buttonText.textContent = config.isValid() ? 'Reconfigure Sources' : 'Configure Sources';
+      const chatBtn = document.getElementById('chatDataSourceBtn');
+      const chatText = document.getElementById('chatDataSourceText');
+      const chatIcon = document.getElementById('chatDataSourceIcon');
+      if (config.isValid()) {
+        const count = config.getCount();
+        const typeText = this.getTypeDisplayName(config.type as string);
+        if (chatText) chatText.textContent = `${count} selected • ${typeText}`;
+        if (chatIcon) chatIcon.textContent = '✅';
+        chatBtn?.classList.add('simple-mode__data-source-btn--configured');
+      } else {
+        if (chatText) chatText.textContent = 'Configure sources';
+        if (chatIcon) chatIcon.textContent = '⚙️';
+        chatBtn?.classList.remove('simple-mode__data-source-btn--configured');
       }
       this.logger.debug('Chat UI updated:', {
         isValid: config.isValid(),
         count: config.getCount(),
         type: config.type,
-        elementFound: !!dataSourceSummaryText,
+        elementFound: !!chatText,
       });
     } catch (error) {
       this.logger.error('Error updating chat UI:', error);
@@ -257,32 +253,37 @@ export class DataSourceUIController {
 
   updateFormFillerUI(config: DataSourceConfig, availableDataSources: AvailableDataSource[]): void {
     try {
-      const formFillerSummaryElement = document.getElementById('formFillerDataSourceSummary');
-      const formFillerSummaryText = document.getElementById('formFillerDataSourceSummaryText');
-      const formFillerConfigButton = document.getElementById('openFormFillerDataSourceModalBtn');
       const validSelected = config.selectedItems.filter(selectedItem => {
         const selectedId = typeof selectedItem === 'object' ? selectedItem.id : selectedItem;
         return availableDataSources.some(source => source.id === selectedId);
       });
       const hasValid = config.isValid() && validSelected.length > 0;
+      const count = validSelected.length;
+      const typeText = this.getTypeDisplayName(config.type as string);
+
+      const simpleBtn = document.getElementById('simpleModeDataSourceBtn');
+      const simpleText = document.getElementById('simpleModeDataSourceText');
+      const simpleIcon = document.getElementById('simpleModeDataSourceIcon');
+      const advancedBtn = document.getElementById('advancedDataSourceBtn');
+      const advancedText = document.getElementById('advancedDataSourceText');
+      const advancedIcon = document.getElementById('advancedDataSourceIcon');
+
       if (hasValid) {
-        if (formFillerSummaryElement) formFillerSummaryElement.classList.remove('hidden');
-        if (formFillerSummaryText) {
-          const count = validSelected.length;
-          const countText = `${count} source${count !== 1 ? 's' : ''}`;
-          const typeText = this.getTypeDisplayName(config.type as string);
-          formFillerSummaryText.textContent = `Selected: ${countText}, ${typeText}`;
-        }
-        if (formFillerConfigButton) {
-          const buttonText = formFillerConfigButton.querySelector('.btn__text');
-          if (buttonText) buttonText.textContent = 'Reconfigure Sources';
-        }
+        const summary = `${count} selected • ${typeText}`;
+        if (simpleText) simpleText.textContent = summary;
+        if (simpleIcon) simpleIcon.textContent = '✅';
+        simpleBtn?.classList.add('simple-mode__data-source-btn--configured');
+
+        if (advancedText) advancedText.textContent = summary;
+        if (advancedIcon) advancedIcon.textContent = '✅';
+        advancedBtn?.classList.add('simple-mode__data-source-btn--configured');
       } else {
-        if (formFillerSummaryElement) formFillerSummaryElement.classList.add('hidden');
-        if (formFillerConfigButton) {
-          const buttonText = formFillerConfigButton.querySelector('.btn__text');
-          if (buttonText) buttonText.textContent = 'Configure Sources';
-        }
+        if (simpleText) simpleText.textContent = 'Configure sources';
+        if (simpleIcon) simpleIcon.textContent = '⚙️';
+        simpleBtn?.classList.remove('simple-mode__data-source-btn--configured');
+        if (advancedText) advancedText.textContent = 'Configure sources';
+        if (advancedIcon) advancedIcon.textContent = '⚙️';
+        advancedBtn?.classList.remove('simple-mode__data-source-btn--configured');
       }
     } catch (error) {
       this.logger.error('Error updating form filler UI:', error);
