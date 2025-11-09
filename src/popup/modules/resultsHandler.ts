@@ -1,7 +1,8 @@
 /**
  * ResultsHandler (TypeScript) - Displays and manages extraction results and history
  */
-import type { PopupElements } from '@/types/popup';
+import type { PopupElements, PopupManagerLike } from '@/types/popup';
+import type { DataSourceConfigObject } from '@/types/dataSource';
 import { Logger } from '@/utils/logger';
 
 export interface ExtractionStats {
@@ -29,6 +30,7 @@ export interface ExtractionResponse {
 export class ResultsHandler {
   private elements: PopupElements;
   private uiController: { updateMainChatButtonState: (hasHistory: boolean) => void } | undefined;
+  private popupManager: PopupManagerLike | undefined;
   private logger = Logger.forScope('ResultsHandler');
 
   lastExtractionResult: DataSources | null = null;
@@ -44,10 +46,12 @@ export class ResultsHandler {
 
   constructor(
     elements: PopupElements,
-    uiController?: { updateMainChatButtonState: (hasHistory: boolean) => void }
+    uiController?: { updateMainChatButtonState: (hasHistory: boolean) => void },
+    popupManager?: PopupManagerLike
   ) {
     this.elements = elements;
     this.uiController = uiController;
+    this.popupManager = popupManager;
   }
 
   showExtractionResults(response: ExtractionResponse): void {
@@ -342,8 +346,51 @@ export class ResultsHandler {
   }
 
   showSuccess(message: string): void {
-    // Minimal success notifier routed through Logger
     this.logger.info(`Success: ${message}`);
+    if (typeof document === 'undefined') return;
+
+    const containerId = 'sff-toast-container';
+    let container = document.getElementById(containerId);
+    if (!container) {
+      container = document.createElement('div');
+      container.id = containerId;
+      container.style.position = 'fixed';
+      container.style.top = '16px';
+      container.style.right = '16px';
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.gap = '8px';
+      container.style.zIndex = '9999';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.background = 'rgba(34, 197, 94, 0.95)';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 16px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '13px';
+    toast.style.fontWeight = '600';
+    toast.style.boxShadow = '0 12px 24px rgba(34, 197, 94, 0.25)';
+    toast.style.transform = 'translateX(120%)';
+    toast.style.opacity = '0';
+    toast.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+    container.appendChild(toast);
+
+    window.requestAnimationFrame(() => {
+      toast.style.transform = 'translateX(0)';
+      toast.style.opacity = '1';
+    });
+
+    window.setTimeout(() => {
+      toast.style.transform = 'translateX(120%)';
+      toast.style.opacity = '0';
+      window.setTimeout(() => {
+        toast.remove();
+        if (container && container.children.length === 0) container.remove();
+      }, 250);
+    }, 3000);
   }
 
   getLastExtractionResult(): DataSources | null {
@@ -357,17 +404,84 @@ export class ResultsHandler {
   }
 
   selectDataSource(index: number): void {
-    // Minimal: in TS port, we only validate and log. Full sync logic is in JS legacy, not required for tests here.
     if (index < 0 || index >= this.extractionHistory.length) {
       this.showError('Invalid data source selection');
       return;
     }
-    // no-op for tests
+    const item = this.extractionHistory[index];
+    const title = item.title ?? `Extraction ${index + 1}`;
+    const content = this.combineDataSourceContent(item.dataSources);
+    const selectionId = `extraction-${index}`;
+    const config: Partial<DataSourceConfigObject> = {
+      type: 'markdown',
+      selectedItems: [
+        {
+          id: selectionId,
+          title,
+          url: item.url,
+          content,
+          timestamp: item.timestamp?.valueOf?.() ?? item.timestamp,
+        },
+      ],
+      isConfigured: true,
+    };
+
+    const manager = this.popupManager?.dataSourceManager;
+    if (manager) {
+      void Promise.resolve(manager.updateChatConfiguration(config));
+      void Promise.resolve(manager.updateFormFillerConfiguration(config));
+    }
+
+    this.dispatchDataSourceSelected(config);
+    this.showSuccess(`✅ Selected "${title}" as Markdown data source`);
+    this.highlightSelectedItem(index);
+    this.switchToFormFillerTab();
   }
 
   highlightSelectedItem(index: number): void {
-    // no-op in TS port for tests
-    void index;
+    if (typeof document === 'undefined') return;
+    document
+      .querySelectorAll('.history-item--selected')
+      .forEach(el => el.classList.remove('history-item--selected'));
+    const item = document.querySelector(`[data-index="${index}"]`);
+    if (!item) return;
+    this.ensureSelectionStyles();
+    item.classList.add('history-item--selected');
+    window.setTimeout(() => item.classList.remove('history-item--selected'), 3000);
+  }
+
+  private dispatchDataSourceSelected(config: Partial<DataSourceConfigObject>): void {
+    if (typeof document === 'undefined') return;
+    document.dispatchEvent(new CustomEvent('dataSourceSelected', { detail: config }));
+  }
+
+  private ensureSelectionStyles(): void {
+    if (typeof document === 'undefined') return;
+    if (document.getElementById('sff-selection-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'sff-selection-styles';
+    style.textContent = `
+      .history-item--selected {
+        border: 2px solid #22c55e !important;
+        background: #f0fff4 !important;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+        transform: translateY(-2px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .history-item--selected .history-item__action-btn[data-action="select"] {
+        background: #22c55e !important;
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  private switchToFormFillerTab(): void {
+    if (typeof document === 'undefined') return;
+    const trigger =
+      (document.getElementById('formFillerTabTrigger') as HTMLButtonElement | null) ??
+      document.querySelector('[data-tab="formfiller"]');
+    trigger?.click?.();
   }
 
   combineDataSourceContent(
@@ -388,11 +502,42 @@ export class ResultsHandler {
     return parts.join('\n\n---\n\n');
   }
 
+  async copyLastResult(): Promise<void> {
+    const content = this.combineDataSourceContent(this.lastExtractionResult);
+    if (!content) {
+      this.showError('No extraction result available to copy');
+      return;
+    }
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(content);
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-1000px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      } else {
+        throw new Error('Clipboard unavailable');
+      }
+      this.showSuccess('📋 Extraction copied to clipboard');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.showError(`Failed to copy results: ${message}`);
+    }
+  }
+
   notifyExtractionHistoryUpdated(): void {
     const event = new CustomEvent('extractionHistoryUpdated', {
       detail: { historyLength: this.extractionHistory.length, lastItem: this.extractionHistory[0] },
     });
     document.dispatchEvent(event);
+    this.popupManager?.dataSourceManager?.updateAvailableDataSources?.();
   }
 }
 

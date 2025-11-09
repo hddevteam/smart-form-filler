@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import ResultsHandler from '@/popup/modules/resultsHandler';
-import type { PopupElements } from '@/types/popup';
+import type { PopupElements, PopupManagerLike } from '@/types/popup';
 
 const createElements = (): PopupElements => {
   const historyContainer = document.createElement('div');
@@ -67,6 +67,13 @@ const sampleResponse = {
 describe('ResultsHandler', () => {
   let elements: PopupElements;
   let handler: ResultsHandler;
+  let updateState: ReturnType<typeof vi.fn>;
+  let dataSourceManager: {
+    updateAvailableDataSources: ReturnType<typeof vi.fn>;
+    updateChatConfiguration: ReturnType<typeof vi.fn>;
+    updateFormFillerConfiguration: ReturnType<typeof vi.fn>;
+  };
+  let popupManager: PopupManagerLike;
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -87,7 +94,24 @@ describe('ResultsHandler', () => {
       elements.cleanedHtmlPanel!,
       elements.resultsMeta!
     );
-    handler = new ResultsHandler(elements);
+    updateState = vi.fn();
+    dataSourceManager = {
+      updateAvailableDataSources: vi.fn(),
+      updateChatConfiguration: vi.fn(),
+      updateFormFillerConfiguration: vi.fn(),
+    };
+    popupManager = {
+      dataSourceManager,
+    } as unknown as PopupManagerLike;
+    handler = new ResultsHandler(
+      elements,
+      { updateMainChatButtonState: updateState },
+      popupManager
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('stores extraction results and renders history/detail views', () => {
@@ -96,13 +120,14 @@ describe('ResultsHandler', () => {
     expect(handler.extractionHistory).toHaveLength(1);
     expect(elements.historyContainer!.children.length).toBe(1);
     expect(elements.resultsSection!.classList.contains('hidden')).toBe(false);
+    expect(dataSourceManager.updateAvailableDataSources).toHaveBeenCalled();
 
     handler.viewHistoryItem(0);
     expect(elements.currentResultsDetail!.classList.contains('hidden')).toBe(false);
     expect(elements.markdownText!.textContent).toContain('Heading');
   });
 
-  it('handles history action buttons (view/delete/select)', () => {
+  it('handles history action buttons (view/delete/select)', async () => {
     handler.showExtractionResults(sampleResponse);
 
     const item = elements.historyContainer!.querySelector('.history-item') as HTMLElement;
@@ -114,16 +139,29 @@ describe('ResultsHandler', () => {
       handler as unknown as { showError: (msg: string) => void },
       'showError'
     );
+    const eventSpy = vi.fn();
+    const listener = (event: Event) => {
+      eventSpy((event as CustomEvent).detail);
+    };
+    document.addEventListener('dataSourceSelected', listener);
 
     viewBtn.click();
     expect(elements.currentResultsDetail!.classList.contains('hidden')).toBe(false);
 
     selectBtn.click();
+    await Promise.resolve();
+    await Promise.resolve();
     expect(showErrorSpy).not.toHaveBeenCalled();
+    expect(dataSourceManager.updateChatConfiguration).toHaveBeenCalledTimes(1);
+    expect(dataSourceManager.updateFormFillerConfiguration).toHaveBeenCalledTimes(1);
+    expect(eventSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ selectedItems: expect.any(Array) })
+    );
 
     deleteBtn.click();
     expect(handler.extractionHistory).toHaveLength(0);
     expect(elements.historyContainer!.innerHTML).toContain('history-empty');
+    document.removeEventListener('dataSourceSelected', listener);
   });
 
   it('shows and hides error state correctly', () => {
@@ -140,5 +178,19 @@ describe('ResultsHandler', () => {
     ]);
     expect(combined).toContain('## Data Source 1');
     expect(combined).toContain('Plain text');
+  });
+
+  it('copies last extraction to clipboard', async () => {
+    handler.showExtractionResults(sampleResponse);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+
+    await handler.copyLastResult();
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('# Heading'));
+    delete (navigator as unknown as { clipboard?: unknown }).clipboard;
   });
 });

@@ -4,6 +4,7 @@
  */
 
 import type { PopupManagerLike, ApiClientLike } from '../../types/popup';
+import type { DataSourceConfigObject } from '@/types/dataSource';
 
 export class PopupManager implements PopupManagerLike {
   elements: Record<string, HTMLElement | HTMLInputElement | HTMLSelectElement | null>;
@@ -16,6 +17,14 @@ export class PopupManager implements PopupManagerLike {
   resultsHandler?: {
     showError: (message: string) => void;
     showMessage?: (message: string, type: string) => void;
+    extractionHistory?: Array<unknown>;
+  };
+  dataSourceManager?: {
+    updateAvailableDataSources?: () => void;
+    updateChatConfiguration: (config: Partial<DataSourceConfigObject>) => Promise<void> | void;
+    updateFormFillerConfiguration: (
+      config: Partial<DataSourceConfigObject>
+    ) => Promise<void> | void;
   };
 
   // Simple operation tracker

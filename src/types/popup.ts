@@ -1,3 +1,5 @@
+import type { DataSourceConfigObject } from '@/types/dataSource';
+
 // Popup type definitions
 
 export interface PopupElements {
@@ -100,6 +102,13 @@ export interface PopupManagerLike {
   // Chat handler for notifying data source configuration changes
   chatHandler?: {
     onDataSourceChanged: (config: unknown) => void;
+  };
+  dataSourceManager?: {
+    updateAvailableDataSources?: () => void;
+    updateChatConfiguration: (config: Partial<DataSourceConfigObject>) => Promise<void> | void;
+    updateFormFillerConfiguration: (
+      config: Partial<DataSourceConfigObject>
+    ) => Promise<void> | void;
   };
   updateAuthenticationStatus?: () => void;
 }

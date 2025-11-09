@@ -7,38 +7,100 @@ import AITestButton from '@/popup/components/AITestButton';
 import '@/popup/components/aiTestButton.css';
 import AzureSettingsModal from '@/popup/components/AzureSettingsModal';
 import { ApiConfigManager } from '@/config/apiConfigManager';
-import type { PopupElements, PopupManagerLike, UIEventHandlers } from '@/types/popup';
+import ResultsHandler from '@/popup/modules/resultsHandler';
+import type { PopupElements, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
+import { PopupManager } from '@/popup/modules/popupManager';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
 
 // Wire up Data Source Manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  const getElement = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+
+  const ensureTabTrigger = (selector: string, id: string) => {
+    const trigger = document.querySelector(selector);
+    if (trigger && !trigger.id) {
+      (trigger as HTMLElement).id = id;
+    }
+  };
+
+  ensureTabTrigger('[data-tab="formfiller"]', 'formFillerTabTrigger');
+  ensureTabTrigger('[data-tab="chat"]', 'chatTabTrigger');
+
   const elements: PopupElements = {
-    // We will pass minimal elements; DataSourceUIController will be migrated later.
+    resultsSection: getElement('resultsSection'),
+    historyContainer: getElement('historyContainer'),
+    currentResultsDetail: getElement('currentResultsDetail'),
+    markdownText: getElement('markdownText'),
+    htmlText: getElement('htmlText'),
+    cleanedHtmlText: getElement('cleanedHtmlText'),
+    metadataData: getElement('metadataData'),
+    markdownPanel: getElement('markdownPanel'),
+    htmlPanel: getElement('htmlPanel'),
+    cleanedHtmlPanel: getElement('cleanedHtmlPanel'),
+    metadataPanel: getElement('metadataPanel'),
+    markdownTab: getElement('markdownTab'),
+    htmlTab: getElement('htmlTab'),
+    cleanedHtmlTab: getElement('cleanedHtmlTab'),
+    resultsTabs: Array.from(document.querySelectorAll<HTMLElement>('.results-tab')),
+    copyBtn: getElement('copyBtn'),
+    chatBtn: getElement('chatBtn'),
+    backToHistoryBtn: getElement('backToHistoryBtn'),
+    clearAllBtn: getElement('clearAllBtn'),
+    extractDataBtn: getElement('extractDataBtn'),
+    connectionStatus: getElement('connectionStatus'),
+    authText: getElement('authText'),
+    mainTabs: Array.from(document.querySelectorAll<HTMLElement>('.main-tab')),
   };
 
-  const moduleManager: PopupManagerLike = {
+  const extensionClient = new ExtensionClient();
+  const popupManager = new PopupManager();
+  popupManager.elements = elements;
+  popupManager.apiClient = extensionClient;
+
+  const updateHistoryState = (hasHistory: boolean) => {
+    if (elements.copyBtn) elements.copyBtn.disabled = !hasHistory;
+    if (elements.chatBtn) elements.chatBtn.disabled = !hasHistory;
+    if (elements.backToHistoryBtn) elements.backToHistoryBtn.disabled = !hasHistory;
+  };
+  updateHistoryState(false);
+
+  const resultsHandler = new ResultsHandler(
     elements,
-    resultsHandler: {
-      showError: (msg: string) => {
-        logger.error('Error:', msg);
-      },
-    },
-    apiClient: new ExtensionClient(),
-  };
+    { updateMainChatButtonState: updateHistoryState },
+    popupManager
+  );
+  popupManager.resultsHandler = resultsHandler as unknown as typeof popupManager.resultsHandler;
 
-  // Initialize manager first, then create UI controller with the manager's event emitter
-  const mgr = new PopupDataSourceManagerRefactored(elements, moduleManager);
-  void mgr.init().then(() => {
-    const ui = new DataSourceUIController(elements, mgr.eventEmitter);
+  const dataSourceManager = new PopupDataSourceManagerRefactored(elements, popupManager);
+  popupManager.dataSourceManager = dataSourceManager;
+  void dataSourceManager.init().then(() => {
+    const ui = new DataSourceUIController(elements, dataSourceManager.eventEmitter);
     // Inject controller and initialize
-    (mgr as unknown as { uiController?: DataSourceUIController }).uiController = ui;
+    (dataSourceManager as unknown as { uiController?: DataSourceUIController }).uiController = ui;
     ui.init();
     // Refresh UI now that controller is ready
-    mgr.updateAvailableDataSources();
-    mgr.updateAllUI();
+    dataSourceManager.updateAvailableDataSources();
+    dataSourceManager.updateAllUI();
+
+    elements.clearAllBtn?.addEventListener('click', () => {
+      resultsHandler.clearAllHistory();
+    });
+
+    elements.backToHistoryBtn?.addEventListener('click', () => {
+      resultsHandler.showHistoryList();
+    });
+
+    elements.chatBtn?.addEventListener('click', () => {
+      const trigger = document.getElementById('chatTabTrigger');
+      if (trigger instanceof HTMLButtonElement) trigger.click();
+    });
+
+    elements.copyBtn?.addEventListener('click', () => {
+      void resultsHandler.copyLastResult();
+    });
     // Registry of model -> endpoint/provider/apiKey for quick lookup in Test button
     const modelEndpointRegistry: Record<
       string,
@@ -50,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let modelSelector: ModelSelector | null = null;
 
     const loadModelsWithRegistry = async () => {
-      const local = (await moduleManager.apiClient?.getAvailableModels?.()) ?? [];
+      const local = (await popupManager.apiClient?.getAvailableModels?.()) ?? [];
       const cfgMgr = new ApiConfigManager();
       const configs = await cfgMgr.listConfigs();
       const azureModels = configs
@@ -89,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiTestContainer = document.getElementById('ai-test');
     if (aiTestContainer) {
       const testBtn = new AITestButton(aiTestContainer, {
-        client: new ExtensionClient(),
+        client: extensionClient,
         getOptions: () => {
           // Read currently selected model from select element
           const select = document.querySelector<HTMLSelectElement>('#model-selector select');
@@ -140,14 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bind content actions via ExtensionClient if buttons exist
     const handlers: UIEventHandlers = {
       detectForms: () => {
-        void moduleManager.apiClient?.detectForms?.();
+        void popupManager.apiClient?.detectForms?.();
       },
       analyzeContent: () => {
-        void moduleManager.apiClient?.analyzeContent?.();
+        void popupManager.apiClient?.analyzeContent?.();
       },
       fillForms: () => {
         // In minimal wiring, send empty mappings; future: use collected mappings
-        void moduleManager.apiClient?.fillForms?.({});
+        void popupManager.apiClient?.fillForms?.({});
       },
     };
     // If a separate UIController exists for general buttons, it would call bindEvents(handlers)
