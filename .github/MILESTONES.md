@@ -32,13 +32,15 @@ _Last updated: 2025-11-09_
 - Added popup `AITestButton` integration coverage for success/error states (clipboard + log assertions) to push UI toward the ≥70% target.
 - Extended background integration tests to cover AIService retry success/failure pathways and error propagation.
 - Introduced Playwright form-filling E2E against a simple fixture, validating content script handling across Chromium and Edge.
+- Added ConfigurationUI provider-toggle guidance and validation failure coverage; introduced ExtensionClient fallback/error tests.
+- Added Playwright detect → analyze → AI response flow with mocked successes/failures (Chromium + Edge).
 
 ## Next Steps
 
 1. **M3 (AI Service Layer)** – Still deferred; resume AIServiceFactory/DeepSeek once UI + background polish completes.
-2. **M5 (UI Layer)** – Close remaining popup coverage gaps (data source interactions, edge copy states) to lock in ≥70% target.
-3. **M7 (Background Script)** – Add negative-path logging assertions (e.g., chrome.runtime.lastError) and monitor retry telemetry.
-4. **M8 (Integration Testing)** – Expand Playwright flows to cover detect/analyze responses feeding background AI mock results.
+2. **M5 (UI Layer)** – Verify data source UI interactions (history select/copy) and measure coverage ≥70%.
+3. **M7 (Background Script)** – Capture runtime error telemetry in message handlers and surface structured logs to popup.
+4. **M8 (Integration Testing)** – Extend Playwright to real-world form fixtures and multi-step AI handoff scenarios.
 
 ## Acceptance Targets (unchanged)
 
