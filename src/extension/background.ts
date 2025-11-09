@@ -3,11 +3,16 @@
 
 import { Logger } from '@/utils/logger';
 import { AIService } from '@/background/services/ai/aiService';
+import { ensureOllamaCorsBypass } from '@/background/services/ai/ollamaCorsBypass';
 import { getAvailableModelsAuto } from '@/extension/modelDiscovery';
 import type { MakeRequestOptions } from '@/background/services/ai/aiService';
 
 const logger = Logger.forScope('Background');
 const aiService = new AIService();
+
+void ensureOllamaCorsBypass().catch(err => {
+  logger.warn(`Failed to pre-register Ollama bypass rules: ${(err as Error).message}`);
+});
 
 // Open side panel when extension icon is clicked
 chrome.action.onClicked.addListener(tab => {
@@ -93,10 +98,32 @@ chrome.runtime.onMessage.addListener((message: BgMessage, _sender, sendResponse)
       break;
     case 'AI_REQUEST': {
       const { options } = message as { options: MakeRequestOptions };
+      logger.debug('[Background] AI_REQUEST received:', {
+        apiUrl: options.apiUrl,
+        model: options.model,
+        messageCount: options.messages?.length,
+      });
+      // Collect logs to send back to frontend
+      const logs: string[] = [];
+      const wrappedOptions = {
+        ...options,
+        onLog: (msg: string) => {
+          logs.push(msg);
+          options.onLog?.(msg);
+        },
+      };
       aiService
-        .makeRequest(options)
-        .then(data => sendResponse({ success: true, data }))
-        .catch(error => sendResponse({ success: false, error: (error as Error).message }));
+        .makeRequest(wrappedOptions)
+        .then(data => {
+          logger.debug('[Background] AI_REQUEST success:', { model: data.model });
+          sendResponse({ success: true, data, logs });
+        })
+        .catch(error => {
+          logger.error('[Background] AI_REQUEST failed:', error);
+          const errorMsg = (error as Error).message;
+          logs.push(`[Background] Error: ${errorMsg}`);
+          sendResponse({ success: false, error: errorMsg, logs });
+        });
       break;
     }
     default:

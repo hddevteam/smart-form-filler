@@ -32,7 +32,7 @@ export interface RequestParams {
 
 export interface Adapter {
   getHeaders(apiKey?: string): Record<string, string>;
-  processRequestBody(messages: ChatMessage[], params: RequestParams): unknown;
+  processRequestBody(messages: ChatMessage[], params: RequestParams, model?: string): unknown;
   responseToChatResponse(raw: unknown): ChatResponse;
 }
 

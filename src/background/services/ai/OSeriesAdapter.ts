@@ -4,22 +4,40 @@ import { BaseAdapter } from './BaseAdapter';
 
 export class OSeriesAdapter extends BaseAdapter {
   getHeaders(apiKey?: string): Record<string, string> {
-    return {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'api-key': apiKey ?? '',
     };
+
+    if (apiKey) {
+      // Support both Azure API key and Bearer token authentication
+      // If apiKey starts with 'Bearer ', use Authorization header
+      // Otherwise use api-key header (traditional Azure OpenAI)
+      if (apiKey.startsWith('Bearer ') || apiKey.startsWith('bearer ')) {
+        headers['Authorization'] = apiKey;
+      } else {
+        headers['api-key'] = apiKey;
+      }
+    }
+
+    return headers;
   }
 
-  processRequestBody(messages: ChatMessage[], params: RequestParams): unknown {
+  processRequestBody(messages: ChatMessage[], params: RequestParams, model?: string): unknown {
     // Azure OpenAI uses { messages, temperature, top_p, max_tokens, ... }
+    // Include model for unified endpoints (will be ignored by deployment-specific endpoints)
     const { temperature, top_p, max_tokens, ...rest } = params;
-    return {
+    const body: Record<string, unknown> = {
       messages,
       temperature,
       top_p,
       max_tokens,
       ...rest,
     };
+    // Add model if provided (supports unified endpoints like /openai/responses)
+    if (model) {
+      body.model = model;
+    }
+    return body;
   }
 
   responseToChatResponse(raw: unknown): ChatResponse {

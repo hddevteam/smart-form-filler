@@ -28,14 +28,8 @@ export async function fetchOllamaModels(baseUrl = 'http://localhost:11434'): Pro
   if (!f) return [];
   try {
     const url = `${baseUrl.replace(/\/$/, '')}/api/tags`;
-    // eslint-disable-next-line no-console
-    console.debug('[modelDiscovery] Fetching Ollama tags:', url);
     const res = await f(url, { method: 'GET' });
-    // eslint-disable-next-line no-console
-    console.debug('[modelDiscovery] Ollama /api/tags status:', res.ok, res.status);
     if (!res.ok) {
-      // eslint-disable-next-line no-console
-      console.warn('[modelDiscovery] Non-OK response from Ollama:', res.status);
       return [];
     }
     const data = (await res.json()) as { models?: Array<{ name?: string; details?: unknown }> };
@@ -43,15 +37,8 @@ export async function fetchOllamaModels(baseUrl = 'http://localhost:11434'): Pro
     const mapped = models
       .filter(m => typeof m?.name === 'string' && !!m.name)
       .map(m => ({ id: `ollama:${m.name as string}`, name: m.name as string, source: 'ollama' }));
-    // eslint-disable-next-line no-console
-    console.debug(
-      '[modelDiscovery] Discovered Ollama models:',
-      mapped.map(m => m.id)
-    );
     return mapped;
   } catch {
-    // eslint-disable-next-line no-console
-    console.error('[modelDiscovery] Failed to fetch Ollama models');
     return [];
   }
 }
@@ -59,7 +46,5 @@ export async function fetchOllamaModels(baseUrl = 'http://localhost:11434'): Pro
 export async function getAvailableModelsAuto(): Promise<ModelItem[]> {
   // For now, only auto-discover Ollama. Cloud models can be provided via separate flows.
   const local = await fetchOllamaModels();
-  // eslint-disable-next-line no-console
-  console.debug('[modelDiscovery] getAvailableModelsAuto -> count:', local.length);
   return local;
 }

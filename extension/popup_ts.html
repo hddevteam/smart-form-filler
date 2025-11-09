@@ -8,7 +8,6 @@
   </head>
   <body>
     <!-- TS popup mounts into existing DOM containers by id -->
-    <div id="config-container"></div>
     <div id="model-selector"></div>
     <!-- Optional AI test button container (renders only if present) -->
     <div id="ai-test"></div>
@@ -19,6 +18,9 @@
       <button id="analyzeContentBtn" class="btn">Analyze Content</button>
       <button id="fillFormsBtn" class="btn">Fill Forms</button>
     </div>
+
+    <!-- Modal root for settings dialogs -->
+    <div id="modal-root"></div>
 
     <!-- Single module entry -->
     <script type="module" src="/src/popup/index.ts"></script>

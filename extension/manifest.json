@@ -3,7 +3,16 @@
   "name": "Smart Form Filler",
   "version": "1.0.0",
   "description": "AI-powered form filling and data extraction browser extension",
-  "permissions": ["activeTab", "storage", "scripting", "sidePanel", "tabs", "clipboardWrite"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "sidePanel",
+    "tabs",
+    "clipboardWrite",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
+  ],
   "host_permissions": [
     "http://*/*",
     "https://*/*",

@@ -24,8 +24,13 @@ describe('Popup -> Background AI_REQUEST integration', () => {
       return undefined;
     }) as any as typeof chrome.runtime.sendMessage);
 
-    const res = await client.sendAIRequest({ apiUrl: 'http://x', model: 'z', messages: [] });
-    expect(res).toEqual(mock);
+    const { response, logs } = await client.sendAIRequest({
+      apiUrl: 'http://x',
+      model: 'z',
+      messages: [],
+    });
+    expect(response).toEqual(mock);
+    expect(logs).toEqual([]);
     expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
       { action: 'AI_REQUEST', options: { apiUrl: 'http://x', model: 'z', messages: [] } },
       expect.any(Function)

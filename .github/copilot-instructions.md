@@ -324,6 +324,7 @@ Before submitting code, ensure:
 
 - [ ] Tests written BEFORE implementation
 - [ ] All tests pass (`pnpm test`)
+- [ ] When running unit tests locally, append `-- --run` (e.g., `pnpm test -- --run`) so Vitest exits cleanly without interactive `h/q` prompts
 - [ ] Coverage meets target (check with `pnpm test:coverage`)
 - [ ] Mock external dependencies (Chrome API, fetch)
 

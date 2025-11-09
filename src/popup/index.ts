@@ -2,9 +2,10 @@ import { ExtensionClient } from '@/popup/apis/extensionClient';
 // Popup entry point
 import PopupDataSourceManagerRefactored from '@/modules/popup/popupDataSourceManagerRefactored';
 import DataSourceUIController from '@/modules/popup/dataSourceUIController';
-import ConfigurationUI from '@/popup/components/ConfigurationUI';
 import ModelSelector from '@/popup/components/ModelSelector';
 import AITestButton from '@/popup/components/AITestButton';
+import '@/popup/components/aiTestButton.css';
+import AzureSettingsModal from '@/popup/components/AzureSettingsModal';
 import { ApiConfigManager } from '@/config/apiConfigManager';
 import type { PopupElements, PopupManagerLike, UIEventHandlers } from '@/types/popup';
 import { Logger } from '@/utils/logger';
@@ -38,67 +39,101 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh UI now that controller is ready
     mgr.updateAvailableDataSources();
     mgr.updateAllUI();
-    // Keep a reference to model selector for refreshes
-    let selectorRef: ModelSelector | null = null;
+    // Registry of model -> endpoint/provider/apiKey for quick lookup in Test button
+    const modelEndpointRegistry: Record<
+      string,
+      { apiUrl: string; provider: 'azure' | 'ollama'; apiKey?: string }
+    > = {};
 
-    // Render configuration UI if container exists
-    const configContainer = document.getElementById('config-container');
-    if (configContainer) {
-      const cfgMgr = new ApiConfigManager();
-      const configUI = new ConfigurationUI(configContainer, {
-        saveConfig: async cfg => {
-          await cfgMgr.saveConfig(cfg as unknown as import('@/config/apiConfigManager').ApiConfig);
-        },
-        loadConfig: async () => {
-          // For popup load, try default named config; if none, undefined
-          // In future we may support multiple named configs; pick the first one
-          const list = await cfgMgr.listConfigs();
-          return list[0];
-        },
-        listConfigs: async () => cfgMgr.listConfigs(),
-        onProviderChange: async provider => {
-          if (provider === 'ollama') {
-            // Trigger background auto-discovery via model selector refresh flow
-            await moduleManager.apiClient?.refreshOllamaModels?.();
-            // Re-render selector to update UI with discovered models
-            setTimeout(() => {
-              void selectorRef?.render();
-            }, 300);
-          }
-        },
-      });
-      void configUI.render();
-    }
-
-    // Render model selector if container exists (pure frontend; no backend fetch)
+    // Render model selector if container exists (default to local Ollama + configured Azure)
     const modelContainer = document.getElementById('model-selector');
+    let modelSelector: ModelSelector | null = null;
+
+    const loadModelsWithRegistry = async () => {
+      const local = (await moduleManager.apiClient?.getAvailableModels?.()) ?? [];
+      const cfgMgr = new ApiConfigManager();
+      const configs = await cfgMgr.listConfigs();
+      const azureModels = configs
+        .filter(c => c.provider === 'azure')
+        .map(c => ({ id: c.model ?? 'gpt-4o', name: c.model ?? 'gpt-4o', source: 'azure' }));
+      // Update endpoint registry: map azure model id -> endpoint + apiKey
+      for (const c of configs) {
+        if (c.provider === 'azure' && c.model) {
+          modelEndpointRegistry[c.model] = {
+            apiUrl: c.endpoint,
+            provider: 'azure',
+            ...(c.apiKey ? { apiKey: c.apiKey } : {}),
+          };
+        }
+      }
+      // Map local ollama models -> default chat endpoint
+      for (const m of local) {
+        if (m.id?.startsWith('ollama:')) {
+          modelEndpointRegistry[m.id] = {
+            apiUrl: 'http://localhost:11434/api/chat',
+            provider: 'ollama',
+          };
+        }
+      }
+      return [...local, ...azureModels];
+    };
+
     if (modelContainer) {
-      const selector = new ModelSelector(modelContainer, {
-        loadModels: async () => {
-          const models = await moduleManager.apiClient?.getAvailableModels?.();
-          return models ?? [];
-        },
+      modelSelector = new ModelSelector(modelContainer, {
+        loadModels: loadModelsWithRegistry,
       });
-      void selector.render();
-      selectorRef = selector;
+      void modelSelector.render();
     }
 
-    // Render AI test button below configuration or in dedicated container
+    // Render AI test button and wire to current selected model
     const aiTestContainer = document.getElementById('ai-test');
     if (aiTestContainer) {
       const testBtn = new AITestButton(aiTestContainer, {
         client: new ExtensionClient(),
         getOptions: () => {
-          const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
-          const apiUrl = env?.VITE_GPT_4_1_NANO_API_URL ?? 'http://localhost:11434/api/generate';
-          return {
+          // Read currently selected model from select element
+          const select = document.querySelector<HTMLSelectElement>('#model-selector select');
+          const selected = select?.value ?? '';
+          const mapped = selected ? modelEndpointRegistry[selected] : undefined;
+          // If mapped, use its endpoint directly; else fallback by type
+          const apiUrl =
+            mapped?.apiUrl ??
+            (selected.startsWith('ollama:') ? 'http://localhost:11434/api/chat' : '');
+
+          // Get apiKey from registry (stored when loading models)
+          const apiKey = mapped?.apiKey;
+
+          const options: import('@/background/services/ai/aiService').MakeRequestOptions = {
             apiUrl,
-            model: 'gpt-4.1-nano',
+            model: selected || 'gpt-4o',
             messages: [{ role: 'user', content: 'Hello from popup!' }],
-          } as const;
+            ...(apiKey ? { apiKey } : {}),
+          };
+          return options;
         },
       });
       testBtn.render();
+    }
+    // Settings button: open Azure settings modal
+    const actions = document.getElementById('actions');
+    if (actions) {
+      const settingsBtn = document.createElement('button');
+      settingsBtn.className = 'btn btn--tertiary';
+      settingsBtn.textContent = 'Settings';
+      actions.prepend(settingsBtn);
+      settingsBtn.addEventListener('click', () => {
+        const modalRoot = document.getElementById('modal-root');
+        if (!modalRoot) return;
+        const modal = new AzureSettingsModal(modalRoot, {
+          onSaved: () => {
+            // Refresh model selector after saving Azure config
+            if (modelSelector) {
+              void modelSelector.render();
+            }
+          },
+        });
+        modal.open();
+      });
     }
 
     // ConnectionTest removed for pure frontend; no backend URL required

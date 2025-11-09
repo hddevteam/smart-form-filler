@@ -8,9 +8,10 @@ export interface ExtensionClientLike {
   detectForms(): Promise<unknown>;
   analyzeContent(): Promise<unknown>;
   fillForms(mappings: unknown): Promise<unknown>;
-  sendAIRequest(
-    options: import('@/background/services/ai/aiService').MakeRequestOptions
-  ): Promise<import('@/types/ai').ChatResponse>;
+  sendAIRequest(options: import('@/background/services/ai/aiService').MakeRequestOptions): Promise<{
+    response: import('@/types/ai').ChatResponse;
+    logs: string[];
+  }>;
 }
 
 // Simple client that calls background/page via chrome.runtime messages
@@ -21,11 +22,11 @@ export class ExtensionClient implements ExtensionClientLike {
       const tid = setTimeout(() => {
         if (!settled) {
           settled = true;
-          // eslint-disable-next-line no-console
-          console.warn('[ExtensionClient] getAvailableModels timed out, returning empty');
+          // Remove verbose warn after stabilization
           // Fallback: try local Ollama discovery directly from side panel
           void fetchOllamaModels()
             .then(list => {
+              // eslint-disable-next-line no-console
               console.debug(
                 '[ExtensionClient] Fallback (timeout) local models count:',
                 list.length
@@ -36,19 +37,18 @@ export class ExtensionClient implements ExtensionClientLike {
         }
       }, 5000);
       try {
-        // eslint-disable-next-line no-console
-        console.debug('[ExtensionClient] Sending getAvailableModels');
+        // Remove verbose debug after stabilization
         chrome.runtime.sendMessage({ action: 'getAvailableModels' }, (resp: unknown) => {
           if (settled) return;
           settled = true;
           clearTimeout(tid);
           const lastError = chrome.runtime.lastError;
           if (lastError) {
-            // eslint-disable-next-line no-console
-            console.warn('[ExtensionClient] getAvailableModels lastError:', lastError.message);
+            // Swallow lastError without noisy logging
             // Fallback on message error
             void fetchOllamaModels()
               .then(list => {
+                // eslint-disable-next-line no-console
                 console.debug(
                   '[ExtensionClient] Fallback (lastError) local models count:',
                   list.length
@@ -60,8 +60,7 @@ export class ExtensionClient implements ExtensionClientLike {
           }
           const payload = (resp as { success?: boolean; models?: ModelItem[] }) ?? {};
           const data = Array.isArray(payload.models) ? payload.models : [];
-          // eslint-disable-next-line no-console
-          console.debug('[ExtensionClient] getAvailableModels received count:', data.length);
+          // Silent after stabilization
           // If empty, attempt a soft fallback once
           if (data.length === 0) {
             void fetchOllamaModels()
@@ -98,25 +97,21 @@ export class ExtensionClient implements ExtensionClientLike {
       const tid = setTimeout(() => {
         if (!settled) {
           settled = true;
-          // eslint-disable-next-line no-console
-          console.warn('[ExtensionClient] refreshOllamaModels timed out');
+          // Silent after stabilization
           resolve();
         }
       }, 3000);
       try {
-        // eslint-disable-next-line no-console
-        console.debug('[ExtensionClient] Sending refreshOllamaModels');
+        // Silent after stabilization
         chrome.runtime.sendMessage({ action: 'refreshOllamaModels' }, () => {
           if (settled) return;
           settled = true;
           clearTimeout(tid);
           const lastError = chrome.runtime.lastError;
           if (lastError) {
-            // eslint-disable-next-line no-console
-            console.warn('[ExtensionClient] refreshOllamaModels lastError:', lastError.message);
+            // Silent after stabilization
           }
-          // eslint-disable-next-line no-console
-          console.debug('[ExtensionClient] refreshOllamaModels ack received');
+          // Silent after stabilization
           resolve();
         });
       } catch {
@@ -167,24 +162,37 @@ export class ExtensionClient implements ExtensionClientLike {
 
   async sendAIRequest(
     options: import('@/background/services/ai/aiService').MakeRequestOptions
-  ): Promise<import('@/types/ai').ChatResponse> {
-    return new Promise(resolve => {
+  ): Promise<{
+    response: import('@/types/ai').ChatResponse;
+    logs: string[];
+  }> {
+    return new Promise((resolve, reject) => {
       try {
         chrome.runtime.sendMessage({ action: 'AI_REQUEST', options }, (resp: unknown) => {
           const payload =
-            (resp as { success?: boolean; data?: import('@/types/ai').ChatResponse }) ?? {};
+            (resp as {
+              success?: boolean;
+              data?: import('@/types/ai').ChatResponse;
+              error?: string;
+              logs?: string[];
+            }) ?? {};
           if (payload && typeof payload === 'object' && 'success' in payload) {
-            resolve(
-              payload.success && payload.data
-                ? payload.data
-                : ({ model: 'error', choices: [] } as unknown as import('@/types/ai').ChatResponse)
-            );
+            if (payload.success && payload.data) {
+              resolve({ response: payload.data, logs: payload.logs ?? [] });
+            } else {
+              const error = new Error(payload.error || 'AI request failed') as Error & {
+                logs?: string[];
+              };
+              error.logs = payload.logs ?? [];
+              reject(error);
+            }
           } else {
-            resolve(resp as import('@/types/ai').ChatResponse);
+            resolve({ response: resp as import('@/types/ai').ChatResponse, logs: [] });
           }
         });
-      } catch {
-        resolve({ model: 'error', choices: [] } as unknown as import('@/types/ai').ChatResponse);
+      } catch (error) {
+        const normalized = error instanceof Error ? error : new Error(String(error));
+        reject(normalized);
       }
     });
   }

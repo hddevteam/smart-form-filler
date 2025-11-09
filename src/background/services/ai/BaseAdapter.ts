@@ -4,7 +4,11 @@ import type { Adapter, ChatMessage, RequestParams, ChatResponse } from '@/types/
 
 export abstract class BaseAdapter implements Adapter {
   abstract getHeaders(apiKey?: string): Record<string, string>;
-  abstract processRequestBody(messages: ChatMessage[], params: RequestParams): unknown;
+  abstract processRequestBody(
+    messages: ChatMessage[],
+    params: RequestParams,
+    model?: string
+  ): unknown;
   abstract responseToChatResponse(raw: unknown): ChatResponse;
 
   protected redact(key?: string): string {

@@ -9,9 +9,11 @@ export class OllamaAdapter extends BaseAdapter {
     };
   }
 
-  processRequestBody(messages: ChatMessage[], params: RequestParams): unknown {
-    // Ollama expects { stream: false, messages, ...params }
+  processRequestBody(messages: ChatMessage[], params: RequestParams, model?: string): unknown {
+    // Ollama expects { model, stream: false, messages, ...params }
+    const actualModel = model?.replace(/^ollama:/, '') ?? 'llama3.2';
     return {
+      model: actualModel,
       stream: false,
       messages,
       ...params,

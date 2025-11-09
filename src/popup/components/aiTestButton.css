@@ -1,0 +1,51 @@
+.ai-test {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-test-log-container {
+  position: relative;
+  border: 1px solid var(--sff-border-color, #d0d5dd);
+  border-radius: 8px;
+  padding: 0.75rem 0.75rem 2.25rem;
+  background: var(--sff-surface-muted, #f8fafc);
+  min-height: 160px;
+  max-height: 240px;
+  overflow: hidden;
+}
+
+.ai-test-log {
+  margin: 0;
+  height: 180px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--sff-mono, 'JetBrains Mono', 'Fira Code', monospace);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--sff-text-muted, #475467);
+}
+
+.ai-test-copy-btn {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--sff-border-color, #d0d5dd);
+  background: var(--sff-surface, #ffffff);
+  color: var(--sff-text, #1f2933);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ai-test-copy-btn:hover {
+  background: var(--sff-surface-strong, #eef2f6);
+}
+
+.ai-test-copy-btn:active {
+  background: var(--sff-surface-stronger, #dde4ea);
+}
