@@ -123,6 +123,76 @@ describe('UI Integration (popup components)', () => {
     expect(saved[0].name).toBe('Local Saved');
   });
 
+  it('ConfigurationUI toggles provider guidance and notifies deps on change', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const onProviderChange = vi.fn();
+    const deps = {
+      saveConfig: vi.fn().mockResolvedValue(undefined),
+      loadConfig: vi.fn().mockResolvedValue({
+        provider: 'azure',
+        name: 'Cloud default',
+        endpoint: 'https://example.azure.com',
+      }),
+      onProviderChange,
+    };
+
+    const ui = new ConfigurationUI(container, deps);
+    await ui.render();
+
+    const form = container.querySelector('form');
+    expect(form).toBeTruthy();
+    if (!form) throw new Error('form not rendered');
+    const providerEl = form.querySelector<HTMLSelectElement>('select[name="provider"]');
+    const saveBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const statusEl = container.querySelector<HTMLElement>('.config-status');
+    expect(providerEl && saveBtn && statusEl).toBeTruthy();
+    if (!providerEl || !saveBtn || !statusEl) throw new Error('configuration elements missing');
+
+    providerEl.value = 'ollama';
+    providerEl.dispatchEvent(new Event('change'));
+    expect(saveBtn.disabled).toBe(true);
+    expect(statusEl.textContent).toContain('Local Ollama models are auto-discovered');
+    expect(onProviderChange).toHaveBeenCalledWith('ollama');
+
+    providerEl.value = 'azure';
+    providerEl.dispatchEvent(new Event('change'));
+    expect(saveBtn.disabled).toBe(false);
+    expect(statusEl.textContent).toContain('Configure your cloud provider and save');
+    expect(onProviderChange).toHaveBeenLastCalledWith('azure');
+  });
+
+  it('ConfigurationUI surfaces validation errors when required fields missing', async () => {
+    document.body.innerHTML = '';
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const saveConfig = vi.fn();
+    const deps = {
+      saveConfig,
+      validateConfig: vi.fn(() => ['Custom validation failed']),
+    };
+
+    const ui = new ConfigurationUI(container, deps);
+    await ui.render();
+
+    const form = container.querySelector('form');
+    expect(form).toBeTruthy();
+    if (!form) throw new Error('form not rendered');
+    form.dispatchEvent(new Event('submit'));
+    await Promise.resolve();
+
+    const statusEl = container.querySelector<HTMLElement>('.config-status');
+    expect(statusEl).toBeTruthy();
+    if (!statusEl) throw new Error('status element missing');
+    expect(statusEl.textContent).toContain('Name is required');
+    expect(statusEl.textContent).toContain('Endpoint is required');
+    expect(statusEl.textContent).toContain('Custom validation failed');
+    expect(saveConfig).not.toHaveBeenCalled();
+  });
+
   it('ConnectionTest shows statuses for empty, success and failure', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
