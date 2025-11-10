@@ -14,6 +14,7 @@ import { PopupManager } from '@/popup/modules/popupManager';
 import { MainTabController } from '@/popup/modules/mainTabController';
 import { ModeToggle } from '@/popup/modules/modeToggle';
 import { ChatHandler } from '@/popup/modules/chatHandler';
+import { CopyHandler } from '@/popup/modules/copyHandler';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
@@ -176,6 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
   );
   popupManager.resultsHandler = resultsHandler as unknown as typeof popupManager.resultsHandler;
 
+  const copyHandler =
+    elements.copyBtn &&
+    new CopyHandler({
+      elements,
+      resultsHandler,
+      rootDocument: document,
+    });
+
   const dataSourceManager = new PopupDataSourceManagerRefactored(elements, popupManager);
   popupManager.dataSourceManager = dataSourceManager;
   void dataSourceManager.init().then(() => {
@@ -269,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     elements.copyBtn?.addEventListener('click', () => {
-      void resultsHandler.copyLastResult();
+      void copyHandler?.handleCopy();
     });
     // Registry of model -> endpoint/provider/apiKey for quick lookup in Test button
     const modelEndpointRegistry: Record<
