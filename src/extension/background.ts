@@ -220,15 +220,50 @@ async function forwardToActiveTab(
       sendResponse({ success: false, error: 'No active tab found' });
       return;
     }
-    chrome.tabs.sendMessage(tab.id, payload, (resp: unknown) => {
-      const lastError = chrome.runtime.lastError;
-      if (lastError) {
-        logger.error('Failed to forward message to content script:', lastError.message);
-        sendResponse({ success: false, error: lastError.message });
+
+    const trySendMessage = async (): Promise<unknown> => {
+      return new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(tab.id!, payload, (resp: unknown) => {
+          const lastError = chrome.runtime.lastError;
+          if (lastError) {
+            reject(new Error(lastError.message));
+            return;
+          }
+          resolve(resp);
+        });
+      });
+    };
+
+    try {
+      const response = await trySendMessage();
+      sendResponse(response);
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const needsInjection = message.includes('Could not establish connection');
+
+      if (!needsInjection) {
+        logger.error('Failed to forward message to content script:', message);
+        sendResponse({ success: false, error: message });
         return;
       }
-      sendResponse(resp);
-    });
+
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['dist/content.js'],
+        });
+        const retryResponse = await trySendMessage();
+        sendResponse(retryResponse);
+        return;
+      } catch (injectError) {
+        const injectMessage =
+          injectError instanceof Error ? injectError.message : String(injectError);
+        logger.warn('Content script injection failed:', injectMessage);
+        sendResponse({ success: false, error: injectMessage });
+        return;
+      }
+    }
   } catch (error) {
     logger.error('Failed to forward message to content script:', error);
     sendResponse({ success: false, error: (error as Error).message });
