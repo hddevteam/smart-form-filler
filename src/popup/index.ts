@@ -13,6 +13,7 @@ import { Logger } from '@/utils/logger';
 import { PopupManager } from '@/popup/modules/popupManager';
 import { MainTabController } from '@/popup/modules/mainTabController';
 import { ModeToggle } from '@/popup/modules/modeToggle';
+import { ChatHandler } from '@/popup/modules/chatHandler';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
@@ -47,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     htmlTab: getElement('htmlTab'),
     cleanedHtmlTab: getElement('cleanedHtmlTab'),
     resultsTabs: Array.from(document.querySelectorAll<HTMLElement>('.results-tab')),
+    chatMessages: getElement('chatMessages'),
+    chatInput: document.getElementById('chatInput') as HTMLTextAreaElement | null,
+    sendChatBtn: getElement('sendChatBtn'),
+    chatStatus: getElement('chatStatus'),
+    dataSourceList: getElement('chatDataSourceList'),
     copyBtn: getElement('copyBtn'),
     chatBtn: getElement('chatBtn'),
     backToHistoryBtn: getElement('backToHistoryBtn'),
@@ -180,6 +186,75 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh UI now that controller is ready
     dataSourceManager.updateAvailableDataSources();
     dataSourceManager.updateAllUI();
+
+    let chatHandler: ChatHandler | null = null;
+    if (
+      elements.chatMessages &&
+      elements.chatInput instanceof HTMLTextAreaElement &&
+      elements.sendChatBtn &&
+      elements.dataSourceList
+    ) {
+      chatHandler = new ChatHandler(
+        {
+          chatMessages: elements.chatMessages,
+          chatInput: elements.chatInput,
+          sendChatBtn: elements.sendChatBtn,
+          dataSourceList: elements.dataSourceList,
+          chatStatus: elements.chatStatus ?? null,
+        },
+        {
+          apiClient: extensionClient,
+          getSelectedModel: () => {
+            const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
+            if (!select || select.disabled || !select.value) return null;
+            return select.value;
+          },
+          getChatDataSources: () => dataSourceManager.getChatDataSources(),
+        }
+      );
+
+      (popupManager as unknown as { chatHandler?: ChatHandler }).chatHandler = chatHandler;
+
+      elements.sendChatBtn.addEventListener('click', event => {
+        event.preventDefault();
+        void chatHandler?.sendMessage();
+      });
+
+      elements.chatInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          if (!elements.sendChatBtn?.disabled) {
+            void chatHandler?.sendMessage();
+          }
+        }
+      });
+
+      const mapHistory = () => {
+        const history = popupManager.resultsHandler?.extractionHistory as
+          | Array<{ id: number | string; title?: string; url?: string }>
+          | undefined;
+        if (!history) return;
+        chatHandler?.setExtractionHistory(
+          history.map(item => ({
+            id: String(item.id ?? ''),
+            title: item.title ?? 'Untitled source',
+            url: item.url,
+          }))
+        );
+      };
+
+      mapHistory();
+
+      document.addEventListener('extractionHistoryUpdated', () => {
+        mapHistory();
+      });
+
+      document.addEventListener('configurationApplied', event => {
+        const detail = (event as CustomEvent).detail;
+        chatHandler?.onDataSourceChanged(detail);
+        chatHandler?.updateDataSourceList();
+      });
+    }
 
     elements.clearAllBtn?.addEventListener('click', () => {
       resultsHandler.clearAllHistory();

@@ -42,6 +42,11 @@ export interface PopupElements {
   backToHistoryBtn?: HTMLButtonElement | null;
   chatBtn?: HTMLButtonElement | null;
   retryBtn?: HTMLButtonElement | null;
+  chatMessages?: HTMLElement | null;
+  chatInput?: HTMLTextAreaElement | HTMLInputElement | null;
+  sendChatBtn?: HTMLButtonElement | null;
+  chatStatus?: HTMLElement | null;
+  dataSourceList?: HTMLElement | null;
   // Model related
   globalModelSelect?: HTMLSelectElement | null;
   globalRefreshModelsBtn?: HTMLButtonElement | null;
@@ -116,6 +121,8 @@ export interface PopupManagerLike {
   // Chat handler for notifying data source configuration changes
   chatHandler?: {
     onDataSourceChanged: (config: unknown) => void;
+    setExtractionHistory?: (history: unknown[]) => void;
+    updateDataSourceList?: () => void;
   };
   dataSourceManager?: {
     updateAvailableDataSources?: () => void;
@@ -147,4 +154,27 @@ export interface UIEventHandlers {
   fillForms?: () => void;
   // Global model select change propagation
   updateChatSendButtonState?: () => void;
+}
+
+export interface ChatHandlerElements {
+  chatMessages: HTMLElement;
+  chatInput: HTMLTextAreaElement | HTMLInputElement;
+  sendChatBtn: HTMLButtonElement;
+  dataSourceList: HTMLElement;
+  chatStatus?: HTMLElement | null;
+}
+
+export interface ChatDataSourceSelection {
+  type: string;
+  sources: Array<{ id?: string; title: string; url?: string; content: string }>;
+}
+
+export interface ChatHandlerDeps {
+  apiClient: {
+    makeRequest: (endpoint: string, init?: RequestInit) => Promise<Response>;
+  };
+  getSelectedModel: () => string | null;
+  getChatDataSources?: () => ChatDataSourceSelection | null | undefined;
+  onSendStart?: () => void;
+  onSendComplete?: () => void;
 }
