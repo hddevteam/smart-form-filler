@@ -24,7 +24,8 @@
     "https://login.microsoftonline.com/*"
   ],
   "action": {
-    "default_title": "Page Summarizer"
+    "default_title": "Smart Form Filler",
+    "default_popup": "dist/extension/popup_ts.html"
   },
   "side_panel": {
     "default_path": "dist/extension/popup_ts.html"

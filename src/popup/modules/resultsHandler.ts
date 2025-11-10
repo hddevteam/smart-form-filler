@@ -409,6 +409,7 @@ export class ResultsHandler {
       return;
     }
     const item = this.extractionHistory[index];
+    if (!item) return;
     const title = item.title ?? `Extraction ${index + 1}`;
     const content = this.combineDataSourceContent(item.dataSources);
     const selectionId = `extraction-${index}`;

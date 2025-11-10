@@ -66,6 +66,17 @@ export interface PopupElements {
   formFillerSimpleMode?: HTMLElement | null;
   formFillerAdvancedMode?: HTMLElement | null;
   formFillerContent?: HTMLElement | null;
+  simpleModeContentInput?: HTMLTextAreaElement | HTMLInputElement | null;
+  simpleModeSubmitBtn?: HTMLButtonElement | null;
+  simpleModeClearBtn?: HTMLButtonElement | null;
+  simpleModeProgress?: HTMLElement | null;
+  simpleModeProgressText?: HTMLElement | null;
+  simpleModeProgressIcon?: HTMLElement | null;
+  simpleModeResults?: HTMLElement | null;
+  simpleModeFillSection?: HTMLElement | null;
+  simpleModeFillFormsBtn?: HTMLButtonElement | null;
+  simpleModeError?: HTMLElement | null;
+  simpleModeErrorMessage?: HTMLElement | null;
   simpleModeLanguageSelect?: HTMLSelectElement | null;
   advancedModeLanguageSelect?: HTMLSelectElement | null;
   fillContentInput?: HTMLTextAreaElement | HTMLInputElement | null;
@@ -104,20 +115,22 @@ export interface PopupManagerLike {
     setButtonsEnabled?(enabled: boolean): void;
   };
   // Results handler (extended for data source manager needs)
-  resultsHandler?: {
-    showError(message: string): void;
-    // Recent extraction history collected by the app (if available)
-    extractionHistory?: Array<{
-      title?: string;
-      url?: string;
-      timestamp?: number;
-      dataSources?: {
-        markdown?: { content?: string };
-        cleaned?: { content?: string };
-        raw?: { content?: string };
-      };
-    }>;
-  };
+  resultsHandler?:
+    | {
+        showError(message: string): void;
+        // Recent extraction history collected by the app (if available)
+        extractionHistory?: Array<{
+          title?: string;
+          url?: string;
+          timestamp?: number;
+          dataSources?: {
+            markdown?: { content?: string };
+            cleaned?: { content?: string };
+            raw?: { content?: string };
+          };
+        }>;
+      }
+    | undefined;
   // Chat handler for notifying data source configuration changes
   chatHandler?: {
     onDataSourceChanged: (config: unknown) => void;

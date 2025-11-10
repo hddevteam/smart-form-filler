@@ -12,6 +12,7 @@ export interface ExtensionClientLike {
     response: import('@/types/ai').ChatResponse;
     logs: string[];
   }>;
+  makeRequest(endpoint: string, init?: RequestInit): Promise<Response>;
 }
 
 // Simple client that calls background/page via chrome.runtime messages
@@ -195,6 +196,10 @@ export class ExtensionClient implements ExtensionClientLike {
         reject(normalized);
       }
     });
+  }
+
+  async makeRequest(endpoint: string, init?: RequestInit): Promise<Response> {
+    return fetch(endpoint, init);
   }
 }
 export default ExtensionClient;

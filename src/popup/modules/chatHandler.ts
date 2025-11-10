@@ -18,7 +18,6 @@ export class ChatHandler {
   private readonly selectedSourceIds = new Set<string>();
   private chatHistory: ChatMessage[] = [];
   private isLoading = false;
-  private dataSourceConfig: unknown;
 
   constructor(elements: ChatHandlerElements, deps: ChatHandlerDeps) {
     this.elements = elements;
@@ -36,8 +35,7 @@ export class ChatHandler {
     this.renderDataSourceList();
   }
 
-  onDataSourceChanged(config: unknown): void {
-    this.dataSourceConfig = config;
+  onDataSourceChanged(_config: unknown): void {
     this.updateSendButtonState();
   }
 

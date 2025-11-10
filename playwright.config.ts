@@ -10,7 +10,7 @@ const projects = [
 if (process.env.PLAYWRIGHT_EDGE === '1') {
   projects.push({
     name: 'msedge',
-    use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    use: { ...devices['Desktop Edge'] },
   });
 }
 

@@ -14,11 +14,22 @@ export class PopupManager implements PopupManagerLike {
     setSystemButtonsEnabled(enabled: boolean): void;
     setButtonsEnabled?(enabled: boolean): void;
   };
-  resultsHandler?: {
-    showError: (message: string) => void;
-    showMessage?: (message: string, type: string) => void;
-    extractionHistory?: Array<unknown>;
-  };
+  resultsHandler?:
+    | {
+        showError: (message: string) => void;
+        showMessage?: (message: string, type: string) => void;
+        extractionHistory?: Array<{
+          title?: string;
+          url?: string;
+          timestamp?: number;
+          dataSources?: {
+            markdown?: { content?: string };
+            cleaned?: { content?: string };
+            raw?: { content?: string };
+          };
+        }>;
+      }
+    | undefined;
   dataSourceManager?: {
     updateAvailableDataSources?: () => void;
     updateChatConfiguration: (config: Partial<DataSourceConfigObject>) => Promise<void> | void;

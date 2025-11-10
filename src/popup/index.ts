@@ -15,6 +15,8 @@ import { MainTabController } from '@/popup/modules/mainTabController';
 import { ModeToggle } from '@/popup/modules/modeToggle';
 import { ChatHandler } from '@/popup/modules/chatHandler';
 import { CopyHandler } from '@/popup/modules/copyHandler';
+import { SimpleMode } from '@/popup/modules/simpleMode';
+import { AdvancedMode } from '@/popup/modules/advancedMode';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
@@ -71,6 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
     formFillerSimpleMode: getElement('formFillerSimpleMode'),
     formFillerAdvancedMode: getElement('formFillerAdvancedMode'),
     formFillerContent: getElement('formFillerContent'),
+    simpleModeContentInput: document.getElementById(
+      'simpleModeContentInput'
+    ) as HTMLTextAreaElement | null,
+    simpleModeSubmitBtn: getElement('simpleModeSubmitBtn'),
+    simpleModeClearBtn: getElement('simpleModeClearBtn'),
+    simpleModeProgress: getElement('simpleModeProgress'),
+    simpleModeProgressText: getElement('simpleModeProgressText'),
+    simpleModeProgressIcon: getElement('simpleModeProgressIcon'),
+    simpleModeResults: getElement('simpleModeResults'),
+    simpleModeFillSection: getElement('simpleModeFillSection'),
+    simpleModeFillFormsBtn: getElement('simpleModeFillFormsBtn'),
+    simpleModeError: getElement('simpleModeError'),
+    simpleModeErrorMessage: getElement('simpleModeErrorMessage'),
     simpleModeLanguageSelect: document.getElementById(
       'simpleModeLanguageSelect'
     ) as HTMLSelectElement | null,
@@ -82,7 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const extensionClient = new ExtensionClient();
   const popupManager = new PopupManager();
-  popupManager.elements = elements;
+  popupManager.elements = elements as Record<
+    string,
+    HTMLElement | HTMLInputElement | HTMLSelectElement | null
+  >;
   popupManager.apiClient = extensionClient;
 
   const mainTabButtons = (elements.mainTabs ?? []).filter(
@@ -107,6 +125,17 @@ document.addEventListener('DOMContentLoaded', () => {
   mainTabController.init();
   (popupManager as unknown as { mainTabController?: MainTabController }).mainTabController =
     mainTabController;
+
+  // Form filler workflow state for AdvancedMode
+  const formFillerHandler = {
+    currentForms: [] as unknown[],
+    currentAnalysisResult: null as unknown,
+    currentMappings: [] as unknown[],
+  };
+
+  // Instantiate AdvancedMode and expose to popupManager
+  const advancedMode = new AdvancedMode({ formFillerHandler, documentRef: document });
+  (popupManager as unknown as { advancedMode?: AdvancedMode }).advancedMode = advancedMode;
 
   const simpleModeAdapter = {
     getContent: () => {
@@ -150,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
     modeIndicator: elements.selectedMode ?? null,
     simpleMode: simpleModeAdapter,
     advancedMode: {
-      updateSectionVisibility: () => undefined,
-      reset: () => undefined,
+      updateSectionVisibility: () => advancedMode.updateSectionVisibility(),
+      reset: () => advancedMode.reset(),
     },
     advancedInput: elements.fillContentInput ?? null,
     simpleLanguageSelect: elements.simpleModeLanguageSelect ?? null,
@@ -185,7 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
       rootDocument: document,
     });
 
-  const dataSourceManager = new PopupDataSourceManagerRefactored(elements, popupManager);
+  const dataSourceManager = new PopupDataSourceManagerRefactored(
+    elements as never,
+    popupManager as never
+  );
   popupManager.dataSourceManager = dataSourceManager;
   void dataSourceManager.init().then(() => {
     const ui = new DataSourceUIController(elements, dataSourceManager.eventEmitter);
@@ -212,7 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
           chatStatus: elements.chatStatus ?? null,
         },
         {
-          apiClient: extensionClient,
+          apiClient: {
+            makeRequest: async (endpoint: string, init?: RequestInit) => {
+              return fetch(endpoint, init);
+            },
+          },
           getSelectedModel: () => {
             const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
             if (!select || select.disabled || !select.value) return null;
@@ -247,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
           history.map(item => ({
             id: String(item.id ?? ''),
             title: item.title ?? 'Untitled source',
-            url: item.url,
+            url: item.url ?? '',
           }))
         );
       };
@@ -263,6 +299,39 @@ document.addEventListener('DOMContentLoaded', () => {
         chatHandler?.onDataSourceChanged(detail);
         chatHandler?.updateDataSourceList();
       });
+    }
+
+    if (
+      elements.formFillerSimpleMode &&
+      elements.simpleModeContentInput &&
+      elements.simpleModeSubmitBtn
+    ) {
+      const noopAsync = async () => {};
+      const simpleMode = new SimpleMode({
+        elements: {
+          container: elements.formFillerSimpleMode,
+          contentInput: elements.simpleModeContentInput as HTMLTextAreaElement,
+          submitBtn: elements.simpleModeSubmitBtn,
+          clearBtn: elements.simpleModeClearBtn ?? null,
+          progressContainer: elements.simpleModeProgress ?? null,
+          progressText: elements.simpleModeProgressText ?? null,
+          progressIcon: elements.simpleModeProgressIcon ?? null,
+          resultsContainer: elements.simpleModeResults ?? null,
+          fillSection: elements.simpleModeFillSection ?? null,
+          fillFormsBtn: elements.simpleModeFillFormsBtn ?? null,
+          errorContainer: elements.simpleModeError ?? null,
+          errorMessage: elements.simpleModeErrorMessage ?? null,
+        },
+        workflow: {
+          detectForms: noopAsync,
+          analyze: noopAsync,
+          generate: noopAsync,
+          hasMappings: () => false,
+        },
+        getSelectedDataSources: () => dataSourceManager.getFormFillerSelectedSources?.() ?? [],
+        document,
+      });
+      (popupManager as unknown as { simpleMode?: SimpleMode }).simpleMode = simpleMode;
     }
 
     elements.clearAllBtn?.addEventListener('click', () => {
@@ -381,14 +450,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bind content actions via ExtensionClient if buttons exist
     const handlers: UIEventHandlers = {
       detectForms: () => {
-        void popupManager.apiClient?.detectForms?.();
+        void (async () => {
+          await popupManager.apiClient?.detectForms?.();
+          // Simulate updating workflow state and notify AdvancedMode
+          formFillerHandler.currentForms = [{}];
+          document.dispatchEvent(new CustomEvent('formDetectionCompleted'));
+          advancedMode.updateSectionVisibility();
+        })();
       },
       analyzeContent: () => {
-        void popupManager.apiClient?.analyzeContent?.();
+        void (async () => {
+          await popupManager.apiClient?.analyzeContent?.();
+          // Simulate updating workflow state and notify AdvancedMode
+          formFillerHandler.currentAnalysisResult = { ok: true };
+          document.dispatchEvent(new CustomEvent('analysisCompleted'));
+          advancedMode.updateSectionVisibility();
+        })();
       },
       fillForms: () => {
-        // In minimal wiring, send empty mappings; future: use collected mappings
-        void popupManager.apiClient?.fillForms?.({});
+        void (async () => {
+          // In minimal wiring, send empty mappings; future: use collected mappings
+          await popupManager.apiClient?.fillForms?.({});
+          // Simulate mappings available then notify AdvancedMode
+          formFillerHandler.currentMappings = [{}];
+          document.dispatchEvent(new CustomEvent('mappingCompleted'));
+          advancedMode.updateSectionVisibility();
+        })();
       },
     };
     // If a separate UIController exists for general buttons, it would call bindEvents(handlers)
