@@ -449,6 +449,55 @@ document.addEventListener('DOMContentLoaded', () => {
     // ConnectionTest removed for pure frontend; no backend URL required
     // Bind content actions via ExtensionClient if buttons exist
     const handlers: UIEventHandlers = {
+      extractData: () => {
+        void (async () => {
+          try {
+            logger.info('Extract Data Sources button clicked');
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab?.id) {
+              resultsHandler.showError('No active tab found');
+              return;
+            }
+
+            // Extract page content using executeScript
+            const results = await chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: () => {
+                const title = document.title;
+                const url = window.location.href;
+                const content = document.body.innerText || '';
+                return { title, url, content };
+              },
+            });
+
+            if (results && results[0]?.result) {
+              const { title, url, content } = results[0].result;
+              logger.info(`Extracted: ${title} (${content.length} chars)`);
+
+              // Show extraction results
+              resultsHandler.showExtractionResults({
+                success: true,
+                currentPageUrl: url,
+                title,
+                dataSources: {
+                  markdown: { content },
+                  raw: { content },
+                },
+                stats: {
+                  originalSize: content.length,
+                  markdownSize: content.length,
+                },
+              });
+            } else {
+              resultsHandler.showError('Failed to extract page content');
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.error('Extract data error:', message);
+            resultsHandler.showError(`Extraction failed: ${message}`);
+          }
+        })();
+      },
       detectForms: () => {
         void (async () => {
           await popupManager.apiClient?.detectForms?.();
@@ -480,6 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     // If a separate UIController exists for general buttons, it would call bindEvents(handlers)
     // Here we trigger bindings for content buttons directly
+    elements.extractDataBtn?.addEventListener('click', () => handlers.extractData?.());
     const detectBtn = document.getElementById('detectFormsBtn');
     const analyzeBtn = document.getElementById('analyzeContentBtn');
     const fillBtn = document.getElementById('fillFormsBtn');
