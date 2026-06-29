@@ -1,4 +1,5 @@
 import type { ChatHandlerElements, ChatHandlerDeps, ChatDataSourceSelection } from '@/types/popup';
+import type { ChatMessage } from '@/types/ai';
 
 interface ExtractionHistoryItem {
   id: string;
@@ -6,9 +7,27 @@ interface ExtractionHistoryItem {
   url?: string;
 }
 
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
+const DEFAULT_SYSTEM_PROMPT =
+  'You are a helpful AI assistant. Provide accurate, helpful, and well-structured responses. Use markdown formatting when appropriate.';
+
+function buildSystemPrompt(sources: ChatDataSourceSelection['sources']): string {
+  if (!sources || sources.length === 0) return DEFAULT_SYSTEM_PROMPT;
+
+  const contextParts = sources.map((src, i) => {
+    return `Data Source ${i + 1} (${src.type ?? 'text'}):\nTitle: ${src.title}\nURL: ${src.url ?? 'N/A'}\nContent:\n${src.content}\n---`;
+  });
+
+  return `You are a helpful AI assistant that answers questions based on provided data sources.
+
+You have access to the following data sources:
+${contextParts.join('\n\n')}
+
+Instructions:
+- Answer questions based only on the information provided in the data sources above
+- If information is not available in the data sources, clearly state that
+- Cite which data source(s) you are referencing when possible
+- Be concise but comprehensive
+- Format your response clearly with appropriate markdown formatting`;
 }
 
 export class ChatHandler {
@@ -22,7 +41,6 @@ export class ChatHandler {
   constructor(elements: ChatHandlerElements, deps: ChatHandlerDeps) {
     this.elements = elements;
     this.deps = deps;
-
     this.elements.chatInput.addEventListener('input', () => this.updateSendButtonState());
   }
 
@@ -88,29 +106,30 @@ export class ChatHandler {
     const assistantMessage = this.addMessage('assistant', '...');
 
     try {
-      const payload = {
-        message,
-        model,
-        dataSources: this.getChatDataSources()?.sources ?? [],
-        chatHistory: historyForPayload,
-      };
+      // Resolve API config (url + key) for the selected model
+      const apiConfig = this.deps.getApiConfig
+        ? await this.deps.getApiConfig()
+        : { apiUrl: 'http://localhost:11434/api/chat', apiKey: undefined };
 
-      const response = await this.deps.apiClient.makeRequest('/extension/chat-with-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // Build messages: system prompt + history + current user message
+      const dataSources = this.getChatDataSources()?.sources ?? [];
+      const systemContent = buildSystemPrompt(dataSources);
 
-      const result = await response.json();
+      const messages: ChatMessage[] = [
+        { role: 'system', content: systemContent },
+        ...historyForPayload,
+        { role: 'user', content: message },
+      ];
 
-      if (result?.success) {
-        const content = typeof result.response === 'string' ? result.response : '';
-        this.setMessageContent(assistantMessage, content || '');
-        this.chatHistory.push({ role: 'assistant', content });
-      } else {
-        const errorMessage = (result && result.error) || '❌ Failed to get response from AI.';
-        this.setMessageContent(assistantMessage, errorMessage);
-      }
+      // Route through Background SW — never call the backend HTTP server
+      const requestOptions = apiConfig.apiKey
+        ? { apiUrl: apiConfig.apiUrl, apiKey: apiConfig.apiKey, model, messages }
+        : { apiUrl: apiConfig.apiUrl, model, messages };
+      const { response } = await this.deps.sendAIRequest(requestOptions);
+
+      const content = response?.choices?.[0]?.message?.content ?? '';
+      this.setMessageContent(assistantMessage, content || '(empty response)');
+      this.chatHistory.push({ role: 'assistant', content });
     } catch (error) {
       const messageText = error instanceof Error ? error.message : String(error);
       this.setMessageContent(assistantMessage, `❌ ${messageText}`);

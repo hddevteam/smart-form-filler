@@ -244,15 +244,31 @@ document.addEventListener('DOMContentLoaded', () => {
           chatStatus: elements.chatStatus ?? null,
         },
         {
-          apiClient: {
-            makeRequest: async (endpoint: string, init?: RequestInit) => {
-              return fetch(endpoint, init);
-            },
-          },
+          sendAIRequest: options => extensionClient.sendAIRequest(options),
           getSelectedModel: () => {
             const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
             if (!select || select.disabled || !select.value) return null;
             return select.value;
+          },
+          getApiConfig: async () => {
+            // Read API config from storage for the selected model
+            const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
+            const model = select?.value ?? '';
+            const stored = await chrome.storage.local.get(['apiConfigs', 'selectedApiConfig']);
+            const configs = stored.apiConfigs as
+              | Record<string, { endpoint: string; apiKey?: string }>
+              | undefined;
+            const selectedKey = (stored.selectedApiConfig as string) ?? '';
+            const config = configs?.[selectedKey];
+            const isOllama =
+              model.startsWith('ollama') || model.includes('llama') || model.includes('mistral');
+            const apiKey = config?.apiKey;
+            if (apiKey) {
+              return { apiUrl: config?.endpoint ?? '', apiKey };
+            }
+            return {
+              apiUrl: config?.endpoint ?? (isOllama ? 'http://localhost:11434/api/chat' : ''),
+            };
           },
           getChatDataSources: () => dataSourceManager.getChatDataSources(),
         }
