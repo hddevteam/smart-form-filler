@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ChatHandler } from '@/popup/modules/chatHandler';
+import type { ChatResponse } from '@/types/ai';
+
+function makeAIResponse(content: string): ChatResponse {
+  return { model: 'test', choices: [{ message: { role: 'assistant', content } }] };
+}
 
 describe('ChatHandler', () => {
   const createElements = () => {
@@ -36,9 +41,8 @@ describe('ChatHandler', () => {
 
   it('enables send button when model and message provided', () => {
     const elements = createElements();
-    const apiClient = { makeRequest: vi.fn() };
     const handler = new ChatHandler(elements, {
-      apiClient,
+      sendAIRequest: vi.fn().mockResolvedValue({ response: makeAIResponse(''), logs: [] }),
       getSelectedModel: () => 'gpt-4o',
     });
 
@@ -55,7 +59,7 @@ describe('ChatHandler', () => {
   it('renders extraction history into selectable list', () => {
     const elements = createElements();
     const handler = new ChatHandler(elements, {
-      apiClient: { makeRequest: vi.fn() },
+      sendAIRequest: vi.fn().mockResolvedValue({ response: makeAIResponse(''), logs: [] }),
       getSelectedModel: () => null,
     });
 
@@ -68,19 +72,16 @@ describe('ChatHandler', () => {
     expect(checkbox?.value).toBe('item-1');
   });
 
-  it('sends message and appends assistant response when request succeeds', async () => {
+  it('sends message via sendAIRequest and appends assistant response', async () => {
     const elements = createElements();
-    const makeRequest = vi.fn((_endpoint: string, init?: RequestInit) =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: true, response: 'Hello from AI' }),
-        body: init?.body,
-      } as unknown as Response)
-    );
+    const sendAIRequest = vi.fn().mockResolvedValue({
+      response: makeAIResponse('Hello from AI'),
+      logs: [],
+    });
     const handler = new ChatHandler(elements, {
-      apiClient: { makeRequest },
+      sendAIRequest,
       getSelectedModel: () => 'gpt-4o',
       getChatDataSources: () => ({
-        type: 'markdown',
         sources: [
           { id: 'item-1', title: 'Sample', url: 'https://example.com', content: '# Sample' },
         ],
@@ -90,13 +91,10 @@ describe('ChatHandler', () => {
     elements.chatInput.value = 'Hi AI';
     await handler.sendMessage();
 
-    expect(makeRequest).toHaveBeenCalledTimes(1);
-    const payload = JSON.parse((makeRequest.mock.calls[0]?.[1]?.body as string) ?? '{}');
-    expect(payload).toMatchObject({
-      message: 'Hi AI',
-      model: 'gpt-4o',
-    });
-    expect(Array.isArray(payload.dataSources)).toBe(true);
+    expect(sendAIRequest).toHaveBeenCalledOnce();
+    const options = sendAIRequest.mock.calls[0][0];
+    expect(options.model).toBe('gpt-4o');
+    expect(Array.isArray(options.messages)).toBe(true);
 
     const messages = elements.chatMessages.querySelectorAll('.chat-message');
     expect(messages.length).toBe(2);
@@ -105,16 +103,10 @@ describe('ChatHandler', () => {
     expect(elements.sendChatBtn.disabled).toBe(true);
   });
 
-  it('shows error message when request fails', async () => {
+  it('shows error message when sendAIRequest fails', async () => {
     const elements = createElements();
     const handler = new ChatHandler(elements, {
-      apiClient: {
-        makeRequest: vi.fn(() =>
-          Promise.resolve({
-            json: () => Promise.resolve({ success: false, error: 'Service unavailable' }),
-          } as unknown as Response)
-        ),
-      },
+      sendAIRequest: vi.fn().mockRejectedValue(new Error('Service unavailable')),
       getSelectedModel: () => 'gpt-4o',
     });
 

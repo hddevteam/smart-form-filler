@@ -157,4 +157,36 @@ describe('DataSourceUIController', () => {
     const advancedIcon = document.getElementById('advancedDataSourceIcon');
     expect(advancedIcon?.textContent).toBe('✅');
   });
+
+  it('context isolation: chat modal config does not affect formFiller context', () => {
+    const emitter = new DataSourceEventEmitter();
+    const spy = vi.spyOn(emitter, 'emit');
+    const elements = {
+      dataSourceModal: document.getElementById('dataSourceModal') as HTMLElement,
+      dataSourceModalClose: document.getElementById('dataSourceModalClose') as HTMLElement,
+      dataSourceApplyBtn: document.getElementById('dataSourceApplyBtn') as HTMLButtonElement,
+      dataSourceCancelBtn: document.getElementById('dataSourceCancelBtn') as HTMLButtonElement,
+    };
+    const ui = new DataSourceUIController(elements, emitter);
+    ui.init();
+
+    // Open for Chat, apply → event should carry context: 'chat'
+    ui.openModalForContext('chat');
+    expect(ui.getCurrentModalContext()).toBe('chat');
+    (document.getElementById('dataSourceApplyBtn') as HTMLButtonElement).click();
+    const chatCallArgs = spy.mock.calls.find(c => c[0] === 'applyConfiguration');
+    expect(chatCallArgs?.[1]).toMatchObject({ context: 'chat' });
+
+    spy.mockClear();
+
+    // Open for FormFiller, apply → event should carry context: 'formFiller'
+    ui.openModalForContext('formFiller');
+    expect(ui.getCurrentModalContext()).toBe('formFiller');
+    (document.getElementById('dataSourceApplyBtn') as HTMLButtonElement).click();
+    const formFillerCallArgs = spy.mock.calls.find(c => c[0] === 'applyConfiguration');
+    expect(formFillerCallArgs?.[1]).toMatchObject({ context: 'formFiller' });
+
+    // Verify contexts are distinct (the two apply events have different contexts)
+    expect(chatCallArgs?.[1]).not.toEqual(formFillerCallArgs?.[1]);
+  });
 });

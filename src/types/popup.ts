@@ -177,16 +177,37 @@ export interface ChatHandlerElements {
   chatStatus?: HTMLElement | null;
 }
 
+export interface ChatDataSourceItem {
+  id?: string;
+  title: string;
+  url?: string;
+  content: string;
+  type?: string;
+}
+
 export interface ChatDataSourceSelection {
-  type: string;
-  sources: Array<{ id?: string; title: string; url?: string; content: string }>;
+  type?: string;
+  sources: ChatDataSourceItem[];
+}
+
+export interface ChatApiConfig {
+  apiUrl: string;
+  apiKey?: string | undefined;
 }
 
 export interface ChatHandlerDeps {
-  apiClient: {
-    makeRequest: (endpoint: string, init?: RequestInit) => Promise<Response>;
-  };
+  /** Route AI calls through the Background Service Worker. Never call makeRequest with an HTTP endpoint. */
+  sendAIRequest: (
+    options: import('@/background/services/ai/aiService').MakeRequestOptions
+  ) => Promise<{
+    response: import('@/types/ai').ChatResponse;
+    logs: string[];
+  }>;
+  /** Kept for non-AI calls (e.g. extension-internal endpoints). Must NOT be used for AI requests. */
+  makeRequest?: (endpoint: string, init?: RequestInit) => Promise<Response>;
   getSelectedModel: () => string | null;
+  /** Resolve API URL and key from stored config for the selected model. */
+  getApiConfig?: () => Promise<ChatApiConfig>;
   getChatDataSources?: () => ChatDataSourceSelection | null | undefined;
   onSendStart?: () => void;
   onSendComplete?: () => void;

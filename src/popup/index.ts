@@ -219,6 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
     popupManager as never
   );
   popupManager.dataSourceManager = dataSourceManager;
+
+  // Hoist chatHandler to outer scope so model selector change events can reach it
+  let chatHandler: ChatHandler | null = null;
+
   void dataSourceManager.init().then(() => {
     const ui = new DataSourceUIController(elements, dataSourceManager.eventEmitter);
     // Inject controller and initialize
@@ -228,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     dataSourceManager.updateAvailableDataSources();
     dataSourceManager.updateAllUI();
 
-    let chatHandler: ChatHandler | null = null;
     if (
       elements.chatMessages &&
       elements.chatInput instanceof HTMLTextAreaElement &&
@@ -244,15 +247,28 @@ document.addEventListener('DOMContentLoaded', () => {
           chatStatus: elements.chatStatus ?? null,
         },
         {
-          apiClient: {
-            makeRequest: async (endpoint: string, init?: RequestInit) => {
-              return fetch(endpoint, init);
-            },
-          },
+          sendAIRequest: options => extensionClient.sendAIRequest(options),
           getSelectedModel: () => {
             const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
             if (!select || select.disabled || !select.value) return null;
             return select.value;
+          },
+          getApiConfig: () => {
+            // Resolve endpoint + apiKey from the in-memory registry populated by loadModelsWithRegistry.
+            // Falls back to Ollama default for local models.
+            const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
+            const model = select?.value ?? '';
+            const entry = modelEndpointRegistry[model];
+            if (entry?.apiKey) {
+              return Promise.resolve({ apiUrl: entry.apiUrl, apiKey: entry.apiKey });
+            }
+            if (entry?.apiUrl) {
+              return Promise.resolve({ apiUrl: entry.apiUrl });
+            }
+            // Fallback for unregistered Ollama models
+            const isOllama =
+              model.startsWith('ollama:') || model.includes('llama') || model.includes('mistral');
+            return Promise.resolve({ apiUrl: isOllama ? 'http://localhost:11434/api/chat' : '' });
           },
           getChatDataSources: () => dataSourceManager.getChatDataSources(),
         }
@@ -392,7 +408,15 @@ document.addEventListener('DOMContentLoaded', () => {
       modelSelector = new ModelSelector(modelContainer, {
         loadModels: loadModelsWithRegistry,
       });
-      void modelSelector.render();
+      void modelSelector.render().then(() => {
+        // When the model select renders/re-renders, wire change event to update chat button state
+        const sel = modelContainer.querySelector<HTMLSelectElement>('select');
+        if (sel) {
+          sel.addEventListener('change', () => {
+            chatHandler?.updateSendButtonState();
+          });
+        }
+      });
     }
 
     // Render AI test button and wire to current selected model

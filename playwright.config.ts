@@ -31,8 +31,8 @@ export default defineConfig({
 
   webServer: {
     command: 'npx vite --host 127.0.0.1 --port 5173 --strictPort',
-    url: 'http://127.0.0.1:5173/extension/popup_ts.html',
+    url: 'http://127.0.0.1:5173/extension/popup.html',
     timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });

@@ -4,6 +4,7 @@
 import { Logger } from '@/utils/logger';
 import FormDetector from '@/content/formDetector';
 import FormFiller from '@/content/formFiller';
+import { ContentAnalyzer } from '@/content/contentAnalyzer';
 
 const logger = Logger.forScope('ContentScript');
 
@@ -66,6 +67,14 @@ class BasicContentExtractor {
         } catch (error) {
           sendResponse({ success: false, error: (error as Error).message });
         }
+      } else if (req.action === 'analyzeContent') {
+        try {
+          const analyzer = new ContentAnalyzer();
+          const analysis = analyzer.analyzePageStructure();
+          sendResponse({ success: true, analysis });
+        } catch (error) {
+          sendResponse({ success: false, error: (error as Error).message });
+        }
       } else if (req.action === 'checkFormDetector') {
         const formDetectorAvailable = typeof window.FormDetector !== 'undefined';
         const formFillerAvailable = typeof window.FormFiller !== 'undefined';
@@ -78,13 +87,9 @@ class BasicContentExtractor {
       } else if (req.action === 'detectForms') {
         logger.info("Received 'detectForms' request in content script");
         try {
-          if (typeof window.FormDetector === 'undefined') {
-            logger.error('FormDetector is not defined in window object');
-            throw new Error('FormDetector not loaded. Please refresh the page and try again.');
-          }
-          const formDetector = new window.FormDetector();
-          const results = (formDetector as { detectForms: () => unknown }).detectForms();
-          sendResponse({ success: true, ...(results as object) });
+          const formDetector = new FormDetector();
+          const results = formDetector.getDetectionResult();
+          sendResponse({ success: true, ...results });
         } catch (error) {
           logger.error('Form detection error:', error);
           sendResponse({ success: false, error: (error as Error).message });
