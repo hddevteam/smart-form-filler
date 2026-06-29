@@ -26,7 +26,7 @@ export class ModelSelector {
   }
 
   async render(): Promise<void> {
-    this.container.innerHTML = `<select class="input" aria-label="Model"><option value="">Loading models...</option></select>`;
+    this.container.innerHTML = `<select id="globalModelSelect" class="input" aria-label="Model"><option value="">Loading models...</option></select>`;
     const select = this.container.querySelector<HTMLSelectElement>('select');
     if (!select) return;
     try {

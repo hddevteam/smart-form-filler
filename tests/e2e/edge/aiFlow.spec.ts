@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const POPUP_DEV_URL = process.env.POPUP_DEV_URL ?? 'http://127.0.0.1:5173/extension/popup_ts.html';
+const POPUP_DEV_URL = process.env.POPUP_DEV_URL ?? 'http://127.0.0.1:5173/extension/popup.html';
 
 test.describe('Popup detect/analyze to AI flow', () => {
   test('handles AI success then failure with mocked runtime responses', async ({ page }) => {

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Use TS popup shell to mount popup/index.ts
-const POPUP_DEV_URL = process.env.POPUP_DEV_URL ?? 'http://127.0.0.1:5173/extension/popup_ts.html';
+const POPUP_DEV_URL = process.env.POPUP_DEV_URL ?? 'http://127.0.0.1:5173/extension/popup.html';
 
 test.describe('Popup Azure settings workflow', () => {
   test('saves Azure config and refreshes model selector', async ({ page }) => {

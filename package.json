@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:ci": "vitest --run --silent --pool=forks",
+    "test:all": "pnpm run test:ci && pnpm run build && pnpm run test:e2e",
     "lint": "eslint src tests vite.config.ts vitest.config.ts playwright.config.ts --ext .ts,.tsx",
     "lint:fix": "eslint src tests vite.config.ts vitest.config.ts playwright.config.ts --ext .ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\" \"tests/**/*.{ts,tsx}\"",
