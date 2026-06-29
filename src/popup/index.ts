@@ -253,25 +253,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!select || select.disabled || !select.value) return null;
             return select.value;
           },
-          getApiConfig: async () => {
-            // Read API config from storage for the selected model
+          getApiConfig: () => {
+            // Resolve endpoint + apiKey from the in-memory registry populated by loadModelsWithRegistry.
+            // Falls back to Ollama default for local models.
             const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
             const model = select?.value ?? '';
-            const stored = await chrome.storage.local.get(['apiConfigs', 'selectedApiConfig']);
-            const configs = stored.apiConfigs as
-              | Record<string, { endpoint: string; apiKey?: string }>
-              | undefined;
-            const selectedKey = (stored.selectedApiConfig as string) ?? '';
-            const config = configs?.[selectedKey];
-            const isOllama =
-              model.startsWith('ollama') || model.includes('llama') || model.includes('mistral');
-            const apiKey = config?.apiKey;
-            if (apiKey) {
-              return { apiUrl: config?.endpoint ?? '', apiKey };
+            const entry = modelEndpointRegistry[model];
+            if (entry?.apiKey) {
+              return Promise.resolve({ apiUrl: entry.apiUrl, apiKey: entry.apiKey });
             }
-            return {
-              apiUrl: config?.endpoint ?? (isOllama ? 'http://localhost:11434/api/chat' : ''),
-            };
+            if (entry?.apiUrl) {
+              return Promise.resolve({ apiUrl: entry.apiUrl });
+            }
+            // Fallback for unregistered Ollama models
+            const isOllama =
+              model.startsWith('ollama:') || model.includes('llama') || model.includes('mistral');
+            return Promise.resolve({ apiUrl: isOllama ? 'http://localhost:11434/api/chat' : '' });
           },
           getChatDataSources: () => dataSourceManager.getChatDataSources(),
         }

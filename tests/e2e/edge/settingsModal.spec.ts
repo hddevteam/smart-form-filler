@@ -83,12 +83,11 @@ test.describe('Popup Azure settings workflow', () => {
     await expect(page.locator('#modal-root')).toBeEmpty();
 
     // Model selector should refresh and include Azure model option
-    const selector = page.locator('#model-selector select');
+    const selector = page.locator('#globalModelSelect, #model-selector select').first();
     await expect(selector).toBeVisible();
-    // Wait for options to populate
     await page.waitForFunction(
       () => {
-        const sel = document.querySelector('#model-selector select');
+        const sel = document.querySelector('#globalModelSelect');
         return !!sel && sel.querySelectorAll('option').length > 0;
       },
       { timeout: 5000 }
@@ -96,5 +95,79 @@ test.describe('Popup Azure settings workflow', () => {
 
     const optionValues = await selector.locator('option').allTextContents();
     expect(optionValues.join('|').toLowerCase()).toContain('gpt-4o');
+  });
+
+  test('Test Connection button dispatches AI_REQUEST via chrome.runtime', async ({ page }) => {
+    await page.addInitScript(() => {
+      const store: Record<string, unknown> = {};
+      const storageLocal = {
+        set: (obj: Record<string, unknown>) => {
+          Object.assign(store, obj);
+          return Promise.resolve();
+        },
+        get: (key: string | string[] | Record<string, unknown>) => {
+          if (typeof key === 'string') return Promise.resolve({ [key]: store[key] });
+          if (Array.isArray(key)) {
+            const r: Record<string, unknown> = {};
+            key.forEach(k => (r[k] = store[k]));
+            return Promise.resolve(r);
+          }
+          return Promise.resolve(store);
+        },
+      } as const;
+
+      const callLog: Array<{ action?: string }> = [];
+      const runtime = {
+        lastError: undefined as unknown,
+        sendMessage: (message: { action?: string }, callback: (resp: unknown) => void) => {
+          callLog.push(message);
+          if (message?.action === 'getAvailableModels') {
+            callback({ success: true, models: [] });
+            return;
+          }
+          if (message?.action === 'AI_REQUEST') {
+            callback({
+              success: true,
+              data: {
+                model: 'gpt-4o',
+                choices: [{ message: { role: 'assistant', content: 'pong' } }],
+              },
+              logs: [],
+            });
+            return;
+          }
+          callback({ success: true });
+        },
+      } as const;
+
+      // @ts-expect-error: injecting mock chrome API
+      window.chrome = { storage: { local: storageLocal }, runtime };
+      (window as unknown as { __sf_calls?: typeof callLog }).__sf_calls = callLog;
+    });
+
+    await page.goto(POPUP_DEV_URL, { waitUntil: 'domcontentloaded' });
+
+    const settingsButton = page.getByRole('button', { name: 'Settings' });
+    await expect(settingsButton).toBeVisible({ timeout: 5000 });
+    await settingsButton.click();
+
+    await page.fill('#azure-model', 'gpt-4o');
+    await page.fill(
+      '#azure-endpoint',
+      'https://example.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview'
+    );
+    await page.fill('#azure-apikey', 'test-key');
+
+    await page.click('#azure-test-btn');
+
+    // Should show success feedback
+    const status = page.locator('.config-status');
+    await expect(status).toContainText(/success|connected|✓/i, { timeout: 5000 });
+
+    // AI_REQUEST was dispatched via chrome.runtime (no backend fetch)
+    const calls = await page.evaluate(
+      () => (window as unknown as { __sf_calls?: Array<{ action: string }> }).__sf_calls ?? []
+    );
+    expect(calls.some(c => c.action === 'AI_REQUEST')).toBe(true);
   });
 });
