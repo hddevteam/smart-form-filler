@@ -10,6 +10,8 @@ export interface SimpleModeElements {
   contentInput: HTMLTextAreaElement;
   submitBtn: HTMLButtonElement;
   clearBtn: HTMLButtonElement | null;
+  retryBtn: HTMLButtonElement | null;
+  languageSelect: HTMLSelectElement | null;
   progressContainer: HTMLElement | null;
   progressText: HTMLElement | null;
   progressIcon: HTMLElement | null;
@@ -24,6 +26,7 @@ export interface SimpleModeDeps {
   elements: SimpleModeElements;
   workflow: SimpleModeWorkflow;
   getSelectedDataSources?: () => unknown[];
+  getLanguage?: () => string;
   document?: Document;
 }
 
@@ -37,12 +40,16 @@ export class SimpleMode {
   private readonly elements: SimpleModeElements;
   private readonly workflow: SimpleModeWorkflow;
   private readonly getSelectedDataSources: () => unknown[];
+  private readonly getLanguage: () => string;
   private isProcessing = false;
+  private lastContent = '';
+  private lastDataSources: unknown[] = [];
 
-  constructor({ elements, workflow, getSelectedDataSources }: SimpleModeDeps) {
+  constructor({ elements, workflow, getSelectedDataSources, getLanguage }: SimpleModeDeps) {
     this.elements = elements;
     this.workflow = workflow;
     this.getSelectedDataSources = getSelectedDataSources ?? (() => []);
+    this.getLanguage = getLanguage ?? (() => 'zh');
 
     this.bindEvents();
     this.updateSubmitButtonState();
@@ -59,6 +66,20 @@ export class SimpleMode {
     });
 
     this.elements.clearBtn?.addEventListener('click', () => this.handleClear());
+    this.elements.retryBtn?.addEventListener('click', () => void this.handleRetry());
+    this.elements.fillFormsBtn?.addEventListener('click', () => void this.handleFillForms());
+    this.elements.languageSelect?.addEventListener('change', () => this.updateSubmitButtonState());
+  }
+
+  private async handleFillForms(): Promise<void> {
+    if (!this.workflow.hasMappings()) return;
+    // Re-trigger generate to fill directly if already mapped
+    await this.workflow.generate();
+  }
+
+  private async handleRetry(): Promise<void> {
+    this.hideAllStates();
+    await this.handleSubmitWith(this.lastContent, this.lastDataSources);
   }
 
   private handleClear(): void {
@@ -108,6 +129,11 @@ export class SimpleMode {
     if (this.elements.errorMessage) this.elements.errorMessage.textContent = message;
   }
 
+  /** Returns the currently selected language. */
+  getSelectedLanguage(): string {
+    return this.elements.languageSelect?.value ?? this.getLanguage();
+  }
+
   private getEffectiveContent(): string {
     return this.elements.contentInput.value.trim();
   }
@@ -133,12 +159,18 @@ export class SimpleMode {
 
     const content = this.getEffectiveContent();
     const dataSources = this.getSelectedDataSources();
+    await this.handleSubmitWith(content, dataSources);
+  }
 
+  private async handleSubmitWith(content: string, dataSources: unknown[]): Promise<void> {
     if (!content && (!dataSources || dataSources.length === 0)) {
       this.showError('Please enter content or select data sources before submitting.');
       this.updateSubmitButtonState();
       return;
     }
+
+    this.lastContent = content;
+    this.lastDataSources = dataSources;
 
     try {
       this.isProcessing = true;
