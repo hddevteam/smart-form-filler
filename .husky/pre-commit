@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+# ── File line-count guard ──────────────────────────────────────────────────
+# Reject staged .ts/.tsx files that exceed 1500 lines.
+MAX_LINES=1500
+VIOLATIONS=""
+
+for file in $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$'); do
+  if [ -f "$file" ]; then
+    count=$(wc -l < "$file")
+    if [ "$count" -gt "$MAX_LINES" ]; then
+      VIOLATIONS="${VIOLATIONS}\n  ${file} (${count} lines)"
+    fi
+  fi
+done
+
+if [ -n "$VIOLATIONS" ]; then
+  echo ""
+  echo "❌ Commit blocked: the following files exceed the ${MAX_LINES}-line limit."
+  echo "   Split them into smaller modules before committing:"
+  printf "%b\n" "$VIOLATIONS"
+  echo ""
+  exit 1
+fi
+# ── End line-count guard ───────────────────────────────────────────────────
+
+npx lint-staged

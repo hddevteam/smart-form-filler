@@ -4,9 +4,6 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-// Initialize logger early
-const logger = require('./utils/logger');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 

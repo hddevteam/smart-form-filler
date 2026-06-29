@@ -8,7 +8,6 @@ const extensionCoreController = require("./extensionCoreController");
 const dataExtractionController = require("./dataExtractionController");
 const dataAnalysisController = require("./dataAnalysisController");
 const formFillerController = require("./formFillerController");
-const logsController = require("./logsController");
 
 module.exports = {
     // Core extension functionality
@@ -21,8 +20,5 @@ module.exports = {
     dataAnalysis: dataAnalysisController,
     
     // Form filler functionality
-    formFiller: formFillerController,
-    
-    // Logging functionality
-    logs: logsController
+    formFiller: formFillerController
 };

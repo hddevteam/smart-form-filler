@@ -1,757 +1,504 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Form Filler</title>
-    <link rel="stylesheet" href="styles/popup.css">
-</head>
-<body>
-    <div class="analyzer">
-        <!-- Header -->
-        <div class="analyzer__header">
-            <div class="analyzer__brand">
-                <img src="icons/icon32.png" alt="Smart Form Filler" class="analyzer__icon">
-                <div class="analyzer__model-controls">
-                    <select id="globalModelSelect" class="select select--header" title="Select AI Model" disabled>
-                        <option value="">Loading models...</option>
-                    </select>
-                    <button id="globalRefreshModelsBtn" class="btn btn--header" title="Refresh Ollama models">
-                        <span class="btn__icon">🔄</span>
-                    </button>
-                    <button id="settingsBtn" class="btn btn--header" title="Settings">
-                        <span class="btn__icon">⚙️</span>
-                    </button>
-                </div>
-            </div>
-            <div class="analyzer__status" id="authStatus">
-                <div class="status-indicator" id="authIndicator"></div>
-                <span class="status-text" id="authText">Checking...</span>
-            </div>
-        </div>        <!-- Content -->
-        <div class="analyzer__content">
-            <!-- Main Navigation Tabs -->
-            <div class="main-tabs">
-                <button class="main-tab main-tab--active" data-tab="extraction">
-                    <span class="main-tab__icon">📊</span>
-                    <span class="main-tab__text">Data Extraction</span>
-                </button>
-                <button class="main-tab" data-tab="chat">
-                    <span class="main-tab__icon">💬</span>
-                    <span class="main-tab__text">Chat with Data</span>
-                </button>
-                <button class="main-tab" data-tab="formfiller">
-                    <span class="main-tab__icon">✍️</span>
-                    <span class="main-tab__text">Form Filler</span>
-                </button>
-            </div>
-
-            <!-- Data Extraction Tab Content -->
-            <div id="extractionTab" class="main-tab-content main-tab-content--active">
-                <!-- Analysis Purpose Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <h3 class="section__title">Data Extraction</h3>
-                        <p class="section__description">Extract structured data sources (Markdown + HTML)</p>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="section">
-                    <div class="section__content">
-                        <div class="action-buttons action-buttons--single-button">
-                            <button id="extractDataBtn" class="btn btn--primary btn--large">
-                                <span class="btn__icon">📊</span>
-                                <span class="btn__text">Extract Data Sources</span>
-                            </button>
-                            <button id="loginBtn" class="btn btn--tertiary hidden">
-                                <span class="btn__icon">🔐</span>
-                                <span class="btn__text">Sign In</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Results Section -->
-                <div id="resultsSection" class="section hidden">
-                    <div class="section__header">
-                        <h3 class="section__title">Extraction History</h3>
-                        <div class="results-actions-header">
-                            <button id="clearAllBtn" class="btn btn--tertiary btn--small">
-                                <span class="btn__icon">🗑️</span>
-                                Clear All
-                            </button>
-                        </div>
-                    </div>
-                    <div class="section__content">
-                        <!-- History List Container -->
-                        <div id="historyContainer" class="history-container">
-                            <!-- Dynamic history items will be inserted here -->
-                        </div>
-                        
-                        <!-- Current Results Detail View (Hidden by default) -->
-                        <div id="currentResultsDetail" class="results-detail hidden">
-                            <div class="results-container">
-                                <div class="results-tabs">
-                                    <button class="results-tab results-tab--active" data-tab="markdown" id="markdownTab">Markdown</button>
-                                    <button class="results-tab" data-tab="html" id="htmlTab">Raw HTML</button>
-                                    <button class="results-tab" data-tab="cleaned-html" id="cleanedHtmlTab">Cleaned HTML</button>
-                                    <button class="results-tab" data-tab="metadata" id="metadataTab">Metadata</button>
-                                </div>
-                                <div class="results-content">
-                                    <div class="results-panel results-panel--active" id="markdownPanel">
-                                        <div class="results-text" id="markdownText"></div>
-                                    </div>
-                                    <div class="results-panel" id="htmlPanel">
-                                        <div class="results-text" id="htmlText"></div>
-                                    </div>
-                                    <div class="results-panel" id="cleanedHtmlPanel">
-                                        <div class="results-text" id="cleanedHtmlText"></div>
-                                    </div>
-                                    <div class="results-panel" id="metadataPanel">
-                                        <pre class="results-code" id="metadataData"></pre>
-                                    </div>
-                                </div>
-                                <div class="results-actions">
-                                    <button id="copyBtn" class="btn btn--secondary btn--small">
-                                        <span class="btn__icon">📋</span>
-                                        Copy Results
-                                    </button>
-                                    <button id="chatBtn" class="btn btn--primary btn--small">
-                                        <span class="btn__icon">💬</span>
-                                        Switch to Chat
-                                    </button>
-                                    <button id="backToHistoryBtn" class="btn btn--tertiary btn--small">
-                                        <span class="btn__icon">←</span>
-                                        Back to List
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat with Data Tab Content -->
-            <div id="chatTab" class="main-tab-content">
-                <!-- Data Source Selection Section -->
-                <div class="section">
-                    <div class="section__header">
-                        <div>
-                            <h3 class="section__title">Data Sources</h3>
-                            <p class="section__description">Configure your chat data sources</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Controls row for data source -->
-                    <div class="section__controls">
-                        <div class="section__controls-group">
-                            <span class="section__control-label">Data Source:</span>
-                            <button id="chatDataSourceBtn" class="simple-mode__data-source-btn">
-                                <span id="chatDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
-                                <span id="chatDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="section__content">
-                        <!-- Chat data source summary is now handled by the button itself -->
-                    </div>
-                </div>
-                
-                <!-- Chat Messages Section -->
-                <div class="section section--chat-container">
-                    <div class="section__header section__header--with-action">
-                        <div>
-                            <h3 class="section__title">Chat Messages</h3>
-                        </div>
-                        <button id="clearChatBtn" class="btn btn--tertiary btn--small">
-                            <span class="btn__icon">🗑️</span>
-                            <span class="btn__text">Clear Chat</span>
-                        </button>
-                    </div>
-                    <div class="section__content section__content--chat">
-                        <!-- Chat Messages -->
-                        <div id="chatMessages" class="chat-messages">
-                            <div class="chat-welcome">
-                                <div class="chat-welcome__icon">💬</div>
-                                <div class="chat-welcome__title">Start chatting with your data</div>
-                                <div class="chat-welcome__description">
-                                    Click "Configure Sources" to select data sources, then ask questions about the content.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Chat Input - Fixed at bottom -->
-                    <div class="chat-input-container">
-                        <div class="chat-input">
-                            <textarea id="chatInput" class="chat-input__field" placeholder="Ask a question about the selected data sources..." rows="2"></textarea>
-                            <button id="sendChatBtn" class="chat-input__send" disabled>
-                                <span class="btn__icon">→</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Filler Tab Content -->
-            <div id="formFillerTab" class="main-tab-content">
-                <!-- Mode Toggle Header -->
-                <div class="form-filler__mode-header">
-                    <div class="mode-toggle-container">
-                        <button id="simpleModeToggle" class="mode-toggle mode-toggle--active" aria-pressed="true">
-                            <span class="mode-toggle__icon">⚡</span>
-                            <span class="mode-toggle__text">Simple</span>
-                        </button>
-                        <button id="advancedModeToggle" class="mode-toggle" aria-pressed="false">
-                            <span class="mode-toggle__icon">🔧</span>
-                            <span class="mode-toggle__text">Advanced</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Form Filler Content Container -->
-                <div id="formFillerContent" class="form-filler__content">
-                    
-                    <!-- Simple Mode Interface -->
-                    <div id="formFillerSimpleMode" class="simple-mode">
-                        <!-- Input Section -->
-                        <div class="simple-mode__section">
-                            <div class="simple-mode__input-group">
-                                <label for="simpleModeLanguageSelect" class="simple-mode__label">
-                                    <span class="simple-mode__label-icon">🌐</span>
-                                    Language
-                                </label>
-                                <select id="simpleModeLanguageSelect" class="simple-mode__select">
-                                    <option value="zh" selected>中文</option>
-                                    <option value="en">English</option>
-                                </select>
-                            </div>
-                            
-                            <div class="simple-mode__input-group">
-                                <label class="simple-mode__label">
-                                    <span class="simple-mode__label-icon">📊</span>
-                                    Data Source
-                                </label>
-                                <button id="simpleModeDataSourceBtn" class="simple-mode__data-source-btn">
-                                    <span id="simpleModeDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
-                                    <span id="simpleModeDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
-                                </button>
-                            </div>
-                            
-                            <div class="simple-mode__input-group">
-                                <label for="simpleModeContentInput" class="simple-mode__label">
-                                    <span class="simple-mode__label-icon">✍️</span>
-                                    Content to Fill
-                                </label>
-                                <textarea id="simpleModeContentInput" class="simple-mode__textarea" 
-                                    placeholder="Example: Last weekend from 8 AM to 10 AM, the Network Information Department arranged for Zhang Ming to work overtime to handle an emergency incident." 
-                                    rows="4"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="simple-mode__actions">
-                            <button id="simpleModeSubmitBtn" class="simple-mode__btn simple-mode__btn--primary" disabled>
-                                <span class="simple-mode__btn-icon">🚀</span>
-                                <span class="simple-mode__btn-text">Submit</span>
-                            </button>
-                            <button id="simpleModeClearBtn" class="simple-mode__btn simple-mode__btn--secondary">
-                                <span class="simple-mode__btn-icon">🗑️</span>
-                                <span class="simple-mode__btn-text">Clear</span>
-                            </button>
-                        </div>
-
-                        <!-- Progress Indicator -->
-                        <div id="simpleModeProgress" class="simple-mode__progress hidden">
-                            <div class="simple-mode__progress-content">
-                                <div class="simple-mode__progress-icon" id="simpleModeProgressIcon">🔍</div>
-                                <div class="simple-mode__progress-text" id="simpleModeProgressText">Processing...</div>
-                                <div class="simple-mode__progress-bar">
-                                    <div class="simple-mode__progress-fill"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Results Preview -->
-                        <div id="simpleModeResults" class="simple-mode__results hidden">
-                            <!-- Results content will be dynamically generated -->
-                        </div>
-
-                        <!-- Fill Forms Action -->
-                        <div id="simpleModeFillSection" class="simple-mode__fill-section hidden">
-                            <button id="simpleModeFillFormsBtn" class="simple-mode__btn simple-mode__btn--success simple-mode__btn--large">
-                                <span class="simple-mode__btn-icon">✍️</span>
-                                <span class="simple-mode__btn-text">Fill Forms</span>
-                            </button>
-                        </div>
-
-                        <!-- Error State -->
-                        <div id="simpleModeError" class="simple-mode__error hidden">
-                            <div class="simple-mode__error-content">
-                                <div class="simple-mode__error-icon">⚠️</div>
-                                <div class="simple-mode__error-message" id="simpleModeErrorMessage">An error occurred</div>
-                                <div class="simple-mode__error-actions">
-                                    <button id="simpleModeRetryBtn" class="simple-mode__btn simple-mode__btn--secondary simple-mode__btn--small">
-                                        <span class="simple-mode__btn-icon">🔄</span>
-                                        <span class="simple-mode__btn-text">Retry</span>
-                                    </button>
-                                    <button id="simpleModeAdvancedBtn" class="simple-mode__btn simple-mode__btn--tertiary simple-mode__btn--small">
-                                        <span class="simple-mode__btn-icon">🔧</span>
-                                        <span class="simple-mode__btn-text">Advanced Mode</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Mode Interface -->
-                    <div id="formFillerAdvancedMode" class="advanced-mode hidden">
-                        <!-- Content Input Section -->
-                        <div class="section">
-                            <div class="section__header">
-                                <div>
-                                    <h3 class="section__title">Content to Fill</h3>
-                                    <p class="section__description">Enter content for AI-powered analysis and field mapping</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Controls row for language and data source -->
-                            <div class="section__controls">
-                                <div class="section__controls-group">
-                                    <label for="languageSelect" class="section__control-label">Output Language:</label>
-                                    <select id="languageSelect" class="select select--primary select--compact" title="Select Output Language">
-                                        <option value="zh" selected>中文</option>
-                                        <option value="en">English</option>
-                                    </select>
-                                </div>
-                                <div class="section__controls-group">
-                                    <span class="section__control-label">Data Source:</span>
-                                    <button id="advancedDataSourceBtn" class="simple-mode__data-source-btn">
-                                        <span id="advancedDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
-                                        <span id="advancedDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="section__content">
-                                <textarea id="fillContentInput" class="form-filler__input" placeholder="Example: Last weekend from 8 AM to 10 AM, the Network Information Department arranged for Zhang Ming to work overtime to handle an emergency incident." rows="4"></textarea>
-                                
-                                <!-- Advanced mode data source summary is now handled by the button itself -->
-                            </div>
-                        </div>
-
-                        <!-- Form Detection Section -->
-                        <div id="advancedFormDetection" class="section advanced-mode__section" data-step="formDetection" data-section-container="formDetection">
-                            <!-- Action button always visible - above section header -->
-                            <div class="action-buttons action-buttons--form-detection">
-                                <button id="detectFormsBtn" class="btn btn--secondary">
-                                    <span class="btn__icon">🔍</span>
-                                    <span class="btn__text">Detect Forms</span>
-                                </button>
-                            </div>
-                            
-                            <div class="section__header advanced-mode__section-header--collapsible hidden" data-target="formDetection">
-                                <div class="section__header-content">
-                                    <h3 class="section__title">Form Detection</h3>
-                                    <p class="section__description">Detect forms on the current page</p>
-                                </div>
-                                <button class="advanced-mode__collapse-btn">
-                                    <span class="advanced-mode__collapse-icon">▼</span>
-                                </button>
-                            </div>
-                            
-                            <div class="section__content advanced-mode__section-content" data-section="formDetection">
-                                <!-- Form Detection Results with independent collapse -->
-                                <div id="formDetectionResults" class="form-detection-results hidden">
-                                    <div class="section__header section__header--collapsible section__header--results" data-target="formDetectionResultsContent">
-                                        <div class="section__header-content">
-                                            <div class="form-detection-summary">
-                                                <span class="summary-item">
-                                                    <span class="summary-label">Forms Found:</span>
-                                                    <span class="summary-value" id="formsFoundCount">0</span>
-                                                </span>
-                                                <span class="summary-item">
-                                                    <span class="summary-label">Fields Found:</span>
-                                                    <span class="summary-value" id="fieldsFoundCount">0</span>
-                                                </span>
-                                                <span class="summary-item hidden" id="iframeStatsContainer">
-                                                    <span class="summary-label">Sources:</span>
-                                                    <span class="summary-value" id="sourceStats">Main + 0 iframes</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <button class="section__collapse-btn" data-target="formDetectionResultsContent" title="Collapse/Expand Results">
-                                            <span class="collapse-icon">▼</span>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="section__content--collapsible" data-section="formDetectionResultsContent">
-                                        <div id="formsList" class="forms-list">
-                                            <!-- Dynamic form list will be inserted here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Content Analysis Section -->
-                        <div id="advancedContentAnalysis" class="section advanced-mode__section hidden" data-step="contentAnalysis" data-section-container="analysisResults">
-                            <!-- Action button always visible - above section header -->
-                            <div class="action-buttons action-buttons--content-analysis">
-                                <button id="analyzeContentBtn" class="btn btn--primary" disabled>
-                                    <span class="btn__icon">🧠</span>
-                                    <span class="btn__text">Analyze Content</span>
-                                </button>
-                            </div>
-                            
-                            <div class="section__header advanced-mode__section-header--collapsible hidden" data-target="analysisResults">
-                                <div class="section__header-content">
-                                    <h3 class="section__title">Content Analysis</h3>
-                                    <p class="section__description">Stage 1: Form relevance analysis</p>
-                                </div>
-                                <button class="advanced-mode__collapse-btn">
-                                    <span class="advanced-mode__collapse-icon">▼</span>
-                                </button>
-                            </div>
-                            
-                            <div class="section__content advanced-mode__section-content" data-section="analysisResults">
-                                <!-- Analysis Results with independent collapse -->
-                                <div id="analysisResultsContainer" class="analysis-results-container hidden">
-                                    <div class="section__header section__header--collapsible section__header--results" data-target="analysisResultsContent">
-                                        <div class="section__header-content">
-                                            <h4 class="section__subtitle">Analysis Results</h4>
-                                        </div>
-                                        <button class="section__collapse-btn" data-target="analysisResultsContent" title="Collapse/Expand Results">
-                                            <span class="collapse-icon">▼</span>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="section__content--collapsible" data-section="analysisResultsContent">
-                                        <div id="analysisResults" class="analysis-results">
-                                            <!-- Dynamic analysis results will be inserted here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Field Mapping Section -->
-                        <div id="advancedFieldMapping" class="section advanced-mode__section hidden" data-step="fieldMapping" data-section-container="fieldMapping">
-                            <div class="section__header advanced-mode__section-header--collapsible hidden" data-target="fieldMapping">
-                                <div class="section__header-content">
-                                    <h3 class="section__title">Field Mapping</h3>
-                                    <p class="section__description">Stage 2: Generate detailed field mappings for the selected form</p>
-                                </div>
-                                <button class="advanced-mode__collapse-btn">
-                                    <span class="advanced-mode__collapse-icon">▼</span>
-                                </button>
-                            </div>
-                            
-                            <!-- Action button always visible - outside collapsible content -->
-                            <div class="action-buttons action-buttons--mapping">
-                                <button id="generateMappingBtn" class="btn btn--primary" disabled>
-                                    <span class="btn__icon">🗺️</span>
-                                    <span class="btn__text">Generate Mapping</span>
-                                </button>
-                            </div>
-                            
-                            <div class="section__content advanced-mode__section-content" data-section="fieldMapping">
-                                <!-- Mapping Results with independent collapse -->
-                                <div id="mappingResultsContainer" class="mapping-results-container hidden">
-                                    <div class="section__header section__header--collapsible section__header--results" data-target="mappingResultsContent">
-                                        <div class="section__header-content">
-                                            <h4 class="section__subtitle">Mapping Results</h4>
-                                        </div>
-                                        <button class="section__collapse-btn" data-target="mappingResultsContent" title="Collapse/Expand Results">
-                                            <span class="collapse-icon">▼</span>
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="section__content--collapsible" data-section="mappingResultsContent">
-                                        <div id="mappingResults" class="mapping-results">
-                                            <!-- Dynamic mapping results will be inserted here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Form Filling Actions -->
-                        <div id="advancedFillActions" class="section advanced-mode__section hidden" data-step="fillActions" data-section="fillActions">
-                            <div class="section__header">
-                                <h3 class="section__title">Fill Forms</h3>
-                                <p class="section__description">Apply the mapped data to form fields</p>
-                            </div>
-                            <div class="section__content">
-                                <div class="action-buttons action-buttons--fill-actions">
-                                    <button id="fillFormsBtn" class="btn btn--primary" disabled>
-                                        <span class="btn__icon">✍️</span>
-                                        <span class="btn__text">Fill Forms</span>
-                                    </button>
-                                </div>
-                                
-                                <div id="fillResults" class="fill-results hidden">
-                                    <!-- Dynamic fill results will be inserted here -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Clear All Section -->
-                        <div class="section">
-                            <div class="section__header">
-                                <h3 class="section__title">Reset</h3>
-                                <p class="section__description">Clear all inputs and analysis results</p>
-                            </div>
-                            <div class="section__content">
-                                <div class="action-buttons action-buttons--clear">
-                                    <button id="clearAllFormFillerBtn" class="btn btn--secondary btn--danger">
-                                        <span class="btn__icon">🗑️</span>
-                                        <span class="btn__text">Clear All</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading State -->
-            <div id="loadingState" class="loading-overlay hidden">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">Processing...</div>
-                    <div class="loading-details" id="loadingDetails">Initializing</div>
-                    <div class="loading-cancel-container">
-                        <button id="cancelLoadingBtn" class="btn btn--secondary btn--small loading-cancel">
-                            <span class="btn__icon">✕</span>
-                            <span class="btn__text">Cancel</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-
-
-
-
-            <!-- Error State -->
-            <div id="errorState" class="error-container hidden">
-                <div class="error-content">
-                    <div class="error-icon">⚠️</div>
-                    <div class="error-message" id="errorMessage"></div>
-                    <button id="retryBtn" class="btn btn--secondary btn--small">
-                        Try Again
-                    </button>
-                </div>
-            </div>
+    <link rel="stylesheet" href="styles/popup.css" />
+    <style>
+      .hidden {
+        display: none !important;
+      }
+      .popup-shell {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+        min-width: 640px;
+        max-width: 680px;
+        min-height: 520px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px 24px;
+      }
+      .popup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .popup-header__brand {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .popup-header__title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .popup-header__subtitle {
+        font-size: 13px;
+        color: #475569;
+        margin: 0;
+      }
+      .popup-header__controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .button-row,
+      .content-actions,
+      .model-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .content-section {
+        background: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .main-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .main-tab {
+        flex: 1 1 33%;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        background: #e2e8f0;
+        color: #0f172a;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      .main-tab--active {
+        background: #2563eb;
+        color: #fff;
+      }
+      .main-tab-content {
+        display: none;
+        gap: 16px;
+        flex-direction: column;
+      }
+      .main-tab-content--active {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .history-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 16px;
+      }
+      .history-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .results-detail {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 320px;
+      }
+      .results-tabs {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .results-tab {
+        flex: 1;
+        padding: 12px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .results-tab--active {
+        border-bottom: 2px solid #2563eb;
+        color: #2563eb;
+      }
+      .results-content {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+      }
+      .results-text,
+      .results-code {
+        white-space: pre-wrap;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .results-actions {
+        border-top: 1px solid #e2e8f0;
+        padding: 12px 16px;
+        display: flex;
+        gap: 12px;
+      }
+      .btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #2563eb;
+        color: #fff;
+        transition: background 0.2s ease;
+      }
+      .btn--secondary {
+        background: #0f172a;
+      }
+      .btn--tertiary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .btn:disabled {
+        background: #cbd5f5;
+        cursor: not-allowed;
+      }
+      .chat-config {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .chat-status {
+        font-size: 12px;
+        color: #64748b;
+      }
+      .chat-data-source-list {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 120px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+      }
+      .chat-data-source-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      .chat-messages {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 160px;
+        max-height: 260px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .chat-message {
+        display: flex;
+        gap: 8px;
+      }
+      .chat-message__text {
+        background: #e2e8f0;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 13px;
+        max-width: 90%;
+      }
+      .chat-message--assistant .chat-message__text {
+        background: #e0f2fe;
+      }
+      .chat-message--user {
+        justify-content: flex-end;
+      }
+      .chat-message--user .chat-message__text {
+        background: #2563eb;
+        color: #fff;
+      }
+      .chat-input {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+      .chat-input textarea {
+        flex: 1;
+        border-radius: 12px;
+        border: 1px solid #cbd5f5;
+        padding: 10px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 48px;
+      }
+      .form-filler__mode-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .mode-toggle-container {
+        display: inline-flex;
+        gap: 8px;
+      }
+      .mode-toggle {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: #e2e8f0;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .mode-toggle--active {
+        background: #2563eb;
+        color: #fff;
+      }
+      .simple-mode__input-group,
+      .advanced-mode__controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .simple-mode__textarea,
+      #fillContentInput {
+        border-radius: 12px;
+        border: 1px solid #cbd5f5;
+        padding: 10px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 80px;
+      }
+      .simple-mode__actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .simple-mode__btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .simple-mode__btn--primary {
+        background: #2563eb;
+        color: #fff;
+      }
+      .simple-mode__btn--secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .simple-mode__btn--success {
+        background: #16a34a;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="popup-shell">
+      <header class="popup-header">
+        <div class="popup-header__brand">
+          <h1 class="popup-header__title">Smart Form Filler</h1>
+          <p class="popup-header__subtitle">Extract, manage and reuse page data instantly</p>
         </div>
-        <div class="analyzer__footer">
-            <div class="footer-info">
-                <span class="footer-version">v2.0.0</span>
-                <span class="footer-separator">•</span>
-                <span class="footer-mode" id="selectedMode">Data Extraction</span>
-            </div>
+        <div class="popup-header__controls">
+          <div id="model-selector" class="model-selector"></div>
+          <div id="actions" class="model-actions"></div>
+          <div class="popup-header__status">
+            <span id="authText">Ready</span>
+          </div>
         </div>
+      </header>
+
+      <div class="main-tabs">
+        <button class="main-tab main-tab--active" data-tab="extraction">Data Extraction</button>
+        <button class="main-tab" data-tab="chat">Chat with Data</button>
+        <button class="main-tab" data-tab="formfiller">Form Filler</button>
+      </div>
+
+      <section id="extractionTab" class="main-tab-content main-tab-content--active">
+        <section class="content-section">
+          <h2 class="section-title">Actions</h2>
+          <div class="button-row">
+            <button id="extractDataBtn" class="btn">Extract Data Sources</button>
+            <button id="clearAllBtn" class="btn btn--tertiary">Clear History</button>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <h2 class="section-title">Content Tools</h2>
+          <div class="content-actions">
+            <button id="detectFormsBtn" class="btn btn--secondary">Detect Forms</button>
+            <button id="analyzeContentBtn" class="btn">Analyze Page</button>
+            <button id="fillFormsBtn" class="btn btn--secondary">Fill Forms</button>
+          </div>
+        </section>
+
+        <section id="resultsSection" class="content-section hidden">
+          <div class="history-layout">
+            <aside id="historyContainer" class="history-container"></aside>
+            <article id="currentResultsDetail" class="results-detail hidden">
+              <div class="results-tabs">
+                <button class="results-tab results-tab--active" data-tab="markdown" id="markdownTab">
+                  Markdown
+                </button>
+                <button class="results-tab" data-tab="html" id="htmlTab">Raw HTML</button>
+                <button class="results-tab" data-tab="cleaned-html" id="cleanedHtmlTab">
+                  Cleaned HTML
+                </button>
+                <button class="results-tab" data-tab="metadata" id="metadataTab">Metadata</button>
+              </div>
+              <div class="results-content">
+                <div class="results-panel results-panel--active" id="markdownPanel">
+                  <div class="results-text" id="markdownText"></div>
+                </div>
+                <div class="results-panel" id="htmlPanel">
+                  <div class="results-text" id="htmlText"></div>
+                </div>
+                <div class="results-panel" id="cleanedHtmlPanel">
+                  <div class="results-text" id="cleanedHtmlText"></div>
+                </div>
+                <div class="results-panel" id="metadataPanel">
+                  <pre class="results-code" id="metadataData"></pre>
+                </div>
+              </div>
+              <div class="results-actions">
+                <button id="copyBtn" class="btn btn--secondary">Copy Results</button>
+                <button id="chatBtn" class="btn">Open in Chat</button>
+                <button id="backToHistoryBtn" class="btn btn--tertiary">Back to History</button>
+              </div>
+            </article>
+          </div>
+          <div id="connectionStatus" class="hidden"></div>
+        </section>
+      </section>
+
+      <section id="chatTab" class="main-tab-content">
+        <div class="content-section">
+          <h2 class="section-title">Chat with Data</h2>
+          <div class="chat-config">
+            <button id="chatDataSourceBtn" class="simple-mode__data-source-btn">
+              <span id="chatDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+              <span id="chatDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+            </button>
+            <span id="chatStatus" class="chat-status"></span>
+          </div>
+          <div id="chatDataSourceList" class="chat-data-source-list"></div>
+          <div id="chatMessages" class="chat-messages">
+            <div class="chat-welcome">Ask a question about the extracted information.</div>
+          </div>
+          <div class="chat-input">
+            <textarea
+              id="chatInput"
+              rows="3"
+              placeholder="Ask about your extracted data..."
+            ></textarea>
+            <button id="sendChatBtn" class="btn" disabled>Send</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="formFillerTab" class="main-tab-content">
+        <div class="content-section">
+          <div class="form-filler__mode-header">
+            <div class="mode-toggle-container">
+              <button id="simpleModeToggle" class="mode-toggle mode-toggle--active" aria-pressed="true">
+                Simple
+              </button>
+              <button id="advancedModeToggle" class="mode-toggle" aria-pressed="false">
+                Advanced
+              </button>
+            </div>
+          </div>
+          <div id="formFillerContent" class="form-filler__content">
+            <div id="formFillerSimpleMode" class="simple-mode">
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label" for="simpleModeLanguageSelect">Language</label>
+                <select id="simpleModeLanguageSelect" class="simple-mode__select">
+                  <option value="zh" selected>中文</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label">Data Source</label>
+                <button id="simpleModeDataSourceBtn" class="simple-mode__data-source-btn">
+                  <span id="simpleModeDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+                  <span id="simpleModeDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+                </button>
+              </div>
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label" for="simpleModeContentInput">Content</label>
+                <textarea
+                  id="simpleModeContentInput"
+                  class="simple-mode__textarea"
+                  rows="4"
+                  placeholder="Summarize the scenario or instructions you want to fill into forms."
+                ></textarea>
+              </div>
+              <div class="simple-mode__actions">
+                <button id="simpleModeSubmitBtn" class="simple-mode__btn simple-mode__btn--primary" disabled>
+                  Submit
+                </button>
+                <button id="simpleModeClearBtn" class="simple-mode__btn simple-mode__btn--secondary">
+                  Clear
+                </button>
+              </div>
+              <div id="simpleModeProgress" class="simple-mode__progress hidden"></div>
+              <div id="simpleModeResults" class="simple-mode__results hidden"></div>
+              <div id="simpleModeFillSection" class="simple-mode__fill-section hidden">
+                <button id="simpleModeFillFormsBtn" class="simple-mode__btn simple-mode__btn--success">
+                  Fill Forms
+                </button>
+              </div>
+              <div id="simpleModeError" class="simple-mode__error hidden">
+                <div id="simpleModeErrorMessage"></div>
+              </div>
+            </div>
+            <div id="formFillerAdvancedMode" class="advanced-mode hidden">
+              <div class="advanced-mode__controls">
+                <label for="languageSelect">Output language</label>
+                <select id="languageSelect">
+                  <option value="zh" selected>中文</option>
+                  <option value="en">English</option>
+                </select>
+                <button id="advancedDataSourceBtn" class="simple-mode__data-source-btn">
+                  <span id="advancedDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+                  <span id="advancedDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+                </button>
+              </div>
+              <textarea
+                id="fillContentInput"
+                rows="4"
+                placeholder="Provide additional context for advanced mode processing."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <h2 class="section-title">AI Diagnostics</h2>
+        <div id="ai-test"></div>
+      </section>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal hidden">
-        <div class="modal__backdrop"></div>
-        <div class="modal__content">
-            <div class="modal__header">
-                <h3 class="modal__title">Settings</h3>
-                <button id="settingsModalClose" class="btn btn--icon" title="Close">
-                    <span class="btn__icon">×</span>
-                </button>
-            </div>
-            <div class="modal__body">
-                <div class="settings-section">
-                    <h4 class="settings-section__title">Backend Configuration</h4>
-                    <div class="form-group">
-                        <label for="backendUrlInput" class="label">Backend URL:</label>
-                        <div class="input-group">
-                            <input 
-                                type="text" 
-                                id="backendUrlInput" 
-                                class="input input--full" 
-                                placeholder="http://localhost:3001"
-                                value="http://localhost:3001"
-                            >
-                            <button id="testConnectionBtn" class="btn btn--secondary" title="Test Connection">
-                                <span class="btn__icon">🔗</span>
-                                <span class="btn__text">Test</span>
-                            </button>
-                        </div>
-                        <div id="connectionStatus" class="connection-status hidden">
-                            <span class="connection-status__icon"></span>
-                            <span class="connection-status__text"></span>
-                        </div>
-                        <div class="help-text">
-                            Enter the URL of your Smart Form Filler backend server.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal__footer">
-                <button id="settingsCancelBtn" class="btn btn--secondary">Cancel</button>
-                <button id="saveSettingsBtn" class="btn btn--primary">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Source Selection Modal -->
-    <div id="dataSourceModal" class="modal hidden">
-        <div class="modal__backdrop"></div>
-        <div class="modal__content">
-            <div class="modal__header">
-                <h3 class="modal__title">Configure Data Sources</h3>
-                <button id="dataSourceModalClose" class="btn btn--icon" title="Close">
-                    <span class="btn__icon">×</span>
-                </button>
-            </div>
-            <div class="modal__body">
-                <!-- Data Source Type Selection -->
-                <div class="data-source-section">
-                    <h4 class="data-source-section__title">Data Source Type</h4>
-                    <div class="data-source-type-options">
-                        <label class="data-source-option">
-                            <input type="radio" name="dataSourceType" value="markdown" checked>
-                            <div class="data-source-option__content">
-                                <div class="data-source-option__icon">📝</div>
-                                <div class="data-source-option__info">
-                                    <div class="data-source-option__title">Markdown</div>
-                                    <div class="data-source-option__description">Clean, formatted text ideal for Q&A</div>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="data-source-option">
-                            <input type="radio" name="dataSourceType" value="cleaned">
-                            <div class="data-source-option__content">
-                                <div class="data-source-option__icon">🧹</div>
-                                <div class="data-source-option__info">
-                                    <div class="data-source-option__title">Cleaned HTML</div>
-                                    <div class="data-source-option__description">Structured HTML with enhanced formatting</div>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="data-source-option">
-                            <input type="radio" name="dataSourceType" value="raw">
-                            <div class="data-source-option__content">
-                                <div class="data-source-option__icon">🔧</div>
-                                <div class="data-source-option__info">
-                                    <div class="data-source-option__title">Raw HTML</div>
-                                    <div class="data-source-option__description">Complete page source including all elements</div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Data Source Selection -->
-                <div class="data-source-section">
-                    <h4 class="data-source-section__title">Available Data Sources</h4>
-                    <div id="dataSourceList" class="data-source-list">
-                        <div class="data-source-empty">
-                            <div class="data-source-empty__icon">📊</div>
-                            <div class="data-source-empty__text">No data sources available</div>
-                            <div class="data-source-empty__description">
-                                Switch to the Data Extraction tab and extract some content first.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal__footer">
-                <button id="dataSourceCancelBtn" class="btn btn--secondary">Cancel</button>
-                <button id="dataSourceApplyBtn" class="btn btn--primary">Apply Selection</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts - Load modules in order -->
-    <script src="src/auth/authManager.js"></script>
-    <script src="src/api/apiClient.js"></script>
-    
-    <!-- Load modules -->
-    <script src="src/modules/dataExtractor.js"></script>
-    <script src="src/modules/resultsHandler.js"></script>
-    <script src="src/modules/chatHandler.js"></script>
-    <script src="src/modules/copyHandler.js"></script>
-    <script src="src/modules/uiController.js"></script>
-    <!-- Form Filler Module Dependencies -->
-    <script src="src/modules/formUtils.js"></script>
-    <script src="src/modules/formDetectionService.js"></script>
-    <script src="src/modules/formAnalysisService.js"></script>
-    <script src="src/modules/formUIController.js"></script>
-    <script src="src/modules/collapsibleManager.js"></script>
-    <!-- Data Source Button Component -->
-    <script src="src/modules/DataSourceButton.js"></script>
-    
-    <!-- Mode Components -->
-    <script src="src/modules/SimpleMode.js"></script>
-    <script src="src/modules/AdvancedMode.js"></script>
-    <script src="src/modules/ModeToggle.js"></script>
-    
-    <!-- Form Filler Handler and Popup Manager -->
-    <script src="src/modules/formFillerHandler.js"></script>
-    <script src="src/modules/popupManager.js"></script>
-    
-    <!-- Popup manager modules -->
-    <script src="src/modules/popupInitializer.js"></script>
-    <script src="src/modules/popupEventHandlers.js"></script>
-    <script src="src/modules/popupModelManager.js"></script>
-    <script src="src/modules/popupSettingsManager.js"></script>
-    
-    <!-- Data Source modules (refactored) -->
-    <script src="src/modules/dataSource/DataSourceConfig.js"></script>
-    <script src="src/modules/dataSource/DataSourceStorage.js"></script>
-    <script src="src/modules/dataSource/DataSourceEventEmitter.js"></script>
-    <script src="src/modules/dataSource/DataSourceSyncManager.js"></script>
-    <script src="src/modules/dataSource/DataSourceUIController.js"></script>
-    <script src="src/modules/dataSource/PopupDataSourceManagerRefactored.js"></script>
-    
-    <!-- Main popup manager -->
-    <script src="src/popup-main.js"></script>
-    
-    <!-- Fallback error handler -->
-    <script>
-        // Global error handler to catch any uncaught errors
-        window.addEventListener('error', function(e) {
-            console.error('Global error caught:', e.error);
-            console.error('Error details:', {
-                message: e.message,
-                filename: e.filename,
-                lineno: e.lineno,
-                colno: e.colno,
-                stack: e.error ? e.error.stack : 'No stack trace'
-            });
-            
-            // Show error in UI if possible
-            const body = document.body;
-            if (body && !document.querySelector('.global-error-display')) {
-                body.insertAdjacentHTML('beforeend', `
-                    <div class="global-error-display" style="position: fixed; top: 0; left: 0; right: 0; z-index: 10000; background: #ff4444; color: white; padding: 10px; font-family: monospace; font-size: 12px;">
-                        <strong>JavaScript Error:</strong> ${e.message}<br>
-                        <strong>File:</strong> ${e.filename}:${e.lineno}:${e.colno}<br>
-                        <button onclick="this.parentElement.remove()" style="float: right; background: white; color: black; border: none; padding: 2px 5px;">×</button>
-                    </div>
-                `);
-            }
-        });
-        
-        // Fallback initialization if DOMContentLoaded fails
-        setTimeout(function() {
-            if (!window.popupManager) {
-                console.warn('⚠️ PopupManager not initialized after 2 seconds, attempting fallback...');
-                try {
-                    window.popupManager = new PopupManager();
-                } catch (error) {
-                    console.error('❌ Fallback initialization also failed:', error);
-                }
-            }
-        }, 2000);
-    </script>
-</body>
+    <button id="formFillerTabTrigger" type="button" class="hidden"></button>
+    <div id="modal-root"></div>
+    <script type="module" src="dist/popup.js"></script>
+  </body>
 </html>

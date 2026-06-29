@@ -1,29 +1,34 @@
 {
   "manifest_version": 3,
   "name": "Smart Form Filler",
-  "version": "2.0.0",
-  "description": "AI-powered form filling and data extraction browser extension with Ollama support",
+  "version": "1.0.0",
+  "description": "AI-powered form filling and data extraction browser extension",
   "permissions": [
     "activeTab",
     "storage",
     "scripting",
     "sidePanel",
     "tabs",
-    "clipboardWrite"
+    "clipboardWrite",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "http://*/*",
     "https://*/*",
-    "file://*/*",
     "http://localhost:*/*",
+    "http://localhost:11434/*",
     "https://*.azurewebsites.net/*",
+    "https://*.openai.azure.com/*",
+    "https://*.ai.azure.com/*",
     "https://login.microsoftonline.com/*"
   ],
   "action": {
-    "default_title": "Smart Form Filler"
+    "default_title": "Smart Form Filler",
+    "default_popup": "dist/extension/popup_ts.html"
   },
   "side_panel": {
-    "default_path": "popup.html"
+    "default_path": "dist/extension/popup_ts.html"
   },
   "content_scripts": [
     {
@@ -32,14 +37,15 @@
         "src/modules/formDetector.js",
         "src/modules/formFiller.js",
         "content-iframe.js",
-        "src/content-script.js",
+        "dist/content.js",
         "src/content-analyzer.js"
       ],
       "run_at": "document_end"
     }
   ],
   "background": {
-    "service_worker": "src/background-sidepanel.js"
+    "service_worker": "dist/background.js",
+    "type": "module"
   },
   "web_accessible_resources": [
     {

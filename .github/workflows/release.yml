@@ -6,86 +6,67 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  build-and-release:
+    name: Build & Create Release
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm run install:all
-    
-    - name: Build extension
-      run: npm run build:extension
-    
-    - name: Build GitHub Pages
-      run: npm run build:pages
-    
-    - name: Create extension package
-      run: |
-        cd extension
-        zip -r ../smart-form-filler-extension-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
-    
-    - name: Create docs package
-      run: |
-        cd docs
-        zip -r ../smart-form-filler-docs-${{ github.ref_name }}.zip . -x "*.git*" "node_modules/*" "*.DS_Store*"
-    
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Smart Form Filler ${{ github.ref_name }}
-        body: |
-          ## Smart Form Filler ${{ github.ref_name }}
-          
-          ### New Features
-          - Enhanced AI-powered form filling capabilities
-          - Improved Ollama local model integration
-          - Better form field detection and mapping
-          
-          ### Improvements
-          - Optimized performance and reliability
-          - Enhanced user interface and experience
-          - Better error handling and feedback
-          
-          ### Downloads
-          - **Extension Package**: Smart Form Filler browser extension
-          - **Documentation Package**: GitHub Pages documentation
-          
-          ### Installation
-          1. Download the extension package
-          2. Extract and load in your browser's extension manager
-          3. Follow the setup guide in the README
-          
-          For detailed installation and usage instructions, see the [README](https://github.com/${{ github.repository }}/blob/main/README.md).
-        draft: false
-        prerelease: false
-    
-    - name: Upload Extension Package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./smart-form-filler-extension-${{ github.ref_name }}.zip
-        asset_name: smart-form-filler-extension-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
-    
-    - name: Upload Documentation Package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./smart-form-filler-docs-${{ github.ref_name }}.zip
-        asset_name: smart-form-filler-docs-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test --run
+
+      - name: Build extension
+        run: pnpm build
+
+      - name: Create extension package
+        run: |
+          cd dist
+          zip -r ../smart-form-filler-${{ github.ref_name }}.zip . -x "*.DS_Store*"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Smart Form Filler ${{ github.ref_name }}
+          body: |
+            ## Smart Form Filler ${{ github.ref_name }}
+            
+            ### Installation
+            1. Download `smart-form-filler-${{ github.ref_name }}.zip`
+            2. Extract the zip file
+            3. Open Edge/Chrome extensions page (`edge://extensions` or `chrome://extensions`)
+            4. Enable "Developer mode"
+            5. Click "Load unpacked" and select the extracted folder
+            
+            ### Configuration
+            - **Pure Frontend Extension** - No backend server required
+            - Configure AI provider (Azure OpenAI or Ollama) directly in extension popup
+            - See [README](https://github.com/${{ github.repository }}/blob/main/README.md) for detailed setup
+            
+            ### What's Changed
+            - TypeScript-based pure frontend MV3 extension
+            - Direct AI provider API calls (Azure OpenAI, Ollama)
+            - Enhanced form detection and filling capabilities
+            - Comprehensive test coverage (100+ tests)
+          draft: false
+          prerelease: false
+          files: |
+            smart-form-filler-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

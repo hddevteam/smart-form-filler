@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Form Filler</title>
+    <style>
+      .hidden {
+        display: none !important;
+      }
+      .popup-shell {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+        min-width: 640px;
+        max-width: 680px;
+        min-height: 520px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px 24px;
+      }
+      .popup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .popup-header__brand {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .popup-header__title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .popup-header__subtitle {
+        font-size: 13px;
+        color: #475569;
+        margin: 0;
+      }
+      .popup-header__controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .button-row,
+      .content-actions,
+      .model-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .content-section {
+        background: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .main-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .main-tab {
+        flex: 1 1 33%;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        background: #e2e8f0;
+        color: #0f172a;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      .main-tab--active {
+        background: #2563eb;
+        color: #fff;
+      }
+      .main-tab-content {
+        display: none;
+        gap: 16px;
+        flex-direction: column;
+      }
+      .main-tab-content--active {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .history-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 16px;
+      }
+      .history-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .results-detail {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 320px;
+      }
+      .results-tabs {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .results-tab {
+        flex: 1;
+        padding: 12px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .results-tab--active {
+        border-bottom: 2px solid #2563eb;
+        color: #2563eb;
+      }
+      .results-content {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+      }
+      .results-text,
+      .results-code {
+        white-space: pre-wrap;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .results-actions {
+        border-top: 1px solid #e2e8f0;
+        padding: 12px 16px;
+        display: flex;
+        gap: 12px;
+      }
+      .btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #2563eb;
+        color: #fff;
+        transition: background 0.2s ease;
+      }
+      .btn--secondary {
+        background: #0f172a;
+      }
+      .btn--tertiary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .btn:disabled {
+        background: #cbd5f5;
+        cursor: not-allowed;
+      }
+      .chat-config {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .chat-status {
+        font-size: 12px;
+        color: #64748b;
+      }
+      .chat-data-source-list {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 120px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+      }
+      .chat-data-source-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+      .chat-messages {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 160px;
+        max-height: 260px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .chat-message {
+        display: flex;
+        gap: 8px;
+      }
+      .chat-message__text {
+        background: #e2e8f0;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 13px;
+        max-width: 90%;
+      }
+      .chat-message--assistant .chat-message__text {
+        background: #e0f2fe;
+      }
+      .chat-message--user {
+        justify-content: flex-end;
+      }
+      .chat-message--user .chat-message__text {
+        background: #2563eb;
+        color: #fff;
+      }
+      .chat-input {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+      .chat-input textarea {
+        flex: 1;
+        border-radius: 12px;
+        border: 1px solid #cbd5f5;
+        padding: 10px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 48px;
+      }
+      .form-filler__mode-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .mode-toggle-container {
+        display: inline-flex;
+        gap: 8px;
+      }
+      .mode-toggle {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: #e2e8f0;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .mode-toggle--active {
+        background: #2563eb;
+        color: #fff;
+      }
+      .simple-mode__input-group,
+      .advanced-mode__controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .simple-mode__textarea,
+      #fillContentInput {
+        border-radius: 12px;
+        border: 1px solid #cbd5f5;
+        padding: 10px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 80px;
+      }
+      .simple-mode__actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .simple-mode__btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .simple-mode__btn--primary {
+        background: #2563eb;
+        color: #fff;
+      }
+      .simple-mode__btn--secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .simple-mode__btn--success {
+        background: #16a34a;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="popup-shell">
+      <header class="popup-header">
+        <div class="popup-header__brand">
+          <h1 class="popup-header__title">Smart Form Filler</h1>
+          <p class="popup-header__subtitle">Extract, manage and reuse page data instantly</p>
+        </div>
+        <div class="popup-header__controls">
+          <div id="model-selector" class="model-selector"></div>
+          <div id="actions" class="model-actions"></div>
+          <div class="popup-header__status">
+            <span id="authText">Ready</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-tabs">
+        <button class="main-tab main-tab--active" data-tab="extraction">Data Extraction</button>
+        <button class="main-tab" data-tab="chat">Chat with Data</button>
+        <button class="main-tab" data-tab="formfiller">Form Filler</button>
+      </div>
+
+      <section id="extractionTab" class="main-tab-content main-tab-content--active">
+        <section class="content-section">
+          <h2 class="section-title">Actions</h2>
+          <div class="button-row">
+            <button id="extractDataBtn" class="btn">Extract Data Sources</button>
+            <button id="clearAllBtn" class="btn btn--tertiary">Clear History</button>
+          </div>
+        </section>
+
+        <section id="resultsSection" class="content-section hidden">
+          <div class="history-layout">
+            <aside id="historyContainer" class="history-container"></aside>
+            <article id="currentResultsDetail" class="results-detail hidden">
+              <div class="results-tabs">
+                <button class="results-tab results-tab--active" data-tab="markdown" id="markdownTab">
+                  Markdown
+                </button>
+                <button class="results-tab" data-tab="html" id="htmlTab">Raw HTML</button>
+                <button class="results-tab" data-tab="cleaned-html" id="cleanedHtmlTab">
+                  Cleaned HTML
+                </button>
+                <button class="results-tab" data-tab="metadata" id="metadataTab">Metadata</button>
+              </div>
+              <div class="results-content">
+                <div class="results-panel results-panel--active" id="markdownPanel">
+                  <div class="results-text" id="markdownText"></div>
+                </div>
+                <div class="results-panel" id="htmlPanel">
+                  <div class="results-text" id="htmlText"></div>
+                </div>
+                <div class="results-panel" id="cleanedHtmlPanel">
+                  <div class="results-text" id="cleanedHtmlText"></div>
+                </div>
+                <div class="results-panel" id="metadataPanel">
+                  <pre class="results-code" id="metadataData"></pre>
+                </div>
+              </div>
+              <div class="results-actions">
+                <button id="copyBtn" class="btn btn--secondary">Copy Results</button>
+                <button id="chatBtn" class="btn">Open in Chat</button>
+                <button id="backToHistoryBtn" class="btn btn--tertiary">Back to History</button>
+              </div>
+            </article>
+          </div>
+          <div id="connectionStatus" class="hidden"></div>
+        </section>
+      </section>
+
+      <section id="chatTab" class="main-tab-content">
+        <div class="content-section">
+          <h2 class="section-title">Chat with Data</h2>
+          <div class="chat-config">
+            <button id="chatDataSourceBtn" class="simple-mode__data-source-btn">
+              <span id="chatDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+              <span id="chatDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+            </button>
+            <span id="chatStatus" class="chat-status"></span>
+          </div>
+          <div id="chatDataSourceList" class="chat-data-source-list"></div>
+          <div id="chatMessages" class="chat-messages">
+            <div class="chat-welcome">Ask a question about the extracted information.</div>
+          </div>
+          <div class="chat-input">
+            <textarea
+              id="chatInput"
+              rows="3"
+              placeholder="Ask about your extracted data..."
+            ></textarea>
+            <button id="sendChatBtn" class="btn" disabled>Send</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="formFillerTab" class="main-tab-content">
+        <div class="content-section">
+          <div class="form-filler__mode-header">
+            <div class="mode-toggle-container">
+              <button id="simpleModeToggle" class="mode-toggle mode-toggle--active" aria-pressed="true">
+                Simple
+              </button>
+              <button id="advancedModeToggle" class="mode-toggle" aria-pressed="false">
+                Advanced
+              </button>
+            </div>
+          </div>
+          <div id="formFillerContent" class="form-filler__content">
+            <div id="formFillerSimpleMode" class="simple-mode">
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label" for="simpleModeLanguageSelect">Language</label>
+                <select id="simpleModeLanguageSelect" class="simple-mode__select">
+                  <option value="zh" selected>中文</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label">Data Source</label>
+                <button id="simpleModeDataSourceBtn" class="simple-mode__data-source-btn">
+                  <span id="simpleModeDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+                  <span id="simpleModeDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+                </button>
+              </div>
+              <div class="simple-mode__input-group">
+                <label class="simple-mode__label" for="simpleModeContentInput">Content</label>
+                <textarea
+                  id="simpleModeContentInput"
+                  class="simple-mode__textarea"
+                  rows="4"
+                  placeholder="Summarize the scenario or instructions you want to fill into forms."
+                ></textarea>
+              </div>
+              <div class="simple-mode__actions">
+                <button id="simpleModeSubmitBtn" class="simple-mode__btn simple-mode__btn--primary" disabled>
+                  Submit
+                </button>
+                <button id="simpleModeClearBtn" class="simple-mode__btn simple-mode__btn--secondary">
+                  Clear
+                </button>
+              </div>
+              <div id="simpleModeProgress" class="simple-mode__progress hidden"></div>
+              <div id="simpleModeResults" class="simple-mode__results hidden"></div>
+              <div id="simpleModeFillSection" class="simple-mode__fill-section hidden">
+                <button id="simpleModeFillFormsBtn" class="simple-mode__btn simple-mode__btn--success">
+                  Fill Forms
+                </button>
+              </div>
+              <div id="simpleModeError" class="simple-mode__error hidden">
+                <div id="simpleModeErrorMessage"></div>
+              </div>
+            </div>
+            <div id="formFillerAdvancedMode" class="advanced-mode hidden">
+              <div class="advanced-mode__controls">
+                <label for="languageSelect">Output language</label>
+                <select id="languageSelect">
+                  <option value="zh" selected>中文</option>
+                  <option value="en">English</option>
+                </select>
+                <button id="advancedDataSourceBtn" class="simple-mode__data-source-btn">
+                  <span id="advancedDataSourceIcon" class="simple-mode__data-source-icon">⚙️</span>
+                  <span id="advancedDataSourceText" class="simple-mode__data-source-text">Configure sources</span>
+                </button>
+              </div>
+              <textarea
+                id="fillContentInput"
+                rows="4"
+                placeholder="Provide additional context for advanced mode processing."
+              ></textarea>
+              
+              <section class="content-section">
+                <h2 class="section-title">Content Tools</h2>
+                <div class="content-actions">
+                  <button id="detectFormsBtn" class="btn btn--secondary">Detect Forms</button>
+                  <button id="analyzeContentBtn" class="btn">Analyze Page</button>
+                  <button id="fillFormsBtn" class="btn btn--secondary">Fill Forms</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <h2 class="section-title">AI Diagnostics</h2>
+        <div id="ai-test"></div>
+      </section>
+    </div>
+
+    <button id="formFillerTabTrigger" type="button" class="hidden"></button>
+    <div id="modal-root"></div>
+    <script type="module" src="/src/popup/index.ts"></script>
+  </body>
+</html>

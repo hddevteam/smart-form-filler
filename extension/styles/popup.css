@@ -2896,6 +2896,59 @@ body {
     outline-offset: 2px;
 }
 
+/* Modern form group styles for Settings modal */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.form-label .required {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.form-label .optional {
+    color: #9ca3af;
+    font-weight: 400;
+    font-size: 12px;
+}
+
+/* Config status styles */
+.config-status {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.config-status:empty {
+    display: none;
+}
+
+.config-status--success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.config-status--error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 /* Accessibility improvements */
 .modal__header .btn--icon[title] {
     position: relative;
