@@ -83,6 +83,7 @@
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.1",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.7",
+    "wait-on": "^9.0.10"
   }
 }
