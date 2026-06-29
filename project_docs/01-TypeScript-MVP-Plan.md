@@ -1,9 +1,9 @@
 # 01 · Smart Form Filler — TypeScript Migration MVP Plan
 
-**Version**: 1.0.0  
+**Version**: 1.0.1  
 **Branch**: `develop` → target: `main` merge  
 **Last Updated**: 2026-06-29  
-**Status**: Draft — Pending Review
+**Status**: Sprint 1 Complete — All P0/P1 Gaps Resolved ✅
 
 ---
 
