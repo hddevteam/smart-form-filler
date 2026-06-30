@@ -3,6 +3,9 @@ export interface AdvancedModeDeps {
     currentForms?: unknown[];
     currentAnalysisResult?: unknown;
     currentMappings?: unknown[];
+    getCurrentForms?: () => unknown[];
+    getCurrentMappings?: () => unknown[];
+    getState?: () => string;
   };
   documentRef?: Document;
 }
@@ -109,10 +112,16 @@ export class AdvancedMode {
   }
 
   updateSectionVisibility(): void {
-    const forms = this.handler.currentForms ?? [];
+    const forms = this.handler.getCurrentForms?.() ?? this.handler.currentForms ?? [];
     const hasForms = forms.length > 0;
-    const hasAnalysis = !!this.handler.currentAnalysisResult;
-    const hasMappings = (this.handler.currentMappings ?? []).length > 0;
+    const state = this.handler.getState?.() ?? '';
+    const hasAnalysis =
+      !!this.handler.currentAnalysisResult ||
+      state === 'ANALYZED' ||
+      state === 'MAPPED' ||
+      state === 'FILLED';
+    const hasMappings =
+      (this.handler.getCurrentMappings?.() ?? this.handler.currentMappings ?? []).length > 0;
 
     if (this.contentAnalysisSection) {
       this.toggleHidden(this.contentAnalysisSection, !hasForms);
@@ -272,9 +281,15 @@ export class AdvancedMode {
   }
 
   getProgress(): { [key: string]: boolean } {
-    const forms = this.handler.currentForms ?? [];
-    const analysis = !!this.handler.currentAnalysisResult;
-    const mappings = (this.handler.currentMappings ?? []).length > 0;
+    const forms = this.handler.getCurrentForms?.() ?? this.handler.currentForms ?? [];
+    const state = this.handler.getState?.() ?? '';
+    const analysis =
+      !!this.handler.currentAnalysisResult ||
+      state === 'ANALYZED' ||
+      state === 'MAPPED' ||
+      state === 'FILLED';
+    const mappings =
+      (this.handler.getCurrentMappings?.() ?? this.handler.currentMappings ?? []).length > 0;
     return {
       formDetection: forms.length > 0,
       contentAnalysis: analysis,

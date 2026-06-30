@@ -17,6 +17,9 @@ import { ChatHandler } from '@/popup/modules/chatHandler';
 import { CopyHandler } from '@/popup/modules/copyHandler';
 import { SimpleMode } from '@/popup/modules/simpleMode';
 import { AdvancedMode } from '@/popup/modules/advancedMode';
+import { FormFillerHandler } from '@/popup/modules/formFillerHandler';
+import { FormDetectionService } from '@/popup/services/formDetectionService';
+import { FormAnalysisService } from '@/popup/services/formAnalysisService';
 
 const logger = Logger.forScope('Popup');
 logger.info('Smart Form Filler - Popup initialized');
@@ -126,15 +129,51 @@ document.addEventListener('DOMContentLoaded', () => {
   (popupManager as unknown as { mainTabController?: MainTabController }).mainTabController =
     mainTabController;
 
-  // Form filler workflow state for AdvancedMode
-  const formFillerHandler = {
-    currentForms: [] as unknown[],
-    currentAnalysisResult: null as unknown,
-    currentMappings: [] as unknown[],
-  };
+  // Real FormFillerHandler (G-S2-3) — replaces stub
+  // modelEndpointRegistry is populated lazily inside dataSourceManager.init().then()
+  // Use a ref object so FormAnalysisService reads the latest values at call time
+  const modelEndpointRegistryRef: {
+    current: Record<string, { apiUrl: string; provider: 'azure' | 'ollama'; apiKey?: string }>;
+  } = { current: {} };
+
+  const formDetectionService = new FormDetectionService();
+  const formAnalysisService = new FormAnalysisService(
+    opts => extensionClient.sendAIRequest(opts),
+    () => {
+      const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
+      const model = select?.value ?? '';
+      const entry = modelEndpointRegistryRef.current[model];
+      if (entry?.apiKey) return Promise.resolve({ apiUrl: entry.apiUrl, apiKey: entry.apiKey });
+      if (entry?.apiUrl) return Promise.resolve({ apiUrl: entry.apiUrl });
+      const isOllama = model.startsWith('ollama:') || model.includes('llama');
+      return Promise.resolve({ apiUrl: isOllama ? 'http://localhost:11434/api/chat' : '' });
+    }
+  );
+
+  const formFillerHandler = new FormFillerHandler({
+    formDetectionService,
+    formAnalysisService,
+    fillForms: mappings => extensionClient.fillForms(mappings),
+    getSelectedModel: () => {
+      const select = document.getElementById('globalModelSelect') as HTMLSelectElement | null;
+      return select?.value ?? null;
+    },
+    getApiConfig: () => Promise.resolve({ apiUrl: '' }),
+    getContentInput: () => {
+      const el = document.getElementById('fillContentInput') as HTMLTextAreaElement | null;
+      return el?.value ?? '';
+    },
+    getDataSources: () => dataSourceManager.getFormFillerDataSources?.() ?? null,
+    getLanguage: () =>
+      (document.getElementById('languageSelect') as HTMLSelectElement | null)?.value ?? 'zh',
+  });
 
   // Instantiate AdvancedMode and expose to popupManager
-  const advancedMode = new AdvancedMode({ formFillerHandler, documentRef: document });
+  const advancedMode = new AdvancedMode({
+    formFillerHandler:
+      formFillerHandler as unknown as import('@/popup/modules/advancedMode').AdvancedModeDeps['formFillerHandler'],
+    documentRef: document,
+  });
   (popupManager as unknown as { advancedMode?: AdvancedMode }).advancedMode = advancedMode;
 
   const simpleModeAdapter = {
@@ -322,13 +361,14 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.simpleModeContentInput &&
       elements.simpleModeSubmitBtn
     ) {
-      const noopAsync = async () => {};
       const simpleMode = new SimpleMode({
         elements: {
           container: elements.formFillerSimpleMode,
           contentInput: elements.simpleModeContentInput as HTMLTextAreaElement,
           submitBtn: elements.simpleModeSubmitBtn,
           clearBtn: elements.simpleModeClearBtn ?? null,
+          retryBtn: document.getElementById('simpleModeRetryBtn') as HTMLButtonElement | null,
+          languageSelect: elements.simpleModeLanguageSelect ?? null,
           progressContainer: elements.simpleModeProgress ?? null,
           progressText: elements.simpleModeProgressText ?? null,
           progressIcon: elements.simpleModeProgressIcon ?? null,
@@ -339,14 +379,24 @@ document.addEventListener('DOMContentLoaded', () => {
           errorMessage: elements.simpleModeErrorMessage ?? null,
         },
         workflow: {
-          detectForms: noopAsync,
-          analyze: noopAsync,
-          generate: noopAsync,
-          hasMappings: () => false,
+          detectForms: () => formFillerHandler.detectForms().then(() => {}),
+          analyze: (content: string) => {
+            // Content is already in the handler's getContentInput(); just trigger analyze
+            void content;
+            return formFillerHandler.analyzeContent().then(() => {});
+          },
+          generate: () =>
+            formFillerHandler.generateMapping().then(async result => {
+              if (result) await formFillerHandler.fillForms();
+            }),
+          hasMappings: () => formFillerHandler.getCurrentMappings().length > 0,
         },
         getSelectedDataSources: () => dataSourceManager.getFormFillerSelectedSources?.() ?? [],
+        getLanguage: () =>
+          (document.getElementById('languageSelect') as HTMLSelectElement | null)?.value ?? 'zh',
         document,
       });
+      formFillerHandler.init();
       (popupManager as unknown as { simpleMode?: SimpleMode }).simpleMode = simpleMode;
     }
 
@@ -370,6 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
       string,
       { apiUrl: string; provider: 'azure' | 'ollama'; apiKey?: string }
     > = {};
+    // Keep the ref in sync for FormAnalysisService (defined in outer scope before registry)
+    modelEndpointRegistryRef.current = modelEndpointRegistry;
 
     // Render model selector if container exists (default to local Ollama + configured Azure)
     const modelContainer = document.getElementById('model-selector');
@@ -522,44 +574,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         })();
       },
-      detectForms: () => {
-        void (async () => {
-          await popupManager.apiClient?.detectForms?.();
-          // Simulate updating workflow state and notify AdvancedMode
-          formFillerHandler.currentForms = [{}];
-          document.dispatchEvent(new CustomEvent('formDetectionCompleted'));
-          advancedMode.updateSectionVisibility();
-        })();
-      },
-      analyzeContent: () => {
-        void (async () => {
-          await popupManager.apiClient?.analyzeContent?.();
-          // Simulate updating workflow state and notify AdvancedMode
-          formFillerHandler.currentAnalysisResult = { ok: true };
-          document.dispatchEvent(new CustomEvent('analysisCompleted'));
-          advancedMode.updateSectionVisibility();
-        })();
-      },
-      fillForms: () => {
-        void (async () => {
-          // In minimal wiring, send empty mappings; future: use collected mappings
-          await popupManager.apiClient?.fillForms?.({});
-          // Simulate mappings available then notify AdvancedMode
-          formFillerHandler.currentMappings = [{}];
-          document.dispatchEvent(new CustomEvent('mappingCompleted'));
-          advancedMode.updateSectionVisibility();
-        })();
-      },
+      detectForms: () => void formFillerHandler.detectForms(),
+      analyzeContent: () => void formFillerHandler.analyzeContent(),
+      fillForms: () => void formFillerHandler.fillForms(),
     };
-    // If a separate UIController exists for general buttons, it would call bindEvents(handlers)
-    // Here we trigger bindings for content buttons directly
     elements.extractDataBtn?.addEventListener('click', () => handlers.extractData?.());
-    const detectBtn = document.getElementById('detectFormsBtn');
-    const analyzeBtn = document.getElementById('analyzeContentBtn');
-    const fillBtn = document.getElementById('fillFormsBtn');
-    detectBtn?.addEventListener('click', () => handlers.detectForms?.());
-    analyzeBtn?.addEventListener('click', () => handlers.analyzeContent?.());
-    fillBtn?.addEventListener('click', () => handlers.fillForms?.());
   });
 });
 
